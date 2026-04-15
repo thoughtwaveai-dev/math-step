@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { generateProblems } from '@/lib/math/generators'
+import Image from 'next/image'
 import WorksheetForm from './WorksheetForm'
 
 export default async function WorksheetPage() {
@@ -29,8 +30,8 @@ export default async function WorksheetPage() {
 
   if (!level) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
-        <p className="text-sm text-zinc-500">Level data not found. Please contact support.</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#f7faf7]">
+        <p className="text-sm text-[#4a6b4e]">Level data not found. Please contact support.</p>
       </div>
     )
   }
@@ -42,28 +43,31 @@ export default async function WorksheetPage() {
   // If no generator exists for this level, show a safe fallback without creating a session
   if (generatedProblems.length === 0) {
     return (
-      <div className="flex min-h-screen flex-col bg-zinc-50">
-        <header className="border-b border-zinc-200 bg-white px-6 py-4">
+      <div className="flex min-h-screen flex-col bg-[#f7faf7]">
+        <header className="border-b border-[#bae0bd] bg-white px-6 py-4">
           <div className="mx-auto flex max-w-3xl items-center justify-between">
-            <span className="text-lg font-semibold text-zinc-900">MathStep</span>
+            <div className="flex items-center gap-3">
+              <Image src="/math-step-logo.png" alt="MathStep" width={32} height={32} className="rounded-lg" />
+              <span className="text-base font-bold text-[#1a2e1c]">MathStep</span>
+            </div>
             <a
               href="/dashboard"
-              className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
+              className="rounded-lg border border-[#bae0bd] px-3.5 py-2 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
             >
               ← Dashboard
             </a>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-3xl px-6 py-10">
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-6">
-            <h2 className="text-lg font-semibold text-amber-900">Coming Soon</h2>
+        <main className="mx-auto w-full max-w-3xl px-5 py-10">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
+            <h2 className="text-lg font-bold text-amber-900">Coming Soon</h2>
             <p className="mt-2 text-sm text-amber-800">
               Worksheets for Level {levelNumber}.{sublevelNumber} ({level.topic}) are not available yet.
               Check back soon!
             </p>
             <a
               href="/dashboard"
-              className="mt-4 inline-block rounded-lg bg-amber-900 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-800"
+              className="mt-4 inline-block rounded-xl bg-[#2d6a35] px-4 py-3 text-sm font-semibold text-white hover:bg-[#1f4d26] transition-colors"
             >
               Back to Dashboard
             </a>
@@ -86,8 +90,8 @@ export default async function WorksheetPage() {
 
   if (sessionError || !session) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
-        <p className="text-sm text-zinc-500">Failed to start session. Please try again.</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#f7faf7]">
+        <p className="text-sm text-[#4a6b4e]">Failed to start session. Please try again.</p>
       </div>
     )
   }
@@ -107,8 +111,8 @@ export default async function WorksheetPage() {
 
   if (problemsError || !insertedProblems) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-50">
-        <p className="text-sm text-zinc-500">Failed to load problems. Please try again.</p>
+      <div className="flex min-h-screen items-center justify-center bg-[#f7faf7]">
+        <p className="text-sm text-[#4a6b4e]">Failed to load problems. Please try again.</p>
       </div>
     )
   }
@@ -126,23 +130,26 @@ export default async function WorksheetPage() {
   const topic = level.topic ?? 'Math'
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white px-6 py-4">
+    <div className="flex min-h-screen flex-col bg-[#f7faf7]">
+      <header className="border-b border-[#bae0bd] bg-white px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
-          <span className="text-lg font-semibold text-zinc-900">MathStep</span>
+          <div className="flex items-center gap-3">
+            <Image src="/math-step-logo.png" alt="MathStep" width={32} height={32} className="rounded-lg" />
+            <span className="text-base font-bold text-[#1a2e1c]">MathStep</span>
+          </div>
           <a
             href="/dashboard"
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
+            className="rounded-lg border border-[#bae0bd] px-3.5 py-2 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
           >
             ← Dashboard
           </a>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl px-6 py-10 space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold text-zinc-900">{topic} Worksheet</h1>
-          <p className="text-sm text-zinc-500">
+      <main className="mx-auto w-full max-w-3xl px-5 py-8 space-y-5">
+        <div>
+          <h1 className="text-2xl font-bold text-[#1a2e1c]">{topic} Worksheet</h1>
+          <p className="mt-0.5 text-sm text-[#4a6b4e]">
             {student.name} · Level {levelNumber}.{sublevelNumber}
           </p>
         </div>

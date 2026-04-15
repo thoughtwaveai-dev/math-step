@@ -6,12 +6,29 @@
 
 ## Current Status
 
-**Phase:** Multiplication levels live — Level 1/1 through 3/2 fully working. Grading, mastery, and advancement verified end-to-end through all six levels.
+**Phase:** Visual design system applied. All pages refreshed with MathStep brand (#BAE0BD). Logo integrated. All flows verified via Playwright.
 **Next:** Additional curriculum generators (Level 4+), or deployment prep.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 11 — Visual Design Refresh (2026-04-15)
+- `public/math-step-logo.png` — logo copied to public folder for Next.js Image serving
+- `src/app/globals.css` — brand token palette added (`--brand-50` through `--brand-900`, `--background`, `--surface`)
+- `src/app/layout.tsx` — metadata title/description updated to MathStep brand copy
+- All pages refreshed with cohesive `#BAE0BD` brand system:
+  - `src/app/page.tsx` — home: logo, green CTA, soft tagline
+  - `src/app/login/page.tsx` — card layout, logo, brand inputs/button
+  - `src/app/signup/page.tsx` — same pattern as login
+  - `src/app/onboarding/page.tsx` + `OnboardingForm.tsx` — logo, card, brand inputs
+  - `src/app/dashboard/page.tsx` — logo header, stat cards with brand borders, CTA button, last session/current focus cards
+  - `src/app/worksheet/page.tsx` — branded header, logo, fallback states updated
+  - `src/app/worksheet/WorksheetForm.tsx` — brand timer, green number badges, larger inputs (`inputMode="numeric"`)
+  - `src/app/worksheet/results/[sessionId]/page.tsx` — pass/fail score card, mastery progress, problem review, two-button footer
+- TypeScript: no type errors
+
+---
 
 ### Milestone 10 — Multiplication Generators (2026-04-15)
 - `src/lib/math/generators/multiplication.ts` — two generators:

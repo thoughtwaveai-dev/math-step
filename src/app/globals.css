@@ -1,26 +1,43 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* MathStep brand tokens */
+  --brand-50:  #f2faf3;
+  --brand-100: #e1f4e3;
+  --brand-200: #bae0bd;   /* primary brand */
+  --brand-300: #90c896;
+  --brand-400: #5fac68;
+  --brand-500: #3d9147;
+  --brand-600: #2d6a35;   /* primary button / heading accent */
+  --brand-700: #1f4d26;
+  --brand-800: #163820;
+  --brand-900: #0e2415;
+
+  --background: #f7faf7;
+  --foreground: #1a2e1c;
+  --surface:    #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface:    var(--surface);
+  --color-brand-50:   var(--brand-50);
+  --color-brand-100:  var(--brand-100);
+  --color-brand-200:  var(--brand-200);
+  --color-brand-300:  var(--brand-300);
+  --color-brand-400:  var(--brand-400);
+  --color-brand-500:  var(--brand-500);
+  --color-brand-600:  var(--brand-600);
+  --color-brand-700:  var(--brand-700);
+  --color-brand-800:  var(--brand-800);
+  --color-brand-900:  var(--brand-900);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans, Arial, sans-serif);
 }

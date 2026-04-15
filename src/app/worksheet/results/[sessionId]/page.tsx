@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import Image from 'next/image'
 
 function formatTime(seconds: number | null): string {
   if (!seconds) return '—'
@@ -97,88 +98,93 @@ export default async function ResultsPage({
   const passed = typedSession.passed ?? false
 
   return (
-    <div className="flex min-h-screen flex-col bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white px-6 py-4">
+    <div className="flex min-h-screen flex-col bg-[#f7faf7]">
+      {/* Header */}
+      <header className="border-b border-[#bae0bd] bg-white px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
-          <span className="text-lg font-semibold text-zinc-900">MathStep</span>
+          <div className="flex items-center gap-3">
+            <Image src="/math-step-logo.png" alt="MathStep" width={32} height={32} className="rounded-lg" />
+            <span className="text-base font-bold text-[#1a2e1c]">MathStep</span>
+          </div>
           <a
             href="/dashboard"
-            className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
+            className="rounded-lg border border-[#bae0bd] px-3.5 py-2 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
           >
             ← Dashboard
           </a>
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl px-6 py-10 space-y-6">
-        <h1 className="text-2xl font-semibold text-zinc-900">Worksheet Results</h1>
+      <main className="mx-auto w-full max-w-3xl px-5 py-8 space-y-5">
+        <h1 className="text-2xl font-bold text-[#1a2e1c]">Worksheet Results</h1>
 
-        {/* Score summary */}
+        {/* Score summary card */}
         <div
-          className={`rounded-xl border p-6 ${
-            passed ? 'border-green-200 bg-green-50' : 'border-red-100 bg-red-50'
+          className={`rounded-2xl border p-6 ${
+            passed
+              ? 'border-[#bae0bd] bg-[#e1f4e3]'
+              : 'border-red-200 bg-red-50'
           }`}
         >
-          <dl className="grid grid-cols-3 gap-4">
-            <div>
-              <dt className="text-xs font-medium uppercase tracking-wide text-zinc-500">Score</dt>
-              <dd className="mt-1 text-3xl font-bold text-zinc-900">
-                {correctCount}/{totalProblems}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium uppercase tracking-wide text-zinc-500">Accuracy</dt>
-              <dd className="mt-1 text-3xl font-bold text-zinc-900">{accuracy}%</dd>
-            </div>
-            <div>
-              <dt className="text-xs font-medium uppercase tracking-wide text-zinc-500">Time</dt>
-              <dd className="mt-1 text-3xl font-bold text-zinc-900">
-                {formatTime(typedSession.time_taken_seconds)}
-              </dd>
-            </div>
-          </dl>
-
-          <div className="mt-4">
+          <div className="flex items-center justify-between mb-4">
             <span
-              className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold ${
+              className={`inline-flex items-center rounded-full px-4 py-1.5 text-sm font-bold ${
                 passed
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-red-100 text-red-700'
+                  ? 'bg-[#2d6a35] text-white'
+                  : 'bg-red-600 text-white'
               }`}
             >
               {passed ? '✓ Passed' : '✗ Not passed'}
             </span>
           </div>
+          <dl className="grid grid-cols-3 gap-4">
+            <div>
+              <dt className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Score</dt>
+              <dd className="mt-1 text-3xl font-bold text-[#1a2e1c]">
+                {correctCount}/{totalProblems}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Accuracy</dt>
+              <dd className="mt-1 text-3xl font-bold text-[#1a2e1c]">{accuracy}%</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Time</dt>
+              <dd className="mt-1 text-3xl font-bold text-[#1a2e1c]">
+                {formatTime(typedSession.time_taken_seconds)}
+              </dd>
+            </div>
+          </dl>
         </div>
 
         {/* Level advancement banner */}
         {didAdvance && newLevel !== null && newSublevel !== null && (
-          <div className="rounded-xl border border-blue-200 bg-blue-50 p-5">
-            <p className="text-base font-semibold text-blue-900">Level Up!</p>
-            <p className="mt-1 text-sm text-blue-700">
+          <div className="rounded-xl border border-[#bae0bd] bg-[#e1f4e3] p-5">
+            <p className="text-base font-bold text-[#1a2e1c]">Level Up!</p>
+            <p className="mt-1 text-sm text-[#2d6a35]">
               Advanced to Level {newLevel}.{newSublevel}{newTopic ? ` — ${newTopic}` : ''}.
             </p>
           </div>
         )}
 
-        {/* Consecutive pass progress for this level */}
+        {/* Mastery progress */}
         {!didAdvance && passesRequired !== null && (
-          <div className="rounded-xl border border-zinc-200 bg-white p-5">
-            <p className="text-sm font-medium text-zinc-700">
-              Progress toward mastery:{' '}
-              <span className="font-bold text-zinc-900">
+          <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
+            <p className="text-sm font-semibold text-[#1a2e1c]">
+              Mastery progress:{' '}
+              <span className="text-[#2d6a35]">
                 {consecutivePasses} / {passesRequired} passes
               </span>
             </p>
             {passed && (
-              <p className="mt-1 text-xs text-zinc-500">
+              <p className="mt-1 text-xs text-[#4a6b4e]">
                 {consecutivePasses >= passesRequired
                   ? 'Mastery reached!'
                   : `${passesRequired - consecutivePasses} more passing session${passesRequired - consecutivePasses === 1 ? '' : 's'} to advance.`}
               </p>
             )}
             {!passed && (
-              <p className="mt-1 text-xs text-zinc-500">
+              <p className="mt-1 text-xs text-[#4a6b4e]">
                 Consecutive passes reset. Keep practicing!
               </p>
             )}
@@ -187,20 +193,20 @@ export default async function ResultsPage({
 
         {/* Problem review */}
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-zinc-900">Problem Review</h2>
+          <h2 className="text-lg font-bold text-[#1a2e1c]">Problem Review</h2>
 
           {problems.map((problem, index) => (
             <div
               key={problem.id}
               className={`rounded-xl border bg-white p-5 ${
-                problem.is_correct ? 'border-green-200' : 'border-red-200'
+                problem.is_correct ? 'border-[#bae0bd]' : 'border-red-200'
               }`}
             >
               <div className="flex items-start gap-4">
                 <span
-                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
                     problem.is_correct
-                      ? 'bg-green-100 text-green-700'
+                      ? 'bg-[#e1f4e3] text-[#2d6a35]'
                       : 'bg-red-100 text-red-700'
                   }`}
                 >
@@ -208,33 +214,31 @@ export default async function ResultsPage({
                 </span>
 
                 <div className="flex-1 space-y-2">
-                  <p className="text-sm font-medium text-zinc-500">
-                    Problem {index + 1}
-                  </p>
-                  <p className="text-base font-medium text-zinc-900">{problem.problem_text}</p>
+                  <p className="text-xs font-medium text-[#4a6b4e]">Problem {index + 1}</p>
+                  <p className="text-base font-semibold text-[#1a2e1c]">{problem.problem_text}</p>
 
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+                      <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">
                         Your answer
                       </p>
                       <p
-                        className={`mt-0.5 font-medium ${
-                          problem.is_correct ? 'text-green-700' : 'text-red-600'
+                        className={`mt-0.5 font-semibold ${
+                          problem.is_correct ? 'text-[#2d6a35]' : 'text-red-600'
                         }`}
                       >
                         {problem.student_answer || (
-                          <span className="italic text-zinc-400">no answer</span>
+                          <span className="italic text-[#a0b8a3]">no answer</span>
                         )}
                       </p>
                     </div>
 
                     {!problem.is_correct && (
                       <div>
-                        <p className="text-xs font-medium uppercase tracking-wide text-zinc-400">
+                        <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">
                           Correct answer
                         </p>
-                        <p className="mt-0.5 font-medium text-green-700">
+                        <p className="mt-0.5 font-semibold text-[#2d6a35]">
                           {problem.correct_answer}
                         </p>
                       </div>
@@ -246,12 +250,20 @@ export default async function ResultsPage({
           ))}
         </div>
 
-        <a
-          href="/worksheet"
-          className="block w-full rounded-xl bg-zinc-900 px-6 py-3 text-center text-sm font-semibold text-white hover:bg-zinc-700"
-        >
-          Try Again
-        </a>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <a
+            href="/worksheet"
+            className="flex-1 rounded-xl bg-[#2d6a35] px-6 py-4 text-center text-base font-semibold text-white hover:bg-[#1f4d26] transition-colors"
+          >
+            Try Again
+          </a>
+          <a
+            href="/dashboard"
+            className="flex-1 rounded-xl border-2 border-[#bae0bd] bg-white px-6 py-4 text-center text-base font-semibold text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
+          >
+            Back to Dashboard
+          </a>
+        </div>
       </main>
     </div>
   )
