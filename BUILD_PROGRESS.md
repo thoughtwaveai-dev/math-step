@@ -6,12 +6,23 @@
 
 ## Current Status
 
-**Phase:** Visual design system applied. All pages refreshed with MathStep brand (#BAE0BD). Logo integrated. All flows verified via Playwright.
-**Next:** Additional curriculum generators (Level 4+), or deployment prep.
+**Phase:** PWA basics added. App is installable on mobile.
+**Next:** Deploy to Vercel (or similar) to test real mobile install flow.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 12 — PWA Setup (2026-04-15)
+- `public/icon-192.png` — generated from `math-step-logo.png` via sharp, 192×192
+- `public/icon-512.png` — generated from `math-step-logo.png` via sharp, 512×512
+- `public/manifest.webmanifest` — name, short_name, description, start_url, display: standalone, theme_color: #2d6a35, background_color: #f7faf7, both icons with `any maskable` purpose
+- `src/app/layout.tsx` — added `manifest`, `themeColor`, `appleWebApp`, and `icons.apple` to Next.js `Metadata` export
+- Manifest served at 200, icons serve at 200, HTML contains `<link rel="manifest">`, `<link rel="apple-touch-icon">`, and `mobile-web-app-capable` meta tags
+- TypeScript: no type errors
+- No service worker / offline caching added (not needed for basic installability)
+
+---
 
 ### Milestone 11 — Visual Design Refresh (2026-04-15)
 - `public/math-step-logo.png` — logo copied to public folder for Next.js Image serving

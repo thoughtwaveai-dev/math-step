@@ -15,6 +15,16 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "MathStep — Step-by-step math learning",
   description: "A structured math learning app for kids. Practice daily, build streaks, master every level.",
+  manifest: "/manifest.webmanifest",
+  themeColor: "#2d6a35",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "MathStep",
+  },
+  icons: {
+    apple: "/icon-192.png",
+  },
 };
 
 export default function RootLayout({
