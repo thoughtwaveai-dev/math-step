@@ -6,12 +6,23 @@
 
 ## Current Status
 
-**Phase:** Level 9/2 (Factor Pairs and Common Factors) fully implemented and tested.
+**Phase:** Dashboard split — parent `/dashboard` and student `/play` both live and tested.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 17 — Parent/Student Dashboard Split (2026-04-16)
+- `src/lib/format.ts` — extracted `formatSpeed()` helper shared by dashboard and play pages
+- `src/app/dashboard/page.tsx` — added "Open Student View" button (links to `/play`) alongside existing "Start Today's Worksheet" CTA; both in a responsive flex row; imported shared `formatSpeed`
+- `src/app/play/page.tsx` — new student-facing server page at `/play`
+  - Auth-protected (same pattern as dashboard)
+  - Shows: student name greeting, streak 🔥, points, level, sublevel, mastery progress bar + text, current topic/description, speed target/accuracy/problems, last session summary
+  - Does NOT show: parent email, placement control (SetLevelForm), admin wording
+  - "Start Today's Worksheet" links to `/worksheet` (unchanged flow)
+  - Subtle "Parent view" link in header returns to `/dashboard`
+- No DB changes, no new dependencies, no changes to worksheet/progression logic
 
 ### Milestone 16 — Level 9/2 Factorization Continuation (2026-04-16)
 - `src/lib/math/generators/factorization.ts` — extended `ProblemType` with `factor_pairs` and `common_factors`; added helpers `factorPairs()` and `commonFactors()`; added `generateFactorizationPairProblems(count)` for Level 9/2 with distribution 4 FP : 3 CF : 3 GCF
@@ -180,6 +191,23 @@
 ---
 
 ## Playwright Test Results
+
+### Suite 17 — Parent/Student Dashboard Split (2026-04-16)
+| Test | Result |
+|------|--------|
+| /dashboard loads as parent view with email, stats, placement control | PASS |
+| /dashboard shows "Open Student View" button linking to /play | PASS |
+| /play loads with student greeting (no parent email) | PASS |
+| /play shows streak, points, level, sublevel | PASS |
+| /play shows current topic + mastery progress bar | PASS |
+| /play shows last session summary | PASS |
+| /play has NO "Set Level" form or placement controls | PASS |
+| /play has NO parent email visible | PASS |
+| "Start Today's Worksheet" from /play navigates to /worksheet | PASS |
+| Worksheet flow from /play unchanged (Coming Soon for Level 10.1 as expected) | PASS |
+| /play has subtle "Parent view" link back to /dashboard | PASS |
+| Auth guard on /play: unauthenticated → redirect /login (code-verified, same pattern as /dashboard) | PASS |
+| TypeScript: no type errors (build clean) | PASS |
 
 ### Suite 16 — Level 9/2 Factor Pairs and Common Factors (2026-04-16)
 | Test | Result |
