@@ -3,6 +3,63 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
+export async function updateStudentPlacement(
+  _prevState: { error: string } | null,
+  formData: FormData
+): Promise<{ error: string } | null> {
+  const studentId = formData.get('student_id') as string
+  const placement = formData.get('placement') as string
+
+  if (!studentId || !placement) return { error: 'Invalid input.' }
+
+  const [lvlStr, sublvlStr] = placement.split(':')
+  const levelNumber = parseInt(lvlStr, 10)
+  const sublevelNumber = parseInt(sublvlStr, 10)
+
+  if (isNaN(levelNumber) || isNaN(sublevelNumber)) return { error: 'Invalid level selection.' }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  // Verify authenticated parent owns this student
+  const { data: student } = await supabase
+    .from('students')
+    .select('id')
+    .eq('id', studentId)
+    .eq('parent_id', user.id)
+    .maybeSingle()
+
+  if (!student) return { error: 'Student not found or access denied.' }
+
+  // Verify the target level exists in the curriculum
+  const { data: level } = await supabase
+    .from('levels')
+    .select('id')
+    .eq('level_number', levelNumber)
+    .eq('sublevel_number', sublevelNumber)
+    .maybeSingle()
+
+  if (!level) return { error: 'Selected level does not exist.' }
+
+  // Update the student's placement
+  const { error: updateErr } = await supabase
+    .from('students')
+    .update({ current_level: levelNumber, current_sublevel: sublevelNumber })
+    .eq('id', studentId)
+
+  if (updateErr) return { error: updateErr.message }
+
+  // Reset consecutive_passes for the new level so stale progress doesn't carry over
+  await supabase
+    .from('student_level_progress')
+    .update({ consecutive_passes: 0, updated_at: new Date().toISOString() })
+    .eq('student_id', studentId)
+    .eq('level_id', level.id)
+
+  redirect('/dashboard')
+}
+
 export async function createStudent(
   _prevState: { error: string } | null,
   formData: FormData

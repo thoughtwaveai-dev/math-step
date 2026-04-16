@@ -6,12 +6,28 @@
 
 ## Current Status
 
-**Phase:** Scratchpad added. Tablet/stylus drawing area below worksheet form.
+**Phase:** Parent placement control added. Parent can set student level/sublevel from dashboard.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 15 — Parent Placement Control (2026-04-16)
+- `src/app/actions/students.ts` — added `updateStudentPlacement` server action
+  - Verifies authenticated parent owns the student (RLS + explicit `parent_id` check)
+  - Verifies target level exists in `levels` table before updating
+  - Updates `students.current_level` and `students.current_sublevel`
+  - Resets `student_level_progress.consecutive_passes` to 0 for the new level (if a row exists), preventing stale mastery carry-over
+  - Redirects to `/dashboard` on success; returns `{ error }` on failure
+- `src/app/dashboard/SetLevelForm.tsx` — new client component
+  - Combined `<select>` listing all curriculum levels as "Level X.Y — Topic: Description"
+  - Defaults to current placement; `useActionState` for inline error display
+  - Styled consistently with brand system
+- `src/app/dashboard/page.tsx` — fetches all levels, renders `SetLevelForm` below Current Focus card
+  - Shows current placement ("Currently on Level X.Y") inline in the form
+  - Stats row (Level / Sublevel cards) continues to reflect live placement
+  - TypeScript: no type errors
 
 ### Milestone 14 — Worksheet Scratchpad (2026-04-16)
 - `src/app/worksheet/WorksheetScratchpad.tsx` — client component with HTML5 canvas drawing area
@@ -153,6 +169,22 @@
 ---
 
 ## Playwright Test Results
+
+### Suite 15 — Parent Placement Control (2026-04-16)
+| Test | Result |
+|------|--------|
+| Dashboard loads with new "Set Level" section | PASS |
+| Combined select shows all 24 curriculum levels in order | PASS |
+| Current level (1.1) is pre-selected on fresh student | PASS |
+| "Currently on Level 1.1" label shown correctly | PASS |
+| Select Level 9.1 → click Update Placement → dashboard reloads | PASS |
+| Stats row shows Level 9 / Sublevel 1 after update | PASS |
+| Current Focus updates to Factorization / Prime factorization and factors | PASS |
+| "Currently on Level 9.1" label updates correctly | PASS |
+| Select in "Set Level" defaults to new placement (9.1 selected) | PASS |
+| Worksheet loads Factorization Worksheet at Level 9.1 after placement change | PASS |
+| Ownership check enforced in server action (parent_id match required) | PASS (code verified) |
+| TypeScript: no type errors | PASS |
 
 ### Suite 14 — Scratchpad (2026-04-16)
 | Test | Result |

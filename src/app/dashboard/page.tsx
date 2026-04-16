@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/app/actions/auth'
 import Image from 'next/image'
+import SetLevelForm from './SetLevelForm'
 
 function formatSpeed(seconds: number): string {
   const m = Math.floor(seconds / 60)
@@ -51,6 +52,13 @@ export default async function DashboardPage() {
     .order('completed_at', { ascending: false })
     .limit(1)
     .maybeSingle()
+
+  // Fetch all curriculum levels for the placement selector
+  const { data: allLevels } = await supabase
+    .from('levels')
+    .select('level_number, sublevel_number, topic, description')
+    .order('level_number', { ascending: true })
+    .order('sublevel_number', { ascending: true })
 
   // Fetch consecutive pass progress for current level
   const { data: levelProgress } = level
@@ -203,6 +211,16 @@ export default async function DashboardPage() {
             </p>
           )}
         </div>
+
+        {/* Set Level — parent control */}
+        {allLevels && allLevels.length > 0 && (
+          <SetLevelForm
+            studentId={student.id}
+            currentLevel={student.current_level}
+            currentSublevel={student.current_sublevel}
+            levels={allLevels}
+          />
+        )}
       </main>
     </div>
   )
