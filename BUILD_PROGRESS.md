@@ -6,12 +6,24 @@
 
 ## Current Status
 
-**Phase:** Lesson cards added. All 7 supported levels have worked-example cards above the worksheet.
+**Phase:** Scratchpad added. Tablet/stylus drawing area below worksheet form.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 14 — Worksheet Scratchpad (2026-04-16)
+- `src/app/worksheet/WorksheetScratchpad.tsx` — client component with HTML5 canvas drawing area
+  - Pointer events (mouse, touch, stylus) via `onPointerDown/Move/Up/Cancel`
+  - `setPointerCapture` ensures strokes aren't interrupted when pointer leaves canvas
+  - `touch-none` CSS class (`touch-action: none`) prevents page scroll while drawing
+  - Stylus pressure support: line width scales with `e.pressure` for pen input
+  - Clear button wipes canvas via `clearRect`
+  - Canvas auto-resizes to container width on mount and window resize, restoring drawing content
+  - 320px fixed height — large enough for tablet use
+- `src/app/worksheet/page.tsx` — imports and renders `<WorksheetScratchpad />` below `<WorksheetForm>`
+- No DB changes, no third-party libraries, no changes to grading/session/progression logic
 
 ### Milestone 13 — Lesson Cards / Learn System (2026-04-16)
 - `src/lib/lessons/index.ts` — static lesson content for all 7 supported levels (1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 9/1). Each entry has: `title`, `explanation`, `example` (problem, steps[], answer), `tip`. Exported `getLesson(level, sublevel)` returns `Lesson | null`.
@@ -141,6 +153,18 @@
 ---
 
 ## Playwright Test Results
+
+### Suite 14 — Scratchpad (2026-04-16)
+| Test | Result |
+|------|--------|
+| Worksheet loads at Level 1.2 with scratchpad visible below form | PASS |
+| Canvas renders at 726×320px (full container width × fixed height) | PASS |
+| "Working Area" heading and "Clear" button present | PASS |
+| Worksheet submit with 20 correct answers: Score 20/20, Passed | PASS |
+| Results page redirects correctly — existing flow unbroken | PASS |
+| TypeScript: no type errors | PASS |
+
+---
 
 ### Suite 13 — Lesson Cards (2026-04-16)
 | Test | Result |

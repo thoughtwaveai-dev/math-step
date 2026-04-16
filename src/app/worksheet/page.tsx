@@ -5,6 +5,7 @@ import { getLesson } from '@/lib/lessons'
 import Image from 'next/image'
 import WorksheetForm from './WorksheetForm'
 import LessonCard from './LessonCard'
+import WorksheetScratchpad from './WorksheetScratchpad'
 
 export default async function WorksheetPage() {
   const supabase = await createClient()
@@ -160,6 +161,8 @@ export default async function WorksheetPage() {
         {lesson && <LessonCard lesson={lesson} />}
 
         <WorksheetForm sessionId={session.id} problems={persistedProblems} />
+
+        <WorksheetScratchpad />
       </main>
     </div>
   )
