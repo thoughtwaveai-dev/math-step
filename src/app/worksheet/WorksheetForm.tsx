@@ -24,6 +24,8 @@ function problemTypeLabel(type: AnyProblemType): string {
     case 'list_factors': return 'List Factors'
     case 'gcf': return 'Greatest Common Factor'
     case 'lcm': return 'Least Common Multiple'
+    case 'factor_pairs': return 'Factor Pairs'
+    case 'common_factors': return 'Common Factors'
   }
 }
 

@@ -1,4 +1,4 @@
-import { generateFactorizationProblems } from './factorization'
+import { generateFactorizationProblems, generateFactorizationPairProblems } from './factorization'
 import { generateSingleDigitAddition, generateDoubleDigitAddition } from './addition'
 import { generateSingleDigitSubtraction, generateDoubleDigitSubtraction } from './subtraction'
 import { generateBasicMultiplication, generateMultiDigitMultiplication } from './multiplication'
@@ -36,6 +36,9 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 9 && sublevelNumber === 1) {
     return generateFactorizationProblems(count)
+  }
+  if (levelNumber === 9 && sublevelNumber === 2) {
+    return generateFactorizationPairProblems(count)
   }
   return []
 }

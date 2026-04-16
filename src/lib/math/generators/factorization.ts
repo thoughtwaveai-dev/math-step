@@ -1,14 +1,16 @@
-export type ProblemType = 'prime_factorization' | 'list_factors' | 'gcf' | 'lcm'
+export type ProblemType = 'prime_factorization' | 'list_factors' | 'gcf' | 'lcm' | 'factor_pairs' | 'common_factors'
 
 export interface MathProblem {
   id: string
   type: ProblemType
   prompt: string
   // answer formats:
-  // prime_factorization: "2 × 3 × 5"  (sorted prime factors joined with ×)
-  // list_factors:        "1, 2, 3, 6"  (all factors sorted ascending)
-  // gcf:                 "6"           (single integer as string)
-  // lcm:                 "12"          (single integer as string)
+  // prime_factorization: "2 × 3 × 5"        (sorted prime factors joined with ×)
+  // list_factors:        "1, 2, 3, 6"        (all factors sorted ascending)
+  // gcf:                 "6"                  (single integer as string)
+  // lcm:                 "12"                 (single integer as string)
+  // factor_pairs:        "1×12, 2×6, 3×4"   (pairs sorted by first factor, joined with ×)
+  // common_factors:      "1, 2, 3, 6"        (sorted ascending)
   answer: string
 }
 
@@ -45,6 +47,18 @@ function gcd(a: number, b: number): number {
 
 function lcm(a: number, b: number): number {
   return (a * b) / gcd(a, b)
+}
+
+function factorPairs(n: number): [number, number][] {
+  const pairs: [number, number][] = []
+  for (let i = 1; i * i <= n; i++) {
+    if (n % i === 0) pairs.push([i, n / i])
+  }
+  return pairs
+}
+
+function commonFactors(a: number, b: number): number[] {
+  return allFactors(a).filter(f => b % f === 0)
 }
 
 // --- Fixed pools (deterministic, no randomness) ---
@@ -108,6 +122,63 @@ export function generateFactorizationProblems(count: number = 10): MathProblem[]
       type: 'lcm',
       prompt: `Find the least common multiple (LCM) of ${a} and ${b}.`,
       answer: String(lcm(a, b)),
+    })
+  }
+
+  return problems
+}
+
+// --- Fixed pools for Level 9 / Sublevel 2 ---
+
+// Numbers chosen to avoid perfect-square pairs (keeps normalize grading clean — no duplicate numbers in answer)
+const FP_NUMBERS = [12, 18, 20, 24, 30, 28, 40, 45, 50, 32]
+const CF_PAIRS: [number, number][] = [
+  [12, 18], [24, 36], [18, 27], [30, 45], [16, 24],
+]
+// GCF pairs distinct from 9/1 to avoid repetition
+const GCF2_PAIRS: [number, number][] = [
+  [15, 25], [20, 30], [28, 42], [14, 21], [36, 48],
+]
+
+// Generates problems for level 9 / sublevel 2 — Factor Pairs and Common Factors
+// Default count is 10. Distribution ratio: 4 FP : 3 CF : 3 GCF (out of 10).
+export function generateFactorizationPairProblems(count: number = 10): MathProblem[] {
+  const fpCount = Math.round(count * 0.4)
+  const cfCount = Math.round(count * 0.3)
+  const gcfCount = count - fpCount - cfCount
+
+  const problems: MathProblem[] = []
+
+  for (let i = 0; i < fpCount; i++) {
+    const n = FP_NUMBERS[i % FP_NUMBERS.length]
+    const pairs = factorPairs(n)
+    const answer = pairs.map(([a, b]) => `${a}×${b}`).join(', ')
+    problems.push({
+      id: `fp_${i + 1}`,
+      type: 'factor_pairs',
+      prompt: `List all factor pairs of ${n}. Write each pair as A×B (e.g. 1×${n}).`,
+      answer,
+    })
+  }
+
+  for (let i = 0; i < cfCount; i++) {
+    const [a, b] = CF_PAIRS[i % CF_PAIRS.length]
+    const answer = commonFactors(a, b).join(', ')
+    problems.push({
+      id: `cf_${i + 1}`,
+      type: 'common_factors',
+      prompt: `List all common factors of ${a} and ${b}.`,
+      answer,
+    })
+  }
+
+  for (let i = 0; i < gcfCount; i++) {
+    const [a, b] = GCF2_PAIRS[i % GCF2_PAIRS.length]
+    problems.push({
+      id: `gcf2_${i + 1}`,
+      type: 'gcf',
+      prompt: `Find the greatest common factor (GCF) of ${a} and ${b}.`,
+      answer: String(gcd(a, b)),
     })
   }
 

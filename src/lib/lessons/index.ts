@@ -99,6 +99,22 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'This is called the distributive property — breaking a big multiplication into smaller, easier ones!',
   },
+  '9/2': {
+    title: 'Factor Pairs and Common Factors',
+    explanation: 'A factor pair is two numbers that multiply together to make a target number. Common factors are factors that two numbers share. The greatest common factor (GCF) is the largest one they share.',
+    example: {
+      problem: 'List all factor pairs of 12, then find the GCF of 12 and 18.',
+      steps: [
+        'Factor pairs of 12: 1×12, 2×6, 3×4',
+        'Factors of 12: 1, 2, 3, 4, 6, 12',
+        'Factors of 18: 1, 2, 3, 6, 9, 18',
+        'Common factors: 1, 2, 3, 6',
+        'Greatest common factor: 6',
+      ],
+      answer: 'GCF = 6',
+    },
+    tip: 'For factor pairs, always start with 1×N and work inward. Stop when the two numbers in the pair meet or cross!',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

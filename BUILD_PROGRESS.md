@@ -6,12 +6,23 @@
 
 ## Current Status
 
-**Phase:** Parent placement control added. Parent can set student level/sublevel from dashboard.
+**Phase:** Level 9/2 (Factor Pairs and Common Factors) fully implemented and tested.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 16 — Level 9/2 Factorization Continuation (2026-04-16)
+- `src/lib/math/generators/factorization.ts` — extended `ProblemType` with `factor_pairs` and `common_factors`; added helpers `factorPairs()` and `commonFactors()`; added `generateFactorizationPairProblems(count)` for Level 9/2 with distribution 4 FP : 3 CF : 3 GCF
+  - Factor pair pools: 10 non-square numbers (12–50); common factor pairs: 5 pairs; GCF pairs: 5 distinct from 9/1
+  - Factor pairs answer format: `"1×12, 2×6, 3×4"` (sorted by first factor)
+  - Common factors format: `"1, 2, 3, 6"` (sorted ascending)
+  - GCF format: `"6"` (single integer — reuses existing exact-match grading)
+- `src/lib/math/generators/index.ts` — added route `9/2 → generateFactorizationPairProblems`
+- `src/lib/lessons/index.ts` — added `9/2` lesson: title "Factor Pairs and Common Factors", explanation, worked example (factor pairs of 12 + GCF of 12 and 18), and tip
+- `src/app/worksheet/WorksheetForm.tsx` — added `factor_pairs` and `common_factors` cases to `problemTypeLabel()`
+- No DB changes, no new dependencies, no grading logic changes
 
 ### Milestone 15 — Parent Placement Control (2026-04-16)
 - `src/app/actions/students.ts` — added `updateStudentPlacement` server action
@@ -169,6 +180,24 @@
 ---
 
 ## Playwright Test Results
+
+### Suite 16 — Level 9/2 Factor Pairs and Common Factors (2026-04-16)
+| Test | Result |
+|------|--------|
+| Placement to 9.2 via dashboard: Level/Sublevel stats update to 9/2 | PASS |
+| Dashboard Current Focus shows "Factorization / Factor pairs and common factors" | PASS |
+| 9/2 worksheet loads with 20 problems (no Coming Soon) | PASS |
+| Lesson card shows "Learn: Factor Pairs and Common Factors" with correct content | PASS |
+| Problem types present: factor_pairs (8), common_factors (6), gcf (6) at count=20 | PASS |
+| Factor pair prompts: "List all factor pairs of N. Write each pair as A×B" | PASS |
+| Common factor prompts: "List all common factors of A and B" | PASS |
+| GCF prompts: "Find the greatest common factor (GCF) of A and B" | PASS |
+| 9/2 correct answers: 20/20, 100%, ✓ Passed, mastery 1/3 | PASS |
+| 9/2 wrong answers (all "999"): 0/20, ✗ Not passed | PASS |
+| 9/1 → 9/2 natural progression: 3 passing sessions at 9/1 → Level Up banner "Advanced to Level 9.2 — Factorization" | PASS |
+| Dashboard after advancement: Level 9 / Sublevel 2, mastery reset to 0/3 | PASS |
+| Unsupported level 10/1: worksheet shows "Coming Soon" with correct topic | PASS |
+| TypeScript: no type errors | PASS |
 
 ### Suite 15 — Parent Placement Control (2026-04-16)
 | Test | Result |
