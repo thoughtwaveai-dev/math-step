@@ -6,12 +6,20 @@
 
 ## Current Status
 
-**Phase:** PWA basics added. App is installable on mobile.
+**Phase:** Lesson cards added. All 7 supported levels have worked-example cards above the worksheet.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 13 — Lesson Cards / Learn System (2026-04-16)
+- `src/lib/lessons/index.ts` — static lesson content for all 7 supported levels (1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 9/1). Each entry has: `title`, `explanation`, `example` (problem, steps[], answer), `tip`. Exported `getLesson(level, sublevel)` returns `Lesson | null`.
+- `src/app/worksheet/LessonCard.tsx` — collapsible `<details>` card (open by default, zero JS). Shows title, explanation, worked example with numbered steps, answer badge, and tip in amber box. Visually consistent with brand system.
+- `src/app/worksheet/page.tsx` — calls `getLesson()` and renders `<LessonCard>` above `<WorksheetForm>` when content exists. Gracefully skipped if `null`.
+- No DB changes, no new dependencies, no logic changes to grading/session/progression.
+
+---
 
 ### Milestone 12 — PWA Setup (2026-04-15)
 - `public/icon-192.png` — generated from `math-step-logo.png` via sharp, 192×192
@@ -133,6 +141,18 @@
 ---
 
 ## Playwright Test Results
+
+### Suite 13 — Lesson Cards (2026-04-16)
+| Test | Result |
+|------|--------|
+| Level 1/1 worksheet shows Learn card: "Learn: Single-Digit Addition" with explanation, worked example (6+3=9), 3 steps, tip | PASS |
+| Level 1/2 worksheet shows Learn card: "Learn: Double-Digit Addition" — different content to 1/1 | PASS |
+| Level card is collapsible via `<details>` — shows "Hide" when open, "Show" when closed | PASS |
+| Worksheet still submits correctly with lesson card present — 20/20, Passed | PASS |
+| Level progression still works — 3 passes advanced from 1/1 → 1/2 as expected | PASS |
+| TypeScript: no type errors | PASS |
+
+---
 
 ### Suite 10 — Multiplication Generators (2026-04-15)
 | Test | Result |

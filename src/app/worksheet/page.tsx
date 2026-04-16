@@ -1,8 +1,10 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { generateProblems } from '@/lib/math/generators'
+import { getLesson } from '@/lib/lessons'
 import Image from 'next/image'
 import WorksheetForm from './WorksheetForm'
+import LessonCard from './LessonCard'
 
 export default async function WorksheetPage() {
   const supabase = await createClient()
@@ -128,6 +130,7 @@ export default async function WorksheetPage() {
   })
 
   const topic = level.topic ?? 'Math'
+  const lesson = getLesson(levelNumber, sublevelNumber)
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f7faf7]">
@@ -153,6 +156,8 @@ export default async function WorksheetPage() {
             {student.name} · Level {levelNumber}.{sublevelNumber}
           </p>
         </div>
+
+        {lesson && <LessonCard lesson={lesson} />}
 
         <WorksheetForm sessionId={session.id} problems={persistedProblems} />
       </main>
