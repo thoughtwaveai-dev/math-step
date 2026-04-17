@@ -1,0 +1,19 @@
+
+> mathstep@0.1.0 dev
+> next dev
+
+⚠ Port 3000 is in use by process 13584, using available port 3001 instead.
+▲ Next.js 16.2.3 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://100.101.213.1:3001
+- Environments: .env.local
+✓ Ready in 696ms
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3000
+- PID:          13584
+- Dir:          C:\Projects\mathstep
+- Log:          .next\dev\logs\next-development.log
+
+Run taskkill /PID 13584 /F to stop it.
+[?25h

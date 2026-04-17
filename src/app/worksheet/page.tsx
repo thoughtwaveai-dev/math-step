@@ -7,7 +7,11 @@ import WorksheetForm from './WorksheetForm'
 import LessonCard from './LessonCard'
 import WorksheetScratchpad from './WorksheetScratchpad'
 
-export default async function WorksheetPage() {
+export default async function WorksheetPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ student?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
@@ -16,11 +20,14 @@ export default async function WorksheetPage() {
     .from('students')
     .select('*')
     .eq('parent_id', user.id)
-    .limit(1)
+    .order('created_at', { ascending: true })
 
   if (!students || students.length === 0) redirect('/onboarding')
 
-  const student = students[0]
+  const sp = await searchParams
+  const selectedId = sp.student
+  const student = (selectedId ? students.find(s => s.id === selectedId) : null) ?? students[0]
+
   const levelNumber = student.current_level as number
   const sublevelNumber = student.current_sublevel as number
 
@@ -39,11 +46,9 @@ export default async function WorksheetPage() {
     )
   }
 
-  // Generate problems in memory — count driven by curriculum metadata
   const problemCount = (level.problems_per_session as number) ?? 10
   const generatedProblems = generateProblems(levelNumber, sublevelNumber, problemCount)
 
-  // If no generator exists for this level, show a safe fallback without creating a session
   if (generatedProblems.length === 0) {
     return (
       <div className="flex min-h-screen flex-col bg-[#f7faf7]">
@@ -54,10 +59,10 @@ export default async function WorksheetPage() {
               <span className="text-base font-bold text-[#1a2e1c]">MathStep</span>
             </div>
             <a
-              href="/dashboard"
+              href={`/play?student=${student.id}`}
               className="rounded-lg border border-[#bae0bd] px-3.5 py-2 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
             >
-              ← Dashboard
+              ← Play
             </a>
           </div>
         </header>
@@ -69,10 +74,10 @@ export default async function WorksheetPage() {
               Check back soon!
             </p>
             <a
-              href="/dashboard"
+              href={`/play?student=${student.id}`}
               className="mt-4 inline-block rounded-xl bg-[#2d6a35] px-4 py-3 text-sm font-semibold text-white hover:bg-[#1f4d26] transition-colors"
             >
-              Back to Dashboard
+              Back to Play
             </a>
           </div>
         </main>
@@ -80,7 +85,6 @@ export default async function WorksheetPage() {
     )
   }
 
-  // Create a new session
   const { data: session, error: sessionError } = await supabase
     .from('sessions')
     .insert({
@@ -99,7 +103,6 @@ export default async function WorksheetPage() {
     )
   }
 
-  // Persist problems to DB
   const problemRows = generatedProblems.map((p, i) => ({
     session_id: session.id,
     problem_text: p.prompt,
@@ -120,7 +123,6 @@ export default async function WorksheetPage() {
     )
   }
 
-  // Merge DB UUIDs with in-memory generator data (matched by order_index)
   const persistedProblems = generatedProblems.map((p, i) => {
     const dbRow = insertedProblems.find(r => r.order_index === i)!
     return {
@@ -142,10 +144,10 @@ export default async function WorksheetPage() {
             <span className="text-base font-bold text-[#1a2e1c]">MathStep</span>
           </div>
           <a
-            href="/dashboard"
+            href={`/play?student=${student.id}`}
             className="rounded-lg border border-[#bae0bd] px-3.5 py-2 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
           >
-            ← Dashboard
+            ← Play
           </a>
         </div>
       </header>

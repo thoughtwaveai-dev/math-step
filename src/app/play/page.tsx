@@ -3,7 +3,11 @@ import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
 import { formatSpeed } from '@/lib/format'
 
-export default async function PlayPage() {
+export default async function PlayPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ student?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -13,11 +17,13 @@ export default async function PlayPage() {
     .from('students')
     .select('*')
     .eq('parent_id', user.id)
-    .limit(1)
+    .order('created_at', { ascending: true })
 
   if (!students || students.length === 0) redirect('/onboarding')
 
-  const student = students[0]
+  const sp = await searchParams
+  const selectedId = sp.student
+  const student = (selectedId ? students.find(s => s.id === selectedId) : null) ?? students[0]
 
   const { data: streakRow } = await supabase
     .from('streaks')
@@ -71,7 +77,7 @@ export default async function PlayPage() {
             <span className="text-lg font-bold text-[#1a2e1c]">MathStep</span>
           </div>
           <a
-            href="/dashboard"
+            href={`/dashboard?student=${student.id}`}
             className="rounded-lg border border-[#bae0bd] bg-white px-3.5 py-2 text-xs font-medium text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors"
           >
             Parent view
@@ -85,6 +91,25 @@ export default async function PlayPage() {
           <h1 className="text-3xl font-bold text-[#1a2e1c]">Hi, {student.name}!</h1>
           <p className="mt-1 text-sm text-[#4a6b4e]">Ready to practise some maths today?</p>
         </div>
+
+        {/* Student switcher — shown when more than one student */}
+        {students.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2">
+            {students.map(s => (
+              <a
+                key={s.id}
+                href={`/play?student=${s.id}`}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+                  s.id === student.id
+                    ? 'bg-[#2d6a35] text-white'
+                    : 'border border-[#bae0bd] bg-white text-[#2d6a35] hover:bg-[#f2faf3]'
+                }`}
+              >
+                {s.name}
+              </a>
+            ))}
+          </div>
+        )}
 
         {/* Stats row */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -108,7 +133,7 @@ export default async function PlayPage() {
 
         {/* Start worksheet CTA */}
         <a
-          href="/worksheet"
+          href={`/worksheet?student=${student.id}`}
           className="flex items-center justify-center gap-2 w-full rounded-xl bg-[#2d6a35] px-6 py-5 text-lg font-bold text-white hover:bg-[#1f4d26] transition-colors shadow-sm"
         >
           Start Today&apos;s Worksheet
@@ -123,7 +148,6 @@ export default async function PlayPage() {
                 <p className="text-xl font-bold text-[#1a2e1c]">{level.topic}</p>
                 <p className="mt-0.5 text-sm text-[#4a6b4e]">{level.description}</p>
               </div>
-              {/* Mastery progress */}
               <span className="shrink-0 rounded-full bg-[#e1f4e3] px-3 py-1 text-xs font-semibold text-[#2d6a35]">
                 {consecutivePasses}/{level.consecutive_passes_required} passes
               </span>

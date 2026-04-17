@@ -51,24 +51,26 @@ export default async function ResultsPage({
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Fetch session + verify ownership via student's parent_id
-  const { data: students } = await supabase
-    .from('students')
-    .select('id')
-    .eq('parent_id', user.id)
-    .limit(1)
-
-  const studentId = students?.[0]?.id
-  if (!studentId) redirect('/onboarding')
-
+  // Fetch session first, then verify the student belongs to this parent
   const { data: session } = await supabase
     .from('sessions')
     .select('*, problems(*)')
     .eq('id', sessionId)
-    .eq('student_id', studentId)
     .maybeSingle()
 
   if (!session) redirect('/dashboard')
+
+  // Verify ownership: session's student must belong to this parent (RLS on students)
+  const { data: ownerCheck } = await supabase
+    .from('students')
+    .select('id')
+    .eq('id', session.student_id)
+    .eq('parent_id', user.id)
+    .maybeSingle()
+
+  if (!ownerCheck) redirect('/dashboard')
+
+  const studentId = session.student_id as string
 
   const typedSession = session as Session
   if (!typedSession.completed_at) redirect('/worksheet')
@@ -111,7 +113,7 @@ export default async function ResultsPage({
             <span className="text-base font-bold text-[#1a2e1c]">MathStep</span>
           </div>
           <a
-            href="/play"
+            href={`/play?student=${studentId}`}
             className="rounded-lg border border-[#bae0bd] px-3.5 py-2 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
           >
             ← Play
@@ -256,13 +258,13 @@ export default async function ResultsPage({
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <a
-            href="/worksheet"
+            href={`/worksheet?student=${studentId}`}
             className="flex-1 rounded-xl bg-[#2d6a35] px-6 py-4 text-center text-base font-semibold text-white hover:bg-[#1f4d26] transition-colors"
           >
             Try Again
           </a>
           <a
-            href="/play"
+            href={`/play?student=${studentId}`}
             className="flex-1 rounded-xl border-2 border-[#bae0bd] bg-white px-6 py-4 text-center text-base font-semibold text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
           >
             Back to Play

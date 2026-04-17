@@ -15,7 +15,7 @@ MathStep is a math learning app for children. Parents create an account, add a s
 - **Parent** — creates account, sets up student, monitors progress
 - **Student (child)** — works through math practice sessions tracked by the parent's account
 
-One account = one parent. One student per parent (for now).
+One account = one parent. Multiple students per parent are supported.
 
 ---
 
@@ -166,7 +166,7 @@ No RLS — publicly readable. Seeded with curriculum data.
 
 ## Known Implementation Decisions
 
-- **One student per parent** — current queries use `.limit(1)`. Multi-student support not planned yet.
+- **Multi-student support** — parents can add multiple students. Student selection uses `?student=<uuid>` URL param on all pages (`/dashboard`, `/play`, `/worksheet`, `/worksheet/results/[sessionId]`). Falls back to first student by `created_at asc` when param is absent or invalid.
 - **Email confirmation** — Supabase may require email confirmation depending on project settings. If enabled, users redirected to `/dashboard` but won't have a session until confirmed.
 - **No Supabase CLI** — migrations are manual via Supabase SQL editor. Schema SQL lives in `supabase/schema.sql`.
 - **No service role key in `.env.local`** — only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are used. DDL requires Supabase dashboard.
@@ -222,3 +222,13 @@ Generators live in `src/lib/math/generators/`. The router is `generateProblems(l
 
 - Deploy to Vercel (or similar) to test real mobile install flow
 - Add generators for remaining curriculum levels (4/1 through 8/2) as needed
+
+## Student Selection Model
+
+Pages that are student-aware accept `searchParams: Promise<{ student?: string }>`. The selection pattern:
+```ts
+const { data: students } = await supabase.from('students').select('*')
+  .eq('parent_id', user.id).order('created_at', { ascending: true })
+const student = (selectedId ? students.find(s => s.id === selectedId) : null) ?? students[0]
+```
+RLS on `students` ensures only the parent's students are returned — no additional ownership check needed for the param fallback. The results page does verify ownership explicitly since it fetches a session by ID (no parent filter on that query).

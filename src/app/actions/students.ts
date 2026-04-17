@@ -57,7 +57,7 @@ export async function updateStudentPlacement(
     .eq('student_id', studentId)
     .eq('level_id', level.id)
 
-  redirect('/dashboard')
+  redirect(`/dashboard?student=${studentId}`)
 }
 
 export async function createStudent(
@@ -92,5 +92,17 @@ export async function createStudent(
 
   if (streakError) return { error: streakError.message }
 
-  redirect('/play')
+  // Count students owned before this insert to decide where to land
+  const { count } = await supabase
+    .from('students')
+    .select('id', { count: 'exact', head: true })
+    .eq('parent_id', user.id)
+    .neq('id', student.id)
+
+  const isFirstStudent = (count ?? 0) === 0
+  if (isFirstStudent) {
+    redirect(`/play?student=${student.id}`)
+  } else {
+    redirect(`/dashboard?student=${student.id}`)
+  }
 }

@@ -6,12 +6,62 @@
 
 ## Current Status
 
-**Phase:** Parent dashboard UX improved — cleaned up parent view, added worksheet history, collapsed admin controls, and celebration confetti.
+**Phase:** Multi-student support added — parents can manage multiple children, switch between them, and each student's data is fully isolated.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 23 — Multi-Student Support (2026-04-17)
+
+**Selection mechanism:** URL query param `?student=<uuid>`. Works natively with Next.js 16 server components. Falls back to first student (by `created_at asc`) when param is absent or doesn't match any owned student. No DB schema changes required.
+
+**Phase 1 — Student selection model**
+- `src/app/dashboard/page.tsx` — accepts `searchParams: Promise<{ student?: string }>`, fetches all students (no `.limit(1)`), resolves selected student from param or defaults to first. Student switcher (pill buttons) shown when >1 students. "Open Student View" and all internal links include `?student=<id>`.
+- `src/app/play/page.tsx` — same pattern. Student switcher shown below greeting when >1 students. "Start Today's Worksheet", "Parent view" all student-scoped.
+- `src/app/worksheet/page.tsx` — same pattern. "← Play" link and fallback "Back to Play" are student-scoped. Session insert uses the resolved student.
+- `src/app/worksheet/results/[sessionId]/page.tsx` — fixed ownership check: fetches session first, then verifies `session.student_id` belongs to current user's students (vs old approach of checking `students[0]` only). "← Play", "Try Again", "Back to Play" all use `session.student_id` for correct routing.
+
+**Phase 2 — Onboarding / adding students**
+- `src/app/onboarding/page.tsx` — counts existing students; shows "Add another student" heading and "← Back to dashboard" link for returning parents. First-time users see original "Set up your student" heading with no back link.
+- Dashboard shows "+ Add Student" button → `/onboarding`.
+
+**Phase 3 — Actions**
+- `src/app/actions/students.ts`:
+  - `createStudent`: counts pre-existing students; if 0 → redirect `/play?student=<newId>` (first-time flow unchanged); if 1+ → redirect `/dashboard?student=<newId>` (parent sees new child immediately)
+  - `updateStudentPlacement`: now redirects to `/dashboard?student=<studentId>` (was `/dashboard`)
+
+No DB schema changes. No new dependencies.
+
+### Suite 23 — Multi-Student Support (2026-04-17)
+| Test | Result |
+|------|--------|
+| Signup (fresh email, no student) → /onboarding with "Set up your student" heading | PASS |
+| Onboarding for first student: no back link shown | PASS |
+| First student created → redirected to /play?student=<id> | PASS |
+| /play with student param: correct greeting, stats, worksheet link includes student param | PASS |
+| "Parent view" → /dashboard?student=<id> | PASS |
+| /dashboard with student param: shows correct student's overview, stats, sessions | PASS |
+| "+ Add Student" button present on dashboard | PASS |
+| /onboarding for returning parent: "Add another student" heading, "← Back to dashboard" link | PASS |
+| Second student created → redirected to /dashboard?student=<newId> | PASS |
+| Dashboard shows student switcher [Alice] [Bob] when 2 students exist | PASS |
+| Switching from Bob → Alice on dashboard: "Alice's Overview" loads correctly | PASS |
+| "Open Student View" → /play?student=<id> for selected student | PASS |
+| /play shows student switcher [Alice] [Bob] when 2 students | PASS |
+| Switching Alice → Bob on /play: "Hi, Bob!" with Bob's stats | PASS |
+| "Start Today's Worksheet" → /worksheet?student=<id> for selected student | PASS |
+| Worksheet shows correct student name and level | PASS |
+| "← Play" on worksheet → /play?student=<id> | PASS |
+| Worksheet submit → results page with all links using same student id | PASS |
+| Results "Back to Play" → /play?student=<id> | PASS |
+| Results "Try Again" → /worksheet?student=<id> | PASS |
+| Results "← Play" header → /play?student=<id> | PASS |
+| Bob's session updated Bob's streak/points; Alice's stats unchanged | PASS |
+| /dashboard with no param: defaults to first student (Alice) | PASS |
+| Logout → login → /play (no param): defaults to first student | PASS |
+| TypeScript: build clean, no type errors | PASS |
 
 ### Milestone 22 — Parent Dashboard Cleanup + History + Celebration (2026-04-17)
 

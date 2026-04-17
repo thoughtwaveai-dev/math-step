@@ -10,7 +10,11 @@ function formatDate(iso: string): string {
   return d.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ student?: string }>
+}) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -20,11 +24,13 @@ export default async function DashboardPage() {
     .from('students')
     .select('*')
     .eq('parent_id', user.id)
-    .limit(1)
+    .order('created_at', { ascending: true })
 
   if (!students || students.length === 0) redirect('/onboarding')
 
-  const student = students[0]
+  const sp = await searchParams
+  const selectedId = sp.student
+  const student = (selectedId ? students.find(s => s.id === selectedId) : null) ?? students[0]
 
   const { data: streakRow } = await supabase
     .from('streaks')
@@ -42,7 +48,6 @@ export default async function DashboardPage() {
     .eq('sublevel_number', student.current_sublevel)
     .maybeSingle()
 
-  // Fetch all curriculum levels for the placement selector and session topic lookup
   const { data: allLevels } = await supabase
     .from('levels')
     .select('id, level_number, sublevel_number, topic, description')
@@ -51,7 +56,6 @@ export default async function DashboardPage() {
 
   const levelMap = new Map(allLevels?.map(l => [l.id, l]) ?? [])
 
-  // Fetch recent completed sessions for worksheet history
   const { data: recentSessions } = await supabase
     .from('sessions')
     .select('id, completed_at, correct_count, total_problems, accuracy, time_taken_seconds, passed, level_id')
@@ -60,7 +64,6 @@ export default async function DashboardPage() {
     .order('completed_at', { ascending: false })
     .limit(10)
 
-  // Fetch consecutive pass progress for current level
   const { data: levelProgress } = level
     ? await supabase
         .from('student_level_progress')
@@ -105,6 +108,25 @@ export default async function DashboardPage() {
           <p className="mt-0.5 text-sm text-[#4a6b4e]">{user.email}</p>
         </div>
 
+        {/* Student switcher — shown when more than one student */}
+        {students.length > 1 && (
+          <div className="flex flex-wrap items-center gap-2">
+            {students.map(s => (
+              <a
+                key={s.id}
+                href={`/dashboard?student=${s.id}`}
+                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+                  s.id === student.id
+                    ? 'bg-[#2d6a35] text-white'
+                    : 'border border-[#bae0bd] bg-white text-[#2d6a35] hover:bg-[#f2faf3]'
+                }`}
+              >
+                {s.name}
+              </a>
+            ))}
+          </div>
+        )}
+
         {/* Stats row */}
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-xl border border-[#bae0bd] bg-white p-4 text-center">
@@ -125,13 +147,21 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Open Student View */}
-        <a
-          href="/play"
-          className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#bae0bd] bg-white px-6 py-4 text-base font-semibold text-[#2d6a35] hover:bg-[#f2faf3] transition-colors shadow-sm"
-        >
-          Open Student View
-        </a>
+        {/* Action buttons row */}
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <a
+            href={`/play?student=${student.id}`}
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#bae0bd] bg-white px-6 py-4 text-base font-semibold text-[#2d6a35] hover:bg-[#f2faf3] transition-colors shadow-sm"
+          >
+            Open Student View
+          </a>
+          <a
+            href="/onboarding"
+            className="flex items-center justify-center gap-2 rounded-xl border border-[#bae0bd] bg-white px-5 py-4 text-sm font-semibold text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors shadow-sm sm:w-auto"
+          >
+            + Add Student
+          </a>
+        </div>
 
         {/* Current Focus */}
         <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
