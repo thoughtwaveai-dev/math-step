@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import { updateStudentPlacement } from '@/app/actions/students'
 
 type Level = {
+  id?: number
   level_number: number
   sublevel_number: number
   topic: string

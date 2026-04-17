@@ -6,12 +6,41 @@
 
 ## Current Status
 
-**Phase:** Levels 10/2 and 11/1 added. Curriculum now extends from 1/1 through 11/1 with real generators. Grading enhanced for inequalities.
+**Phase:** Parent dashboard UX improved — cleaned up parent view, added worksheet history, collapsed admin controls, and celebration confetti.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 22 — Parent Dashboard Cleanup + History + Celebration (2026-04-17)
+
+**Phase 1 — Parent dashboard cleanup**
+- `src/app/dashboard/page.tsx` — removed "Start Today's Worksheet" CTA from parent dashboard
+- "Open Student View" is now the sole full-width action button
+- Page heading changed to "{student.name}'s Overview" to reinforce oversight framing
+
+**Phase 2 — Completed worksheet history**
+- Added `recentSessions` query (last 10 completed sessions) to dashboard
+- Added `id` field to `allLevels` fetch; built a `Map<level_id, levelInfo>` to look up topic/level for each session row
+- "Recent Worksheets" section lists each session: date, level/topic, score, accuracy, time, pass/fail badge
+- Each row links to `/worksheet/results/[sessionId]` — verified navigation works
+
+**Phase 3 — Admin controls**
+- `SetLevelForm` wrapped in a `<details>` element ("Admin controls") — collapsed by default
+- Full placement functionality preserved inside the collapsed section
+- `SetLevelForm.tsx` — updated `Level` type to accept optional `id` field
+
+**Phase 4 — Celebration confetti**
+- `src/app/worksheet/results/[sessionId]/CelebrationEffect.tsx` — new client component
+  - Generates 70 confetti pieces client-side via `useEffect` (avoids SSR hydration mismatch)
+  - Inline `<style>` keyframe `confettiFall` (no globals.css changes needed)
+  - Pieces: random position, size (5–14px), color (7 brand/accent colors), delay (0–1.8s), duration (2.2–3.8s)
+  - Auto-cleans up after 5.5s; `pointer-events-none` + `aria-hidden` so it doesn't block interaction or accessibility
+- `src/app/worksheet/results/[sessionId]/page.tsx` — mounts `<CelebrationEffect />` when `accuracy === 100 || didAdvance`
+- Confirmed: triggers on 100% score, triggers on level-up, does NOT trigger on partial/failing score
+
+No DB schema changes. No new third-party dependencies.
 
 ### Milestone 21 — Level 11/1 Inequalities (2026-04-17)
 - `src/lib/math/generators/inequalities.ts` — new generator for Level 11/1
@@ -233,6 +262,28 @@
 ---
 
 ## Playwright Test Results
+
+### Suite 22 — Parent Dashboard + History + Celebration (2026-04-17)
+| Test | Result |
+|------|--------|
+| /dashboard no longer shows "Start Today's Worksheet" button | PASS |
+| /dashboard shows "Open Student View" as full-width button | PASS |
+| "Open Student View" navigates to /play | PASS |
+| /dashboard shows "Recent Worksheets" section | PASS |
+| Recent Worksheets shows completed session rows with date, score, accuracy, time, pass badge | PASS |
+| Each session row links to correct /worksheet/results/[sessionId] URL | PASS |
+| Session link navigates to results page successfully | PASS |
+| "No completed worksheets yet." shown when no sessions exist | PASS |
+| SetLevelForm hidden inside collapsed "Admin controls" <details> section | PASS |
+| Admin controls collapsed by default | PASS |
+| SetLevelForm placement functionality works inside admin controls | PASS |
+| 100% accuracy result triggers confetti (70 pieces in DOM, aria-hidden) | PASS |
+| Level-up result triggers confetti (70 pieces in DOM, confirmed via evaluate) | PASS |
+| Partial/failing result (0/20) does NOT trigger confetti | PASS |
+| Confetti auto-expires after 5.5s (setPieces(null) cleanup) | PASS |
+| Level-up banner ("Level Up! Advanced to Level 1.2 — Addition") renders correctly | PASS |
+| /play student flow unaffected — Start Worksheet, results, back to play all work | PASS |
+| TypeScript: build clean, no type errors | PASS |
 
 ### Suite 20 — Levels 10/2 and 11/1 Bundle (2026-04-17)
 | Test | Result |
@@ -516,5 +567,5 @@
 
 ## Immediate Next Tasks
 
-1. Add generators for remaining curriculum levels (4/1, 4/2, etc.) as needed
-2. Deployment prep — Vercel or similar
+1. Deployment prep — Vercel or similar
+2. Add generators for remaining curriculum levels (4/1, 4/2, etc.) as needed

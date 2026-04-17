@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
+import CelebrationEffect from './CelebrationEffect'
 
 function formatTime(seconds: number | null): string {
   if (!seconds) return '—'
@@ -97,8 +98,11 @@ export default async function ResultsPage({
   const accuracy = typedSession.accuracy ? Number(typedSession.accuracy) : 0
   const passed = typedSession.passed ?? false
 
+  const showCelebration = accuracy === 100 || didAdvance
+
   return (
     <div className="flex min-h-screen flex-col bg-[#f7faf7]">
+      {showCelebration && <CelebrationEffect />}
       {/* Header */}
       <header className="border-b border-[#bae0bd] bg-white px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">

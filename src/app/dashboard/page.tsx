@@ -5,6 +5,11 @@ import Image from 'next/image'
 import SetLevelForm from './SetLevelForm'
 import { formatSpeed } from '@/lib/format'
 
+function formatDate(iso: string): string {
+  const d = new Date(iso)
+  return d.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -37,21 +42,23 @@ export default async function DashboardPage() {
     .eq('sublevel_number', student.current_sublevel)
     .maybeSingle()
 
-  const { data: lastSession } = await supabase
+  // Fetch all curriculum levels for the placement selector and session topic lookup
+  const { data: allLevels } = await supabase
+    .from('levels')
+    .select('id, level_number, sublevel_number, topic, description')
+    .order('level_number', { ascending: true })
+    .order('sublevel_number', { ascending: true })
+
+  const levelMap = new Map(allLevels?.map(l => [l.id, l]) ?? [])
+
+  // Fetch recent completed sessions for worksheet history
+  const { data: recentSessions } = await supabase
     .from('sessions')
-    .select('correct_count, total_problems, accuracy, time_taken_seconds, passed, completed_at')
+    .select('id, completed_at, correct_count, total_problems, accuracy, time_taken_seconds, passed, level_id')
     .eq('student_id', student.id)
     .not('completed_at', 'is', null)
     .order('completed_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  // Fetch all curriculum levels for the placement selector
-  const { data: allLevels } = await supabase
-    .from('levels')
-    .select('level_number, sublevel_number, topic, description')
-    .order('level_number', { ascending: true })
-    .order('sublevel_number', { ascending: true })
+    .limit(10)
 
   // Fetch consecutive pass progress for current level
   const { data: levelProgress } = level
@@ -94,7 +101,7 @@ export default async function DashboardPage() {
       <main className="mx-auto w-full max-w-3xl px-5 py-8 space-y-5">
         {/* Page heading */}
         <div>
-          <h1 className="text-2xl font-bold text-[#1a2e1c]">Hello, {student.name}</h1>
+          <h1 className="text-2xl font-bold text-[#1a2e1c]">{student.name}&apos;s Overview</h1>
           <p className="mt-0.5 text-sm text-[#4a6b4e]">{user.email}</p>
         </div>
 
@@ -118,59 +125,13 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* Action row */}
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <a
-            href="/worksheet"
-            className="flex items-center justify-center gap-2 flex-1 rounded-xl bg-[#2d6a35] px-6 py-4 text-base font-semibold text-white hover:bg-[#1f4d26] transition-colors shadow-sm"
-          >
-            Start Today&apos;s Worksheet
-          </a>
-          <a
-            href="/play"
-            className="flex items-center justify-center gap-2 flex-1 rounded-xl border border-[#bae0bd] bg-white px-6 py-4 text-base font-semibold text-[#2d6a35] hover:bg-[#f2faf3] transition-colors shadow-sm"
-          >
-            Open Student View
-          </a>
-        </div>
-
-        {/* Last session */}
-        {lastSession && (
-          <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-base font-semibold text-[#1a2e1c]">Last Session</h2>
-              <span
-                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold ${
-                  lastSession.passed
-                    ? 'bg-[#e1f4e3] text-[#2d6a35]'
-                    : 'bg-red-50 text-red-700'
-                }`}
-              >
-                {lastSession.passed ? '✓ Passed' : '✗ Not passed'}
-              </span>
-            </div>
-            <dl className="grid grid-cols-3 gap-3">
-              <div className="rounded-lg bg-[#f7faf7] p-3 text-center">
-                <dt className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Score</dt>
-                <dd className="mt-1 text-lg font-bold text-[#1a2e1c]">
-                  {lastSession.correct_count}/{lastSession.total_problems}
-                </dd>
-              </div>
-              <div className="rounded-lg bg-[#f7faf7] p-3 text-center">
-                <dt className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Accuracy</dt>
-                <dd className="mt-1 text-lg font-bold text-[#1a2e1c]">
-                  {Number(lastSession.accuracy)}%
-                </dd>
-              </div>
-              <div className="rounded-lg bg-[#f7faf7] p-3 text-center">
-                <dt className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Time</dt>
-                <dd className="mt-1 text-lg font-bold text-[#1a2e1c]">
-                  {formatSpeed(lastSession.time_taken_seconds ?? 0)}
-                </dd>
-              </div>
-            </dl>
-          </div>
-        )}
+        {/* Open Student View */}
+        <a
+          href="/play"
+          className="flex items-center justify-center gap-2 w-full rounded-xl border border-[#bae0bd] bg-white px-6 py-4 text-base font-semibold text-[#2d6a35] hover:bg-[#f2faf3] transition-colors shadow-sm"
+        >
+          Open Student View
+        </a>
 
         {/* Current Focus */}
         <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
@@ -183,7 +144,6 @@ export default async function DashboardPage() {
                   <p className="text-xl font-bold text-[#1a2e1c]">{level.topic}</p>
                   <p className="mt-0.5 text-sm text-[#4a6b4e]">{level.description}</p>
                 </div>
-                {/* Mastery pill */}
                 <span className="shrink-0 rounded-full bg-[#e1f4e3] px-3 py-1 text-xs font-semibold text-[#2d6a35]">
                   {consecutivePasses}/{level.consecutive_passes_required} passes
                 </span>
@@ -213,15 +173,67 @@ export default async function DashboardPage() {
           )}
         </div>
 
-        {/* Set Level — parent control */}
-        {allLevels && allLevels.length > 0 && (
-          <SetLevelForm
-            studentId={student.id}
-            currentLevel={student.current_level}
-            currentSublevel={student.current_sublevel}
-            levels={allLevels}
-          />
-        )}
+        {/* Recent Worksheets */}
+        <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
+          <h2 className="text-base font-semibold text-[#1a2e1c] mb-4">Recent Worksheets</h2>
+
+          {recentSessions && recentSessions.length > 0 ? (
+            <div className="space-y-2">
+              {recentSessions.map((s) => {
+                const lvl = levelMap.get(s.level_id)
+                return (
+                  <a
+                    key={s.id}
+                    href={`/worksheet/results/${s.id}`}
+                    className="flex items-center justify-between gap-3 rounded-lg border border-[#e8f5e9] bg-[#f7faf7] px-4 py-3 hover:bg-[#f2faf3] transition-colors"
+                  >
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-[#1a2e1c] truncate">
+                        {lvl ? `Level ${lvl.level_number}.${lvl.sublevel_number} — ${lvl.topic}` : `Level ID ${s.level_id}`}
+                      </p>
+                      <p className="text-xs text-[#4a6b4e] mt-0.5">
+                        {s.completed_at ? formatDate(s.completed_at) : '—'}
+                        {' · '}
+                        {s.correct_count}/{s.total_problems}
+                        {' · '}
+                        {Number(s.accuracy)}%
+                        {' · '}
+                        {formatSpeed(s.time_taken_seconds ?? 0)}
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        s.passed ? 'bg-[#e1f4e3] text-[#2d6a35]' : 'bg-red-50 text-red-700'
+                      }`}
+                    >
+                      {s.passed ? '✓' : '✗'}
+                    </span>
+                  </a>
+                )
+              })}
+            </div>
+          ) : (
+            <p className="text-sm text-[#4a6b4e]">No completed worksheets yet.</p>
+          )}
+        </div>
+
+        {/* Admin controls — collapsed by default */}
+        <details className="rounded-xl border border-[#bae0bd] bg-white">
+          <summary className="cursor-pointer select-none px-5 py-4 text-sm font-semibold text-[#4a6b4e] hover:text-[#1a2e1c] transition-colors list-none flex items-center justify-between">
+            <span>Admin controls</span>
+            <span className="text-xs text-[#4a6b4e]">▾</span>
+          </summary>
+          <div className="px-5 pb-5">
+            {allLevels && allLevels.length > 0 && (
+              <SetLevelForm
+                studentId={student.id}
+                currentLevel={student.current_level}
+                currentSublevel={student.current_sublevel}
+                levels={allLevels}
+              />
+            )}
+          </div>
+        </details>
       </main>
     </div>
   )
