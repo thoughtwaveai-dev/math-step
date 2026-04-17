@@ -58,7 +58,7 @@ export default function TermsPage() {
             <p className="text-sm text-[#4a6b4e] leading-relaxed">
               MathStep is in active development. Features may change, be removed, or be unavailable from time to time.
               We appreciate your patience and welcome feedback at{' '}
-              <a href="mailto:feedback@mathstep.app" className="text-[#2d6a35] hover:underline">feedback@mathstep.app</a>.
+              <a href="mailto:mathstepfeedback@gmail.com" className="text-[#2d6a35] hover:underline">mathstepfeedback@gmail.com</a>.
             </p>
           </section>
 
@@ -83,7 +83,7 @@ export default function TermsPage() {
             <h2 className="text-lg font-semibold mb-2">Contact</h2>
             <p className="text-sm text-[#4a6b4e] leading-relaxed">
               Questions or concerns? Email{' '}
-              <a href="mailto:feedback@mathstep.app" className="text-[#2d6a35] hover:underline">feedback@mathstep.app</a>.
+              <a href="mailto:mathstepfeedback@gmail.com" className="text-[#2d6a35] hover:underline">mathstepfeedback@gmail.com</a>.
             </p>
           </section>
         </div>

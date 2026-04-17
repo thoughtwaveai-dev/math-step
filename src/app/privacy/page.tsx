@@ -67,7 +67,7 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-semibold mb-2">Deleting your data</h2>
             <p className="text-sm text-[#4a6b4e] leading-relaxed">
               If you want your account and all associated data deleted, email us at{' '}
-              <a href="mailto:feedback@mathstep.app" className="text-[#2d6a35] hover:underline">feedback@mathstep.app</a>.
+              <a href="mailto:mathstepfeedback@gmail.com" className="text-[#2d6a35] hover:underline">mathstepfeedback@gmail.com</a>.
               We will delete it within 14 days.
             </p>
           </section>
@@ -84,7 +84,7 @@ export default function PrivacyPage() {
             <h2 className="text-lg font-semibold mb-2">Contact</h2>
             <p className="text-sm text-[#4a6b4e] leading-relaxed">
               Questions? Email{' '}
-              <a href="mailto:feedback@mathstep.app" className="text-[#2d6a35] hover:underline">feedback@mathstep.app</a>.
+              <a href="mailto:mathstepfeedback@gmail.com" className="text-[#2d6a35] hover:underline">mathstepfeedback@gmail.com</a>.
             </p>
           </section>
         </div>
