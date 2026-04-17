@@ -1,0 +1,195 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - img "MathStep" [ref=e6]
+          - generic [ref=e7]: MathStep
+        - link "← Dashboard" [ref=e8] [cursor=pointer]:
+          - /url: /dashboard
+    - main [ref=e9]:
+      - generic [ref=e10]:
+        - heading "Linear Equations Worksheet" [level=1] [ref=e11]
+        - paragraph [ref=e12]: Alex · Level 10.1
+      - group [ref=e13]:
+        - 'generic "? Learn: Linear Equations Hide" [ref=e14] [cursor=pointer]':
+          - generic [ref=e15]:
+            - generic [ref=e16]: "?"
+            - generic [ref=e17]: "Learn: Linear Equations"
+          - generic [ref=e18]: Hide
+        - generic [ref=e19]:
+          - paragraph [ref=e20]: A linear equation has one unknown, usually called x. Your goal is to find the value of x that makes the equation true. Whatever you do to one side of the equals sign, you must do to the other side too.
+          - generic [ref=e21]:
+            - generic [ref=e23]: Worked Example
+            - paragraph [ref=e24]: 2x + 5 = 13
+            - list [ref=e25]:
+              - listitem [ref=e26]:
+                - generic [ref=e27]: "1"
+                - text: We want x on its own
+              - listitem [ref=e28]:
+                - generic [ref=e29]: "2"
+                - text: "Subtract 5 from both sides: 2x + 5 − 5 = 13 − 5 → 2x = 8"
+              - listitem [ref=e30]:
+                - generic [ref=e31]: "3"
+                - text: "Divide both sides by 2: 2x ÷ 2 = 8 ÷ 2 → x = 4"
+              - listitem [ref=e32]:
+                - generic [ref=e33]: "4"
+                - text: "Check: 2(4) + 5 = 8 + 5 = 13 ✓"
+            - generic [ref=e34]: "Answer: x = 4"
+          - generic [ref=e35]:
+            - generic [ref=e36]: 💡
+            - paragraph [ref=e37]: Always check your answer by substituting x back into the original equation — if both sides match, you're right!
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - generic [ref=e40]: Timer
+          - generic [ref=e41]: 00:00
+          - generic [ref=e42]: Starting…
+        - generic [ref=e44]:
+          - generic [ref=e45]: "1"
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - text: Linear Equation
+              - paragraph [ref=e48]: "Solve for x: x + 4 = 11"
+            - textbox "Your answer" [ref=e49]
+        - generic [ref=e51]:
+          - generic [ref=e52]: "2"
+          - generic [ref=e53]:
+            - generic [ref=e54]:
+              - text: Linear Equation
+              - paragraph [ref=e55]: "Solve for x: x + 7 = 15"
+            - textbox "Your answer" [ref=e56]
+        - generic [ref=e58]:
+          - generic [ref=e59]: "3"
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - text: Linear Equation
+              - paragraph [ref=e62]: "Solve for x: x + 9 = 21"
+            - textbox "Your answer" [ref=e63]
+        - generic [ref=e65]:
+          - generic [ref=e66]: "4"
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - text: Linear Equation
+              - paragraph [ref=e69]: "Solve for x: x + 6 = 18"
+            - textbox "Your answer" [ref=e70]
+        - generic [ref=e72]:
+          - generic [ref=e73]: "5"
+          - generic [ref=e74]:
+            - generic [ref=e75]:
+              - text: Linear Equation
+              - paragraph [ref=e76]: "Solve for x: x + 3 = 10"
+            - textbox "Your answer" [ref=e77]
+        - generic [ref=e79]:
+          - generic [ref=e80]: "6"
+          - generic [ref=e81]:
+            - generic [ref=e82]:
+              - text: Linear Equation
+              - paragraph [ref=e83]: "Solve for x: x - 6 = 9"
+            - textbox "Your answer" [ref=e84]
+        - generic [ref=e86]:
+          - generic [ref=e87]: "7"
+          - generic [ref=e88]:
+            - generic [ref=e89]:
+              - text: Linear Equation
+              - paragraph [ref=e90]: "Solve for x: x - 3 = 8"
+            - textbox "Your answer" [ref=e91]
+        - generic [ref=e93]:
+          - generic [ref=e94]: "8"
+          - generic [ref=e95]:
+            - generic [ref=e96]:
+              - text: Linear Equation
+              - paragraph [ref=e97]: "Solve for x: x - 5 = 12"
+            - textbox "Your answer" [ref=e98]
+        - generic [ref=e100]:
+          - generic [ref=e101]: "9"
+          - generic [ref=e102]:
+            - generic [ref=e103]:
+              - text: Linear Equation
+              - paragraph [ref=e104]: "Solve for x: x - 8 = 6"
+            - textbox "Your answer" [ref=e105]
+        - generic [ref=e107]:
+          - generic [ref=e108]: "10"
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - text: Linear Equation
+              - paragraph [ref=e111]: "Solve for x: x - 4 = 13"
+            - textbox "Your answer" [ref=e112]
+        - generic [ref=e114]:
+          - generic [ref=e115]: "11"
+          - generic [ref=e116]:
+            - generic [ref=e117]:
+              - text: Linear Equation
+              - paragraph [ref=e118]: "Solve for x: 3x = 18"
+            - textbox "Your answer" [ref=e119]
+        - generic [ref=e121]:
+          - generic [ref=e122]: "12"
+          - generic [ref=e123]:
+            - generic [ref=e124]:
+              - text: Linear Equation
+              - paragraph [ref=e125]: "Solve for x: 4x = 20"
+            - textbox "Your answer" [ref=e126]
+        - generic [ref=e128]:
+          - generic [ref=e129]: "13"
+          - generic [ref=e130]:
+            - generic [ref=e131]:
+              - text: Linear Equation
+              - paragraph [ref=e132]: "Solve for x: 5x = 35"
+            - textbox "Your answer" [ref=e133]
+        - generic [ref=e135]:
+          - generic [ref=e136]: "14"
+          - generic [ref=e137]:
+            - generic [ref=e138]:
+              - text: Linear Equation
+              - paragraph [ref=e139]: "Solve for x: 2x = 16"
+            - textbox "Your answer" [ref=e140]
+        - generic [ref=e142]:
+          - generic [ref=e143]: "15"
+          - generic [ref=e144]:
+            - generic [ref=e145]:
+              - text: Linear Equation
+              - paragraph [ref=e146]: "Solve for x: x / 4 = 3"
+            - textbox "Your answer" [ref=e147]
+        - generic [ref=e149]:
+          - generic [ref=e150]: "16"
+          - generic [ref=e151]:
+            - generic [ref=e152]:
+              - text: Linear Equation
+              - paragraph [ref=e153]: "Solve for x: x / 5 = 4"
+            - textbox "Your answer" [ref=e154]
+        - generic [ref=e156]:
+          - generic [ref=e157]: "17"
+          - generic [ref=e158]:
+            - generic [ref=e159]:
+              - text: Linear Equation
+              - paragraph [ref=e160]: "Solve for x: x / 3 = 6"
+            - textbox "Your answer" [ref=e161]
+        - generic [ref=e163]:
+          - generic [ref=e164]: "18"
+          - generic [ref=e165]:
+            - generic [ref=e166]:
+              - text: Linear Equation
+              - paragraph [ref=e167]: "Solve for x: 2x + 5 = 13"
+            - textbox "Your answer" [ref=e168]
+        - generic [ref=e170]:
+          - generic [ref=e171]: "19"
+          - generic [ref=e172]:
+            - generic [ref=e173]:
+              - text: Linear Equation
+              - paragraph [ref=e174]: "Solve for x: 3x - 4 = 11"
+            - textbox "Your answer" [ref=e175]
+        - generic [ref=e177]:
+          - generic [ref=e178]: "20"
+          - generic [ref=e179]:
+            - generic [ref=e180]:
+              - text: Linear Equation
+              - paragraph [ref=e181]: "Solve for x: x / 3 - 2 = 4"
+            - textbox "Your answer" [ref=e182]
+        - button "Submit Worksheet" [ref=e183]
+      - generic [ref=e184]:
+        - generic [ref=e185]:
+          - generic [ref=e186]: Working Area
+          - button "Clear" [ref=e187]
+        - generic "Drawing scratchpad" [ref=e188]
+  - button "Open Next.js Dev Tools" [ref=e194] [cursor=pointer]:
+    - img [ref=e195]
+  - alert [ref=e198]

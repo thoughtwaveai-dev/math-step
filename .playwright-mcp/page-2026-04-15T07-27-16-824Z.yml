@@ -1,0 +1,47 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e20] [cursor=pointer]:
+    - img [ref=e21]
+  - alert [ref=e24]
+  - generic [ref=e25]:
+    - banner [ref=e26]:
+      - generic [ref=e27]:
+        - generic [ref=e28]: MathStep
+        - button "Log out" [ref=e30]
+    - main [ref=e31]:
+      - generic [ref=e32]:
+        - heading "Dashboard" [level=1] [ref=e33]
+        - paragraph [ref=e34]: testuser+1776237543@mathstep.dev
+      - generic [ref=e35]:
+        - heading "Alex" [level=2] [ref=e36]
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - term [ref=e39]: Level
+            - definition [ref=e40]: "1"
+          - generic [ref=e41]:
+            - term [ref=e42]: Sublevel
+            - definition [ref=e43]: "1"
+          - generic [ref=e44]:
+            - term [ref=e45]: Streak
+            - definition [ref=e46]: "0"
+          - generic [ref=e47]:
+            - term [ref=e48]: Points
+            - definition [ref=e49]: "0"
+      - generic [ref=e50]:
+        - heading "Current Focus" [level=2] [ref=e51]
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - paragraph [ref=e54]: Addition
+            - paragraph [ref=e55]: Single-digit addition
+          - generic [ref=e56]:
+            - generic [ref=e57]:
+              - term [ref=e58]: Speed target
+              - definition [ref=e59]: 8m
+            - generic [ref=e60]:
+              - term [ref=e61]: Accuracy
+              - definition [ref=e62]: 90%
+            - generic [ref=e63]:
+              - term [ref=e64]: Problems/session
+              - definition [ref=e65]: "20"
+            - generic [ref=e66]:
+              - term [ref=e67]: Passes required
+              - definition [ref=e68]: "3"

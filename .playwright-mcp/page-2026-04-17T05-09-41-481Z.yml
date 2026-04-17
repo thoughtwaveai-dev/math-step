@@ -1,0 +1,49 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e27] [cursor=pointer]:
+    - img [ref=e28]
+  - alert [ref=e31]
+  - generic [ref=e44]:
+    - banner [ref=e45]:
+      - generic [ref=e46]:
+        - generic [ref=e47]:
+          - img "MathStep" [ref=e48]
+          - generic [ref=e49]: MathStep
+        - link "Parent view" [ref=e50] [cursor=pointer]:
+          - /url: /dashboard
+    - main [ref=e51]:
+      - generic [ref=e52]:
+        - heading "Hi, Alex!" [level=1] [ref=e53]
+        - paragraph [ref=e54]: Ready to practise some maths today?
+      - generic [ref=e55]:
+        - generic [ref=e56]:
+          - paragraph [ref=e57]: Level
+          - paragraph [ref=e58]: "1"
+        - generic [ref=e59]:
+          - paragraph [ref=e60]: Sublevel
+          - paragraph [ref=e61]: "1"
+        - generic [ref=e62]:
+          - paragraph [ref=e63]: Streak
+          - paragraph [ref=e64]: 0 🔥
+        - generic [ref=e65]:
+          - paragraph [ref=e66]: Points
+          - paragraph [ref=e67]: "0"
+      - link "Start Today's Worksheet" [ref=e68] [cursor=pointer]:
+        - /url: /worksheet
+      - generic [ref=e69]:
+        - heading "What you're working on" [level=2] [ref=e70]
+        - generic [ref=e71]:
+          - generic [ref=e72]:
+            - paragraph [ref=e73]: Addition
+            - paragraph [ref=e74]: Single-digit addition
+          - generic [ref=e75]: 0/3 passes
+        - paragraph [ref=e78]: 3 more passing sessions to advance
+        - generic [ref=e79]:
+          - generic [ref=e80]:
+            - term [ref=e81]: Speed target
+            - definition [ref=e82]: 8m
+          - generic [ref=e83]:
+            - term [ref=e84]: Accuracy
+            - definition [ref=e85]: 90%
+          - generic [ref=e86]:
+            - term [ref=e87]: Problems
+            - definition [ref=e88]: "20"

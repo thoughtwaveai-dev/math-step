@@ -1,0 +1,278 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e194] [cursor=pointer]:
+    - img [ref=e195]
+  - alert [ref=e198]
+  - generic [ref=e199]:
+    - banner [ref=e200]:
+      - generic [ref=e201]:
+        - generic [ref=e202]:
+          - img "MathStep" [ref=e203]
+          - generic [ref=e204]: MathStep
+        - link "← Play" [ref=e205] [cursor=pointer]:
+          - /url: /play
+    - main [ref=e206]:
+      - heading "Worksheet Results" [level=1] [ref=e207]
+      - generic [ref=e208]:
+        - generic [ref=e210]: ✗ Not passed
+        - generic [ref=e211]:
+          - generic [ref=e212]:
+            - term [ref=e213]: Score
+            - definition [ref=e214]: 0/20
+          - generic [ref=e215]:
+            - term [ref=e216]: Accuracy
+            - definition [ref=e217]: 0%
+          - generic [ref=e218]:
+            - term [ref=e219]: Time
+            - definition [ref=e220]: 24s
+      - generic [ref=e221]:
+        - paragraph [ref=e222]:
+          - text: "Mastery progress:"
+          - generic [ref=e223]: 0 / 3 passes
+        - paragraph [ref=e224]: Consecutive passes reset. Keep practicing!
+      - generic [ref=e225]:
+        - heading "Problem Review" [level=2] [ref=e226]
+        - generic [ref=e228]:
+          - generic [ref=e229]: ✗
+          - generic [ref=e230]:
+            - paragraph [ref=e231]: Problem 1
+            - paragraph [ref=e232]: "Solve for x: x + 4 = 11"
+            - generic [ref=e233]:
+              - generic [ref=e234]:
+                - paragraph [ref=e235]: Your answer
+                - paragraph [ref=e236]: "999"
+              - generic [ref=e237]:
+                - paragraph [ref=e238]: Correct answer
+                - paragraph [ref=e239]: "7"
+        - generic [ref=e241]:
+          - generic [ref=e242]: ✗
+          - generic [ref=e243]:
+            - paragraph [ref=e244]: Problem 2
+            - paragraph [ref=e245]: "Solve for x: x + 7 = 15"
+            - generic [ref=e246]:
+              - generic [ref=e247]:
+                - paragraph [ref=e248]: Your answer
+                - paragraph [ref=e249]: "999"
+              - generic [ref=e250]:
+                - paragraph [ref=e251]: Correct answer
+                - paragraph [ref=e252]: "8"
+        - generic [ref=e254]:
+          - generic [ref=e255]: ✗
+          - generic [ref=e256]:
+            - paragraph [ref=e257]: Problem 3
+            - paragraph [ref=e258]: "Solve for x: x + 9 = 21"
+            - generic [ref=e259]:
+              - generic [ref=e260]:
+                - paragraph [ref=e261]: Your answer
+                - paragraph [ref=e262]: "999"
+              - generic [ref=e263]:
+                - paragraph [ref=e264]: Correct answer
+                - paragraph [ref=e265]: "12"
+        - generic [ref=e267]:
+          - generic [ref=e268]: ✗
+          - generic [ref=e269]:
+            - paragraph [ref=e270]: Problem 4
+            - paragraph [ref=e271]: "Solve for x: x + 6 = 18"
+            - generic [ref=e272]:
+              - generic [ref=e273]:
+                - paragraph [ref=e274]: Your answer
+                - paragraph [ref=e275]: "999"
+              - generic [ref=e276]:
+                - paragraph [ref=e277]: Correct answer
+                - paragraph [ref=e278]: "12"
+        - generic [ref=e280]:
+          - generic [ref=e281]: ✗
+          - generic [ref=e282]:
+            - paragraph [ref=e283]: Problem 5
+            - paragraph [ref=e284]: "Solve for x: x + 3 = 10"
+            - generic [ref=e285]:
+              - generic [ref=e286]:
+                - paragraph [ref=e287]: Your answer
+                - paragraph [ref=e288]: "999"
+              - generic [ref=e289]:
+                - paragraph [ref=e290]: Correct answer
+                - paragraph [ref=e291]: "7"
+        - generic [ref=e293]:
+          - generic [ref=e294]: ✗
+          - generic [ref=e295]:
+            - paragraph [ref=e296]: Problem 6
+            - paragraph [ref=e297]: "Solve for x: x - 6 = 9"
+            - generic [ref=e298]:
+              - generic [ref=e299]:
+                - paragraph [ref=e300]: Your answer
+                - paragraph [ref=e301]: "999"
+              - generic [ref=e302]:
+                - paragraph [ref=e303]: Correct answer
+                - paragraph [ref=e304]: "15"
+        - generic [ref=e306]:
+          - generic [ref=e307]: ✗
+          - generic [ref=e308]:
+            - paragraph [ref=e309]: Problem 7
+            - paragraph [ref=e310]: "Solve for x: x - 3 = 8"
+            - generic [ref=e311]:
+              - generic [ref=e312]:
+                - paragraph [ref=e313]: Your answer
+                - paragraph [ref=e314]: "999"
+              - generic [ref=e315]:
+                - paragraph [ref=e316]: Correct answer
+                - paragraph [ref=e317]: "11"
+        - generic [ref=e319]:
+          - generic [ref=e320]: ✗
+          - generic [ref=e321]:
+            - paragraph [ref=e322]: Problem 8
+            - paragraph [ref=e323]: "Solve for x: x - 5 = 12"
+            - generic [ref=e324]:
+              - generic [ref=e325]:
+                - paragraph [ref=e326]: Your answer
+                - paragraph [ref=e327]: "999"
+              - generic [ref=e328]:
+                - paragraph [ref=e329]: Correct answer
+                - paragraph [ref=e330]: "17"
+        - generic [ref=e332]:
+          - generic [ref=e333]: ✗
+          - generic [ref=e334]:
+            - paragraph [ref=e335]: Problem 9
+            - paragraph [ref=e336]: "Solve for x: x - 8 = 6"
+            - generic [ref=e337]:
+              - generic [ref=e338]:
+                - paragraph [ref=e339]: Your answer
+                - paragraph [ref=e340]: "999"
+              - generic [ref=e341]:
+                - paragraph [ref=e342]: Correct answer
+                - paragraph [ref=e343]: "14"
+        - generic [ref=e345]:
+          - generic [ref=e346]: ✗
+          - generic [ref=e347]:
+            - paragraph [ref=e348]: Problem 10
+            - paragraph [ref=e349]: "Solve for x: x - 4 = 13"
+            - generic [ref=e350]:
+              - generic [ref=e351]:
+                - paragraph [ref=e352]: Your answer
+                - paragraph [ref=e353]: "999"
+              - generic [ref=e354]:
+                - paragraph [ref=e355]: Correct answer
+                - paragraph [ref=e356]: "17"
+        - generic [ref=e358]:
+          - generic [ref=e359]: ✗
+          - generic [ref=e360]:
+            - paragraph [ref=e361]: Problem 11
+            - paragraph [ref=e362]: "Solve for x: 3x = 18"
+            - generic [ref=e363]:
+              - generic [ref=e364]:
+                - paragraph [ref=e365]: Your answer
+                - paragraph [ref=e366]: "999"
+              - generic [ref=e367]:
+                - paragraph [ref=e368]: Correct answer
+                - paragraph [ref=e369]: "6"
+        - generic [ref=e371]:
+          - generic [ref=e372]: ✗
+          - generic [ref=e373]:
+            - paragraph [ref=e374]: Problem 12
+            - paragraph [ref=e375]: "Solve for x: 4x = 20"
+            - generic [ref=e376]:
+              - generic [ref=e377]:
+                - paragraph [ref=e378]: Your answer
+                - paragraph [ref=e379]: "999"
+              - generic [ref=e380]:
+                - paragraph [ref=e381]: Correct answer
+                - paragraph [ref=e382]: "5"
+        - generic [ref=e384]:
+          - generic [ref=e385]: ✗
+          - generic [ref=e386]:
+            - paragraph [ref=e387]: Problem 13
+            - paragraph [ref=e388]: "Solve for x: 5x = 35"
+            - generic [ref=e389]:
+              - generic [ref=e390]:
+                - paragraph [ref=e391]: Your answer
+                - paragraph [ref=e392]: "999"
+              - generic [ref=e393]:
+                - paragraph [ref=e394]: Correct answer
+                - paragraph [ref=e395]: "7"
+        - generic [ref=e397]:
+          - generic [ref=e398]: ✗
+          - generic [ref=e399]:
+            - paragraph [ref=e400]: Problem 14
+            - paragraph [ref=e401]: "Solve for x: 2x = 16"
+            - generic [ref=e402]:
+              - generic [ref=e403]:
+                - paragraph [ref=e404]: Your answer
+                - paragraph [ref=e405]: "999"
+              - generic [ref=e406]:
+                - paragraph [ref=e407]: Correct answer
+                - paragraph [ref=e408]: "8"
+        - generic [ref=e410]:
+          - generic [ref=e411]: ✗
+          - generic [ref=e412]:
+            - paragraph [ref=e413]: Problem 15
+            - paragraph [ref=e414]: "Solve for x: x / 4 = 3"
+            - generic [ref=e415]:
+              - generic [ref=e416]:
+                - paragraph [ref=e417]: Your answer
+                - paragraph [ref=e418]: "999"
+              - generic [ref=e419]:
+                - paragraph [ref=e420]: Correct answer
+                - paragraph [ref=e421]: "12"
+        - generic [ref=e423]:
+          - generic [ref=e424]: ✗
+          - generic [ref=e425]:
+            - paragraph [ref=e426]: Problem 16
+            - paragraph [ref=e427]: "Solve for x: x / 5 = 4"
+            - generic [ref=e428]:
+              - generic [ref=e429]:
+                - paragraph [ref=e430]: Your answer
+                - paragraph [ref=e431]: "999"
+              - generic [ref=e432]:
+                - paragraph [ref=e433]: Correct answer
+                - paragraph [ref=e434]: "20"
+        - generic [ref=e436]:
+          - generic [ref=e437]: ✗
+          - generic [ref=e438]:
+            - paragraph [ref=e439]: Problem 17
+            - paragraph [ref=e440]: "Solve for x: x / 3 = 6"
+            - generic [ref=e441]:
+              - generic [ref=e442]:
+                - paragraph [ref=e443]: Your answer
+                - paragraph [ref=e444]: "999"
+              - generic [ref=e445]:
+                - paragraph [ref=e446]: Correct answer
+                - paragraph [ref=e447]: "18"
+        - generic [ref=e449]:
+          - generic [ref=e450]: ✗
+          - generic [ref=e451]:
+            - paragraph [ref=e452]: Problem 18
+            - paragraph [ref=e453]: "Solve for x: 2x + 5 = 13"
+            - generic [ref=e454]:
+              - generic [ref=e455]:
+                - paragraph [ref=e456]: Your answer
+                - paragraph [ref=e457]: "999"
+              - generic [ref=e458]:
+                - paragraph [ref=e459]: Correct answer
+                - paragraph [ref=e460]: "4"
+        - generic [ref=e462]:
+          - generic [ref=e463]: ✗
+          - generic [ref=e464]:
+            - paragraph [ref=e465]: Problem 19
+            - paragraph [ref=e466]: "Solve for x: 3x - 4 = 11"
+            - generic [ref=e467]:
+              - generic [ref=e468]:
+                - paragraph [ref=e469]: Your answer
+                - paragraph [ref=e470]: "999"
+              - generic [ref=e471]:
+                - paragraph [ref=e472]: Correct answer
+                - paragraph [ref=e473]: "5"
+        - generic [ref=e475]:
+          - generic [ref=e476]: ✗
+          - generic [ref=e477]:
+            - paragraph [ref=e478]: Problem 20
+            - paragraph [ref=e479]: "Solve for x: x / 3 - 2 = 4"
+            - generic [ref=e480]:
+              - generic [ref=e481]:
+                - paragraph [ref=e482]: Your answer
+                - paragraph [ref=e483]: "999"
+              - generic [ref=e484]:
+                - paragraph [ref=e485]: Correct answer
+                - paragraph [ref=e486]: "18"
+      - generic [ref=e487]:
+        - link "Try Again" [ref=e488] [cursor=pointer]:
+          - /url: /worksheet
+        - link "Back to Play" [ref=e489] [cursor=pointer]:
+          - /url: /play

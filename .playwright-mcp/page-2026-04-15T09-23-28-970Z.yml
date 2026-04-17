@@ -1,0 +1,62 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: MathStep
+        - button "Log out" [ref=e7]
+    - main [ref=e8]:
+      - generic [ref=e9]:
+        - heading "Dashboard" [level=1] [ref=e10]
+        - paragraph [ref=e11]: test_1776244880@test.com
+      - generic [ref=e12]:
+        - heading "Alex" [level=2] [ref=e13]
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - term [ref=e16]: Level
+            - definition [ref=e17]: "1"
+          - generic [ref=e18]:
+            - term [ref=e19]: Sublevel
+            - definition [ref=e20]: "2"
+          - generic [ref=e21]:
+            - term [ref=e22]: Streak
+            - definition [ref=e23]: "1"
+          - generic [ref=e24]:
+            - term [ref=e25]: Points
+            - definition [ref=e26]: "45"
+      - link "Start Today's Worksheet" [ref=e27] [cursor=pointer]:
+        - /url: /worksheet
+      - generic [ref=e28]:
+        - heading "Last Session" [level=2] [ref=e29]
+        - generic [ref=e31]: ✓ Passed
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - term [ref=e34]: Score
+            - definition [ref=e35]: 10/10
+          - generic [ref=e36]:
+            - term [ref=e37]: Accuracy
+            - definition [ref=e38]: 100%
+          - generic [ref=e39]:
+            - term [ref=e40]: Time
+            - definition [ref=e41]: 0s
+      - generic [ref=e42]:
+        - heading "Current Focus" [level=2] [ref=e43]
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - paragraph [ref=e46]: Addition
+            - paragraph [ref=e47]: Double-digit addition
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - term [ref=e50]: Speed target
+              - definition [ref=e51]: 8m
+            - generic [ref=e52]:
+              - term [ref=e53]: Accuracy
+              - definition [ref=e54]: 90%
+            - generic [ref=e55]:
+              - term [ref=e56]: Problems/session
+              - definition [ref=e57]: "20"
+            - generic [ref=e58]:
+              - term [ref=e59]: Mastery progress
+              - definition [ref=e60]: 0/3
+  - button "Open Next.js Dev Tools" [ref=e66] [cursor=pointer]:
+    - img [ref=e67]
+  - alert [ref=e70]

@@ -1,0 +1,98 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e74] [cursor=pointer]:
+    - img [ref=e75]
+  - alert [ref=e78]
+  - generic [ref=e79]:
+    - banner [ref=e80]:
+      - generic [ref=e81]:
+        - generic [ref=e82]:
+          - img "MathStep" [ref=e83]
+          - generic [ref=e84]: MathStep
+        - button "Log out" [ref=e86]
+    - main [ref=e87]:
+      - generic [ref=e88]:
+        - heading "Hello, Alex" [level=1] [ref=e89]
+        - paragraph [ref=e90]: test_1776402555@example.com
+      - generic [ref=e91]:
+        - generic [ref=e92]:
+          - paragraph [ref=e93]: Level
+          - paragraph [ref=e94]: "9"
+        - generic [ref=e95]:
+          - paragraph [ref=e96]: Sublevel
+          - paragraph [ref=e97]: "2"
+        - generic [ref=e98]:
+          - paragraph [ref=e99]: Streak
+          - paragraph [ref=e100]: "1"
+        - generic [ref=e101]:
+          - paragraph [ref=e102]: Points
+          - paragraph [ref=e103]: "25"
+      - generic [ref=e104]:
+        - link "Start Today's Worksheet" [ref=e105] [cursor=pointer]:
+          - /url: /worksheet
+        - link "Open Student View" [ref=e106] [cursor=pointer]:
+          - /url: /play
+      - generic [ref=e107]:
+        - generic [ref=e108]:
+          - heading "Last Session" [level=2] [ref=e109]
+          - generic [ref=e110]: ✗ Not passed
+        - generic [ref=e111]:
+          - generic [ref=e112]:
+            - term [ref=e113]: Score
+            - definition [ref=e114]: 0/20
+          - generic [ref=e115]:
+            - term [ref=e116]: Accuracy
+            - definition [ref=e117]: 0%
+          - generic [ref=e118]:
+            - term [ref=e119]: Time
+            - definition [ref=e120]: 24s
+      - generic [ref=e121]:
+        - heading "Current Focus" [level=2] [ref=e122]
+        - generic [ref=e123]:
+          - generic [ref=e124]:
+            - generic [ref=e125]:
+              - paragraph [ref=e126]: Factorization
+              - paragraph [ref=e127]: Factor pairs and common factors
+            - generic [ref=e128]: 0/3 passes
+          - generic [ref=e129]:
+            - generic [ref=e130]:
+              - term [ref=e131]: Speed target
+              - definition [ref=e132]: 10m
+            - generic [ref=e133]:
+              - term [ref=e134]: Accuracy
+              - definition [ref=e135]: 90%
+            - generic [ref=e136]:
+              - term [ref=e137]: Problems
+              - definition [ref=e138]: "20"
+      - generic [ref=e139]:
+        - heading "Set Level" [level=2] [ref=e140]
+        - paragraph [ref=e141]:
+          - text: Currently on
+          - generic [ref=e142]: Level 9.2
+          - text: . Change the placement below.
+        - generic [ref=e143]:
+          - combobox [ref=e144]:
+            - 'option "Level 1.1 — Addition: Single-digit addition"'
+            - 'option "Level 1.2 — Addition: Double-digit addition"'
+            - 'option "Level 2.1 — Subtraction: Single-digit subtraction"'
+            - 'option "Level 2.2 — Subtraction: Double-digit subtraction"'
+            - 'option "Level 3.1 — Multiplication: Basic multiplication facts"'
+            - 'option "Level 3.2 — Multiplication: Multi-digit multiplication"'
+            - 'option "Level 4.1 — Division: Basic division facts"'
+            - 'option "Level 4.2 — Division: Long division"'
+            - 'option "Level 5.1 — Fractions: Fraction addition and subtraction"'
+            - 'option "Level 5.2 — Fractions: Fraction multiplication and division"'
+            - 'option "Level 6.1 — Decimals: Decimal operations"'
+            - 'option "Level 6.2 — Percentages: Percent basics and conversions"'
+            - 'option "Level 7.1 — Negative Numbers: Operations with negative numbers"'
+            - 'option "Level 7.2 — Order of Operations: PEMDAS with integers"'
+            - 'option "Level 8.1 — Algebra: Simplifying expressions"'
+            - 'option "Level 8.2 — Algebra: Solving one-step equations"'
+            - 'option "Level 9.1 — Factorization: Prime factorization and factors"'
+            - 'option "Level 9.2 — Factorization: Factor pairs and common factors" [selected]'
+            - 'option "Level 10.1 — Linear Equations: Two-step equations"'
+            - 'option "Level 10.2 — Linear Equations: Equations with variables on both sides"'
+            - 'option "Level 11.1 — Inequalities: One-variable inequalities"'
+            - 'option "Level 11.2 — Simultaneous Equations: Solving systems of equations"'
+            - 'option "Level 12.1 — Functions: Function notation basics"'
+            - 'option "Level 12.2 — Graphing: Coordinate plane and linear graphs"'
+          - button "Update Placement" [ref=e145]

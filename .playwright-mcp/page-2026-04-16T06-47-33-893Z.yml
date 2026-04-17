@@ -1,0 +1,81 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e27] [cursor=pointer]:
+    - img [ref=e28]
+  - alert [ref=e31]
+  - generic [ref=e44]:
+    - banner [ref=e45]:
+      - generic [ref=e46]:
+        - generic [ref=e47]:
+          - img "MathStep" [ref=e48]
+          - generic [ref=e49]: MathStep
+        - button "Log out" [ref=e51]
+    - main [ref=e52]:
+      - generic [ref=e53]:
+        - heading "Hello, TestKid" [level=1] [ref=e54]
+        - paragraph [ref=e55]: playwright-test-15@mathstep.test
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - paragraph [ref=e58]: Level
+          - paragraph [ref=e59]: "1"
+        - generic [ref=e60]:
+          - paragraph [ref=e61]: Sublevel
+          - paragraph [ref=e62]: "1"
+        - generic [ref=e63]:
+          - paragraph [ref=e64]: Streak
+          - paragraph [ref=e65]: "0"
+        - generic [ref=e66]:
+          - paragraph [ref=e67]: Points
+          - paragraph [ref=e68]: "0"
+      - link "Start Today's Worksheet" [ref=e69] [cursor=pointer]:
+        - /url: /worksheet
+      - generic [ref=e70]:
+        - heading "Current Focus" [level=2] [ref=e71]
+        - generic [ref=e72]:
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - paragraph [ref=e75]: Addition
+              - paragraph [ref=e76]: Single-digit addition
+            - generic [ref=e77]: 0/3 passes
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - term [ref=e80]: Speed target
+              - definition [ref=e81]: 8m
+            - generic [ref=e82]:
+              - term [ref=e83]: Accuracy
+              - definition [ref=e84]: 90%
+            - generic [ref=e85]:
+              - term [ref=e86]: Problems
+              - definition [ref=e87]: "20"
+      - generic [ref=e88]:
+        - heading "Set Level" [level=2] [ref=e89]
+        - paragraph [ref=e90]:
+          - text: Currently on
+          - generic [ref=e91]: Level 1.1
+          - text: . Change the placement below.
+        - generic [ref=e92]:
+          - combobox [ref=e93]:
+            - 'option "Level 1.1 — Addition: Single-digit addition" [selected]'
+            - 'option "Level 1.2 — Addition: Double-digit addition"'
+            - 'option "Level 2.1 — Subtraction: Single-digit subtraction"'
+            - 'option "Level 2.2 — Subtraction: Double-digit subtraction"'
+            - 'option "Level 3.1 — Multiplication: Basic multiplication facts"'
+            - 'option "Level 3.2 — Multiplication: Multi-digit multiplication"'
+            - 'option "Level 4.1 — Division: Basic division facts"'
+            - 'option "Level 4.2 — Division: Long division"'
+            - 'option "Level 5.1 — Fractions: Fraction addition and subtraction"'
+            - 'option "Level 5.2 — Fractions: Fraction multiplication and division"'
+            - 'option "Level 6.1 — Decimals: Decimal operations"'
+            - 'option "Level 6.2 — Percentages: Percent basics and conversions"'
+            - 'option "Level 7.1 — Negative Numbers: Operations with negative numbers"'
+            - 'option "Level 7.2 — Order of Operations: PEMDAS with integers"'
+            - 'option "Level 8.1 — Algebra: Simplifying expressions"'
+            - 'option "Level 8.2 — Algebra: Solving one-step equations"'
+            - 'option "Level 9.1 — Factorization: Prime factorization and factors"'
+            - 'option "Level 9.2 — Factorization: Factor pairs and common factors"'
+            - 'option "Level 10.1 — Linear Equations: Two-step equations"'
+            - 'option "Level 10.2 — Linear Equations: Equations with variables on both sides"'
+            - 'option "Level 11.1 — Inequalities: One-variable inequalities"'
+            - 'option "Level 11.2 — Simultaneous Equations: Solving systems of equations"'
+            - 'option "Level 12.1 — Functions: Function notation basics"'
+            - 'option "Level 12.2 — Graphing: Coordinate plane and linear graphs"'
+          - button "Update Placement" [ref=e94]

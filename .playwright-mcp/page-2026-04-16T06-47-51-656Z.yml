@@ -1,0 +1,195 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - img "MathStep" [ref=e6]
+          - generic [ref=e7]: MathStep
+        - link "← Dashboard" [ref=e8] [cursor=pointer]:
+          - /url: /dashboard
+    - main [ref=e9]:
+      - generic [ref=e10]:
+        - heading "Factorization Worksheet" [level=1] [ref=e11]
+        - paragraph [ref=e12]: TestKid · Level 9.1
+      - group [ref=e13]:
+        - 'generic "? Learn: Factorization Hide" [ref=e14] [cursor=pointer]':
+          - generic [ref=e15]:
+            - generic [ref=e16]: "?"
+            - generic [ref=e17]: "Learn: Factorization"
+          - generic [ref=e18]: Hide
+        - generic [ref=e19]:
+          - paragraph [ref=e20]: Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.
+          - generic [ref=e21]:
+            - generic [ref=e23]: Worked Example
+            - paragraph [ref=e24]: Prime factorization of 12
+            - list [ref=e25]:
+              - listitem [ref=e26]:
+                - generic [ref=e27]: "1"
+                - text: 12 ÷ 2 = 6
+              - listitem [ref=e28]:
+                - generic [ref=e29]: "2"
+                - text: 6 ÷ 2 = 3
+              - listitem [ref=e30]:
+                - generic [ref=e31]: "3"
+                - text: 3 is prime — stop here
+              - listitem [ref=e32]:
+                - generic [ref=e33]: "4"
+                - text: 12 = 2 × 2 × 3
+            - generic [ref=e34]: "Answer: 2 × 2 × 3"
+          - generic [ref=e35]:
+            - generic [ref=e36]: 💡
+            - paragraph [ref=e37]: Always start dividing by the smallest prime (2), then 3, then 5, and so on until you can't divide any further.
+      - generic [ref=e38]:
+        - generic [ref=e39]:
+          - generic [ref=e40]: Timer
+          - generic [ref=e41]: 00:00
+          - generic [ref=e42]: Starting…
+        - generic [ref=e44]:
+          - generic [ref=e45]: "1"
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - text: Prime Factorization
+              - paragraph [ref=e48]: Write the prime factorization of 12.
+            - textbox "Your answer" [ref=e49]
+        - generic [ref=e51]:
+          - generic [ref=e52]: "2"
+          - generic [ref=e53]:
+            - generic [ref=e54]:
+              - text: Prime Factorization
+              - paragraph [ref=e55]: Write the prime factorization of 18.
+            - textbox "Your answer" [ref=e56]
+        - generic [ref=e58]:
+          - generic [ref=e59]: "3"
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - text: Prime Factorization
+              - paragraph [ref=e62]: Write the prime factorization of 24.
+            - textbox "Your answer" [ref=e63]
+        - generic [ref=e65]:
+          - generic [ref=e66]: "4"
+          - generic [ref=e67]:
+            - generic [ref=e68]:
+              - text: Prime Factorization
+              - paragraph [ref=e69]: Write the prime factorization of 30.
+            - textbox "Your answer" [ref=e70]
+        - generic [ref=e72]:
+          - generic [ref=e73]: "5"
+          - generic [ref=e74]:
+            - generic [ref=e75]:
+              - text: Prime Factorization
+              - paragraph [ref=e76]: Write the prime factorization of 36.
+            - textbox "Your answer" [ref=e77]
+        - generic [ref=e79]:
+          - generic [ref=e80]: "6"
+          - generic [ref=e81]:
+            - generic [ref=e82]:
+              - text: Prime Factorization
+              - paragraph [ref=e83]: Write the prime factorization of 42.
+            - textbox "Your answer" [ref=e84]
+        - generic [ref=e86]:
+          - generic [ref=e87]: "7"
+          - generic [ref=e88]:
+            - generic [ref=e89]:
+              - text: List Factors
+              - paragraph [ref=e90]: List all factors of 12.
+            - textbox "Your answer" [ref=e91]
+        - generic [ref=e93]:
+          - generic [ref=e94]: "8"
+          - generic [ref=e95]:
+            - generic [ref=e96]:
+              - text: List Factors
+              - paragraph [ref=e97]: List all factors of 18.
+            - textbox "Your answer" [ref=e98]
+        - generic [ref=e100]:
+          - generic [ref=e101]: "9"
+          - generic [ref=e102]:
+            - generic [ref=e103]:
+              - text: List Factors
+              - paragraph [ref=e104]: List all factors of 24.
+            - textbox "Your answer" [ref=e105]
+        - generic [ref=e107]:
+          - generic [ref=e108]: "10"
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - text: List Factors
+              - paragraph [ref=e111]: List all factors of 30.
+            - textbox "Your answer" [ref=e112]
+        - generic [ref=e114]:
+          - generic [ref=e115]: "11"
+          - generic [ref=e116]:
+            - generic [ref=e117]:
+              - text: Greatest Common Factor
+              - paragraph [ref=e118]: Find the greatest common factor (GCF) of 12 and 18.
+            - textbox "Your answer" [ref=e119]
+        - generic [ref=e121]:
+          - generic [ref=e122]: "12"
+          - generic [ref=e123]:
+            - generic [ref=e124]:
+              - text: Greatest Common Factor
+              - paragraph [ref=e125]: Find the greatest common factor (GCF) of 24 and 36.
+            - textbox "Your answer" [ref=e126]
+        - generic [ref=e128]:
+          - generic [ref=e129]: "13"
+          - generic [ref=e130]:
+            - generic [ref=e131]:
+              - text: Greatest Common Factor
+              - paragraph [ref=e132]: Find the greatest common factor (GCF) of 30 and 45.
+            - textbox "Your answer" [ref=e133]
+        - generic [ref=e135]:
+          - generic [ref=e136]: "14"
+          - generic [ref=e137]:
+            - generic [ref=e138]:
+              - text: Greatest Common Factor
+              - paragraph [ref=e139]: Find the greatest common factor (GCF) of 18 and 27.
+            - textbox "Your answer" [ref=e140]
+        - generic [ref=e142]:
+          - generic [ref=e143]: "15"
+          - generic [ref=e144]:
+            - generic [ref=e145]:
+              - text: Greatest Common Factor
+              - paragraph [ref=e146]: Find the greatest common factor (GCF) of 16 and 24.
+            - textbox "Your answer" [ref=e147]
+        - generic [ref=e149]:
+          - generic [ref=e150]: "16"
+          - generic [ref=e151]:
+            - generic [ref=e152]:
+              - text: Greatest Common Factor
+              - paragraph [ref=e153]: Find the greatest common factor (GCF) of 12 and 18.
+            - textbox "Your answer" [ref=e154]
+        - generic [ref=e156]:
+          - generic [ref=e157]: "17"
+          - generic [ref=e158]:
+            - generic [ref=e159]:
+              - text: Least Common Multiple
+              - paragraph [ref=e160]: Find the least common multiple (LCM) of 4 and 6.
+            - textbox "Your answer" [ref=e161]
+        - generic [ref=e163]:
+          - generic [ref=e164]: "18"
+          - generic [ref=e165]:
+            - generic [ref=e166]:
+              - text: Least Common Multiple
+              - paragraph [ref=e167]: Find the least common multiple (LCM) of 6 and 9.
+            - textbox "Your answer" [ref=e168]
+        - generic [ref=e170]:
+          - generic [ref=e171]: "19"
+          - generic [ref=e172]:
+            - generic [ref=e173]:
+              - text: Least Common Multiple
+              - paragraph [ref=e174]: Find the least common multiple (LCM) of 8 and 12.
+            - textbox "Your answer" [ref=e175]
+        - generic [ref=e177]:
+          - generic [ref=e178]: "20"
+          - generic [ref=e179]:
+            - generic [ref=e180]:
+              - text: Least Common Multiple
+              - paragraph [ref=e181]: Find the least common multiple (LCM) of 4 and 6.
+            - textbox "Your answer" [ref=e182]
+        - button "Submit Worksheet" [ref=e183]
+      - generic [ref=e184]:
+        - generic [ref=e185]:
+          - generic [ref=e186]: Working Area
+          - button "Clear" [ref=e187]
+        - generic "Drawing scratchpad" [ref=e188]
+  - button "Open Next.js Dev Tools" [ref=e194] [cursor=pointer]:
+    - img [ref=e195]
+  - alert [ref=e198]

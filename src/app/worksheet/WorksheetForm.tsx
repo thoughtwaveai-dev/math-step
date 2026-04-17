@@ -26,6 +26,7 @@ function problemTypeLabel(type: AnyProblemType): string {
     case 'lcm': return 'Least Common Multiple'
     case 'factor_pairs': return 'Factor Pairs'
     case 'common_factors': return 'Common Factors'
+    case 'linear_equation': return 'Linear Equation'
   }
 }
 

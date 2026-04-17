@@ -1,0 +1,48 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e27] [cursor=pointer]:
+    - img [ref=e28]
+  - alert [ref=e31]
+  - generic [ref=e44]:
+    - banner [ref=e45]:
+      - generic [ref=e46]:
+        - generic [ref=e47]:
+          - img "MathStep" [ref=e48]
+          - generic [ref=e49]: MathStep
+        - button "Log out" [ref=e51]
+    - main [ref=e52]:
+      - generic [ref=e53]:
+        - heading "Hello, Alex" [level=1] [ref=e54]
+        - paragraph [ref=e55]: lessontest1@mathstep.test
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - paragraph [ref=e58]: Level
+          - paragraph [ref=e59]: "1"
+        - generic [ref=e60]:
+          - paragraph [ref=e61]: Sublevel
+          - paragraph [ref=e62]: "1"
+        - generic [ref=e63]:
+          - paragraph [ref=e64]: Streak
+          - paragraph [ref=e65]: "0"
+        - generic [ref=e66]:
+          - paragraph [ref=e67]: Points
+          - paragraph [ref=e68]: "0"
+      - link "Start Today's Worksheet" [ref=e69] [cursor=pointer]:
+        - /url: /worksheet
+      - generic [ref=e70]:
+        - heading "Current Focus" [level=2] [ref=e71]
+        - generic [ref=e72]:
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - paragraph [ref=e75]: Addition
+              - paragraph [ref=e76]: Single-digit addition
+            - generic [ref=e77]: 0/3 passes
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - term [ref=e80]: Speed target
+              - definition [ref=e81]: 8m
+            - generic [ref=e82]:
+              - term [ref=e83]: Accuracy
+              - definition [ref=e84]: 90%
+            - generic [ref=e85]:
+              - term [ref=e86]: Problems
+              - definition [ref=e87]: "20"

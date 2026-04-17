@@ -1,0 +1,198 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e187] [cursor=pointer]:
+    - img [ref=e188]
+  - alert [ref=e191]
+  - generic [ref=e192]:
+    - banner [ref=e193]:
+      - generic [ref=e194]:
+        - generic [ref=e195]:
+          - img "MathStep" [ref=e196]
+          - generic [ref=e197]: MathStep
+        - link "← Dashboard" [ref=e198] [cursor=pointer]:
+          - /url: /dashboard
+    - main [ref=e199]:
+      - heading "Worksheet Results" [level=1] [ref=e200]
+      - generic [ref=e201]:
+        - generic [ref=e203]: ✓ Passed
+        - generic [ref=e204]:
+          - generic [ref=e205]:
+            - term [ref=e206]: Score
+            - definition [ref=e207]: 20/20
+          - generic [ref=e208]:
+            - term [ref=e209]: Accuracy
+            - definition [ref=e210]: 100%
+          - generic [ref=e211]:
+            - term [ref=e212]: Time
+            - definition [ref=e213]: 22s
+      - generic [ref=e214]:
+        - paragraph [ref=e215]:
+          - text: "Mastery progress:"
+          - generic [ref=e216]: 1 / 3 passes
+        - paragraph [ref=e217]: 2 more passing sessions to advance.
+      - generic [ref=e218]:
+        - heading "Problem Review" [level=2] [ref=e219]
+        - generic [ref=e221]:
+          - generic [ref=e222]: ✓
+          - generic [ref=e223]:
+            - paragraph [ref=e224]: Problem 1
+            - paragraph [ref=e225]: 2 + 3 = ?
+            - generic [ref=e227]:
+              - paragraph [ref=e228]: Your answer
+              - paragraph [ref=e229]: "5"
+        - generic [ref=e231]:
+          - generic [ref=e232]: ✓
+          - generic [ref=e233]:
+            - paragraph [ref=e234]: Problem 2
+            - paragraph [ref=e235]: 4 + 5 = ?
+            - generic [ref=e237]:
+              - paragraph [ref=e238]: Your answer
+              - paragraph [ref=e239]: "9"
+        - generic [ref=e241]:
+          - generic [ref=e242]: ✓
+          - generic [ref=e243]:
+            - paragraph [ref=e244]: Problem 3
+            - paragraph [ref=e245]: 1 + 6 = ?
+            - generic [ref=e247]:
+              - paragraph [ref=e248]: Your answer
+              - paragraph [ref=e249]: "7"
+        - generic [ref=e251]:
+          - generic [ref=e252]: ✓
+          - generic [ref=e253]:
+            - paragraph [ref=e254]: Problem 4
+            - paragraph [ref=e255]: 3 + 4 = ?
+            - generic [ref=e257]:
+              - paragraph [ref=e258]: Your answer
+              - paragraph [ref=e259]: "7"
+        - generic [ref=e261]:
+          - generic [ref=e262]: ✓
+          - generic [ref=e263]:
+            - paragraph [ref=e264]: Problem 5
+            - paragraph [ref=e265]: 5 + 3 = ?
+            - generic [ref=e267]:
+              - paragraph [ref=e268]: Your answer
+              - paragraph [ref=e269]: "8"
+        - generic [ref=e271]:
+          - generic [ref=e272]: ✓
+          - generic [ref=e273]:
+            - paragraph [ref=e274]: Problem 6
+            - paragraph [ref=e275]: 2 + 7 = ?
+            - generic [ref=e277]:
+              - paragraph [ref=e278]: Your answer
+              - paragraph [ref=e279]: "9"
+        - generic [ref=e281]:
+          - generic [ref=e282]: ✓
+          - generic [ref=e283]:
+            - paragraph [ref=e284]: Problem 7
+            - paragraph [ref=e285]: 6 + 2 = ?
+            - generic [ref=e287]:
+              - paragraph [ref=e288]: Your answer
+              - paragraph [ref=e289]: "8"
+        - generic [ref=e291]:
+          - generic [ref=e292]: ✓
+          - generic [ref=e293]:
+            - paragraph [ref=e294]: Problem 8
+            - paragraph [ref=e295]: 4 + 4 = ?
+            - generic [ref=e297]:
+              - paragraph [ref=e298]: Your answer
+              - paragraph [ref=e299]: "8"
+        - generic [ref=e301]:
+          - generic [ref=e302]: ✓
+          - generic [ref=e303]:
+            - paragraph [ref=e304]: Problem 9
+            - paragraph [ref=e305]: 1 + 8 = ?
+            - generic [ref=e307]:
+              - paragraph [ref=e308]: Your answer
+              - paragraph [ref=e309]: "9"
+        - generic [ref=e311]:
+          - generic [ref=e312]: ✓
+          - generic [ref=e313]:
+            - paragraph [ref=e314]: Problem 10
+            - paragraph [ref=e315]: 3 + 6 = ?
+            - generic [ref=e317]:
+              - paragraph [ref=e318]: Your answer
+              - paragraph [ref=e319]: "9"
+        - generic [ref=e321]:
+          - generic [ref=e322]: ✓
+          - generic [ref=e323]:
+            - paragraph [ref=e324]: Problem 11
+            - paragraph [ref=e325]: 2 + 3 = ?
+            - generic [ref=e327]:
+              - paragraph [ref=e328]: Your answer
+              - paragraph [ref=e329]: "5"
+        - generic [ref=e331]:
+          - generic [ref=e332]: ✓
+          - generic [ref=e333]:
+            - paragraph [ref=e334]: Problem 12
+            - paragraph [ref=e335]: 4 + 5 = ?
+            - generic [ref=e337]:
+              - paragraph [ref=e338]: Your answer
+              - paragraph [ref=e339]: "9"
+        - generic [ref=e341]:
+          - generic [ref=e342]: ✓
+          - generic [ref=e343]:
+            - paragraph [ref=e344]: Problem 13
+            - paragraph [ref=e345]: 1 + 6 = ?
+            - generic [ref=e347]:
+              - paragraph [ref=e348]: Your answer
+              - paragraph [ref=e349]: "7"
+        - generic [ref=e351]:
+          - generic [ref=e352]: ✓
+          - generic [ref=e353]:
+            - paragraph [ref=e354]: Problem 14
+            - paragraph [ref=e355]: 3 + 4 = ?
+            - generic [ref=e357]:
+              - paragraph [ref=e358]: Your answer
+              - paragraph [ref=e359]: "7"
+        - generic [ref=e361]:
+          - generic [ref=e362]: ✓
+          - generic [ref=e363]:
+            - paragraph [ref=e364]: Problem 15
+            - paragraph [ref=e365]: 5 + 3 = ?
+            - generic [ref=e367]:
+              - paragraph [ref=e368]: Your answer
+              - paragraph [ref=e369]: "8"
+        - generic [ref=e371]:
+          - generic [ref=e372]: ✓
+          - generic [ref=e373]:
+            - paragraph [ref=e374]: Problem 16
+            - paragraph [ref=e375]: 2 + 7 = ?
+            - generic [ref=e377]:
+              - paragraph [ref=e378]: Your answer
+              - paragraph [ref=e379]: "9"
+        - generic [ref=e381]:
+          - generic [ref=e382]: ✓
+          - generic [ref=e383]:
+            - paragraph [ref=e384]: Problem 17
+            - paragraph [ref=e385]: 6 + 2 = ?
+            - generic [ref=e387]:
+              - paragraph [ref=e388]: Your answer
+              - paragraph [ref=e389]: "8"
+        - generic [ref=e391]:
+          - generic [ref=e392]: ✓
+          - generic [ref=e393]:
+            - paragraph [ref=e394]: Problem 18
+            - paragraph [ref=e395]: 4 + 4 = ?
+            - generic [ref=e397]:
+              - paragraph [ref=e398]: Your answer
+              - paragraph [ref=e399]: "8"
+        - generic [ref=e401]:
+          - generic [ref=e402]: ✓
+          - generic [ref=e403]:
+            - paragraph [ref=e404]: Problem 19
+            - paragraph [ref=e405]: 1 + 8 = ?
+            - generic [ref=e407]:
+              - paragraph [ref=e408]: Your answer
+              - paragraph [ref=e409]: "9"
+        - generic [ref=e411]:
+          - generic [ref=e412]: ✓
+          - generic [ref=e413]:
+            - paragraph [ref=e414]: Problem 20
+            - paragraph [ref=e415]: 3 + 6 = ?
+            - generic [ref=e417]:
+              - paragraph [ref=e418]: Your answer
+              - paragraph [ref=e419]: "9"
+      - generic [ref=e420]:
+        - link "Try Again" [ref=e421] [cursor=pointer]:
+          - /url: /worksheet
+        - link "Back to Dashboard" [ref=e422] [cursor=pointer]:
+          - /url: /dashboard

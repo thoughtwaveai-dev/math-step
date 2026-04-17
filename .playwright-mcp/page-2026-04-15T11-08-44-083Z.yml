@@ -1,0 +1,14 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - img "MathStep" [ref=e5]
+    - heading "MathStep" [level=1] [ref=e6]
+    - paragraph [ref=e7]: Step-by-step math learning for kids.
+    - generic [ref=e8]:
+      - link "Get started" [ref=e9] [cursor=pointer]:
+        - /url: /signup
+      - link "Log in" [ref=e10] [cursor=pointer]:
+        - /url: /login
+    - paragraph [ref=e11]: Build streaks. Master every level.
+  - button "Open Next.js Dev Tools" [ref=e17] [cursor=pointer]:
+    - img [ref=e18]
+  - alert [ref=e21]

@@ -1,0 +1,12 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e14] [cursor=pointer]:
+    - img [ref=e15]
+  - alert [ref=e8]
+  - generic [ref=e34]:
+    - banner [ref=e35]:
+      - generic [ref=e36]:
+        - generic [ref=e37]: MathStep
+        - button "Log out" [ref=e39]
+    - main [ref=e40]:
+      - heading "Dashboard" [level=1] [ref=e41]
+      - paragraph [ref=e42]: Logged in as testuser+1744701000@mathstep.dev

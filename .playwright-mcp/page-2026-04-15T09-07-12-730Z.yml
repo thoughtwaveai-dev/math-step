@@ -1,0 +1,49 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: MathStep
+        - button "Log out" [ref=e7]
+    - main [ref=e8]:
+      - generic [ref=e9]:
+        - heading "Dashboard" [level=1] [ref=e10]
+        - paragraph [ref=e11]: test1776243812@example.com
+      - generic [ref=e12]:
+        - heading "Sam" [level=2] [ref=e13]
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - term [ref=e16]: Level
+            - definition [ref=e17]: "9"
+          - generic [ref=e18]:
+            - term [ref=e19]: Sublevel
+            - definition [ref=e20]: "1"
+          - generic [ref=e21]:
+            - term [ref=e22]: Streak
+            - definition [ref=e23]: "0"
+          - generic [ref=e24]:
+            - term [ref=e25]: Points
+            - definition [ref=e26]: "0"
+      - link "Start Today's Worksheet" [ref=e27] [cursor=pointer]:
+        - /url: /worksheet
+      - generic [ref=e28]:
+        - heading "Current Focus" [level=2] [ref=e29]
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - paragraph [ref=e32]: Factorization
+            - paragraph [ref=e33]: Prime factorization and factors
+          - generic [ref=e34]:
+            - generic [ref=e35]:
+              - term [ref=e36]: Speed target
+              - definition [ref=e37]: 10m
+            - generic [ref=e38]:
+              - term [ref=e39]: Accuracy
+              - definition [ref=e40]: 90%
+            - generic [ref=e41]:
+              - term [ref=e42]: Problems/session
+              - definition [ref=e43]: "20"
+            - generic [ref=e44]:
+              - term [ref=e45]: Mastery progress
+              - definition [ref=e46]: 0/3
+  - button "Open Next.js Dev Tools" [ref=e52] [cursor=pointer]:
+    - img [ref=e53]
+  - alert [ref=e56]

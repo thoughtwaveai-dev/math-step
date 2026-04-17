@@ -1,0 +1,49 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e23] [cursor=pointer]:
+    - img [ref=e24]
+  - alert [ref=e27]
+  - generic [ref=e37]:
+    - banner [ref=e38]:
+      - generic [ref=e39]:
+        - generic [ref=e40]: MathStep
+        - button "Log out" [ref=e42]
+    - main [ref=e43]:
+      - generic [ref=e44]:
+        - heading "Dashboard" [level=1] [ref=e45]
+        - paragraph [ref=e46]: subtraction-test-1045@mathstep.test
+      - generic [ref=e47]:
+        - heading "SubTest" [level=2] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - term [ref=e51]: Level
+            - definition [ref=e52]: "1"
+          - generic [ref=e53]:
+            - term [ref=e54]: Sublevel
+            - definition [ref=e55]: "1"
+          - generic [ref=e56]:
+            - term [ref=e57]: Streak
+            - definition [ref=e58]: "0"
+          - generic [ref=e59]:
+            - term [ref=e60]: Points
+            - definition [ref=e61]: "0"
+      - link "Start Today's Worksheet" [ref=e62] [cursor=pointer]:
+        - /url: /worksheet
+      - generic [ref=e63]:
+        - heading "Current Focus" [level=2] [ref=e64]
+        - generic [ref=e65]:
+          - generic [ref=e66]:
+            - paragraph [ref=e67]: Addition
+            - paragraph [ref=e68]: Single-digit addition
+          - generic [ref=e69]:
+            - generic [ref=e70]:
+              - term [ref=e71]: Speed target
+              - definition [ref=e72]: 8m
+            - generic [ref=e73]:
+              - term [ref=e74]: Accuracy
+              - definition [ref=e75]: 90%
+            - generic [ref=e76]:
+              - term [ref=e77]: Problems/session
+              - definition [ref=e78]: "20"
+            - generic [ref=e79]:
+              - term [ref=e80]: Mastery progress
+              - definition [ref=e81]: 0/3

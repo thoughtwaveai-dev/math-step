@@ -1,0 +1,98 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - img "MathStep" [ref=e6]
+          - generic [ref=e7]: MathStep
+        - button "Log out" [ref=e9]
+    - main [ref=e10]:
+      - generic [ref=e11]:
+        - heading "Hello, Test Kid" [level=1] [ref=e12]
+        - paragraph [ref=e13]: test+1776402051@mathstep.test
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - paragraph [ref=e16]: Level
+          - paragraph [ref=e17]: "1"
+        - generic [ref=e18]:
+          - paragraph [ref=e19]: Sublevel
+          - paragraph [ref=e20]: "1"
+        - generic [ref=e21]:
+          - paragraph [ref=e22]: Streak
+          - paragraph [ref=e23]: "1"
+        - generic [ref=e24]:
+          - paragraph [ref=e25]: Points
+          - paragraph [ref=e26]: "15"
+      - generic [ref=e27]:
+        - link "Start Today's Worksheet" [ref=e28] [cursor=pointer]:
+          - /url: /worksheet
+        - link "Open Student View" [ref=e29] [cursor=pointer]:
+          - /url: /play
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - heading "Last Session" [level=2] [ref=e32]
+          - generic [ref=e33]: ✓ Passed
+        - generic [ref=e34]:
+          - generic [ref=e35]:
+            - term [ref=e36]: Score
+            - definition [ref=e37]: 20/20
+          - generic [ref=e38]:
+            - term [ref=e39]: Accuracy
+            - definition [ref=e40]: 100%
+          - generic [ref=e41]:
+            - term [ref=e42]: Time
+            - definition [ref=e43]: 15s
+      - generic [ref=e44]:
+        - heading "Current Focus" [level=2] [ref=e45]
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - generic [ref=e48]:
+              - paragraph [ref=e49]: Addition
+              - paragraph [ref=e50]: Single-digit addition
+            - generic [ref=e51]: 1/3 passes
+          - generic [ref=e52]:
+            - generic [ref=e53]:
+              - term [ref=e54]: Speed target
+              - definition [ref=e55]: 8m
+            - generic [ref=e56]:
+              - term [ref=e57]: Accuracy
+              - definition [ref=e58]: 90%
+            - generic [ref=e59]:
+              - term [ref=e60]: Problems
+              - definition [ref=e61]: "20"
+      - generic [ref=e62]:
+        - heading "Set Level" [level=2] [ref=e63]
+        - paragraph [ref=e64]:
+          - text: Currently on
+          - generic [ref=e65]: Level 1.1
+          - text: . Change the placement below.
+        - generic [ref=e66]:
+          - combobox [ref=e67]:
+            - 'option "Level 1.1 — Addition: Single-digit addition" [selected]'
+            - 'option "Level 1.2 — Addition: Double-digit addition"'
+            - 'option "Level 2.1 — Subtraction: Single-digit subtraction"'
+            - 'option "Level 2.2 — Subtraction: Double-digit subtraction"'
+            - 'option "Level 3.1 — Multiplication: Basic multiplication facts"'
+            - 'option "Level 3.2 — Multiplication: Multi-digit multiplication"'
+            - 'option "Level 4.1 — Division: Basic division facts"'
+            - 'option "Level 4.2 — Division: Long division"'
+            - 'option "Level 5.1 — Fractions: Fraction addition and subtraction"'
+            - 'option "Level 5.2 — Fractions: Fraction multiplication and division"'
+            - 'option "Level 6.1 — Decimals: Decimal operations"'
+            - 'option "Level 6.2 — Percentages: Percent basics and conversions"'
+            - 'option "Level 7.1 — Negative Numbers: Operations with negative numbers"'
+            - 'option "Level 7.2 — Order of Operations: PEMDAS with integers"'
+            - 'option "Level 8.1 — Algebra: Simplifying expressions"'
+            - 'option "Level 8.2 — Algebra: Solving one-step equations"'
+            - 'option "Level 9.1 — Factorization: Prime factorization and factors"'
+            - 'option "Level 9.2 — Factorization: Factor pairs and common factors"'
+            - 'option "Level 10.1 — Linear Equations: Two-step equations"'
+            - 'option "Level 10.2 — Linear Equations: Equations with variables on both sides"'
+            - 'option "Level 11.1 — Inequalities: One-variable inequalities"'
+            - 'option "Level 11.2 — Simultaneous Equations: Solving systems of equations"'
+            - 'option "Level 12.1 — Functions: Function notation basics"'
+            - 'option "Level 12.2 — Graphing: Coordinate plane and linear graphs"'
+          - button "Update Placement" [ref=e68]
+  - button "Open Next.js Dev Tools" [ref=e74] [cursor=pointer]:
+    - img [ref=e75]
+  - alert [ref=e78]

@@ -6,12 +6,22 @@
 
 ## Current Status
 
-**Phase:** Student-first daily flow — `/play` is now the default landing page for all authenticated users.
+**Phase:** Level 10/1 Linear Equations added. Curriculum now extends from 1/1 through 10/1 with real generators.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 19 — Level 10/1 Linear Equations (2026-04-17)
+- `src/lib/math/generators/linear-equations.ts` — new generator for Level 10/1
+  - 5 problem subtypes: addition (x+a=b), subtraction (x-a=b), multiplication (ax=b), division (x/a=b), two-step (ax±b=c, x/a±b=c)
+  - Fixed deterministic pools; integer-only answers; count-driven distribution (25/25/20/15/remainder%)
+  - All answers are single integers — compatible with existing exact-match grading, no grading changes needed
+- `src/lib/math/generators/index.ts` — added route `10/1 → generateLinearEquations`; exported `LinearEquationProblem` and `LinearEquationType`; added `LinearEquationType` to `AnyProblemType` union
+- `src/lib/lessons/index.ts` — added `10/1` lesson: "Linear Equations", two-step worked example (2x+5=13→x=4), check step, tip
+- `src/app/worksheet/WorksheetForm.tsx` — added `linear_equation` case to `problemTypeLabel()`
+- No DB schema changes, no new dependencies, no grading logic changes
 
 ### Milestone 18 — Student-First Daily Flow (2026-04-17)
 - `src/app/actions/auth.ts` — `signIn` and `signUp` now redirect to `/play` instead of `/dashboard`
@@ -201,6 +211,21 @@
 ---
 
 ## Playwright Test Results
+
+### Suite 19 — Level 10/1 Linear Equations (2026-04-17)
+| Test | Result |
+|------|--------|
+| Manual placement to 10/1 via dashboard: Level/Sublevel stats update to 10/1 | PASS |
+| Dashboard Current Focus shows "Linear Equations / Two-step equations" | PASS |
+| 10/1 worksheet loads with 20 real linear equation problems (no Coming Soon) | PASS |
+| Lesson card shows "Learn: Linear Equations" with two-step worked example and tip | PASS |
+| Problem types present: addition, subtraction, multiplication, division, two-step | PASS |
+| 10/1 correct answers (20/20): 100%, ✓ Passed, mastery 1/3 | PASS |
+| 10/1 wrong answers (all "999"): 0/20, 0%, ✗ Not passed, mastery reset to 0/3 | PASS |
+| 9/2 → 10/1 natural advancement: 3 passing sessions at 9/2 → "Level Up! Advanced to Level 10.1 — Linear Equations" | PASS |
+| Dashboard after 9/2→10/1 advancement: Level 10 / Sublevel 1, mastery reset to 0/3 | PASS |
+| Unsupported level 10/2: worksheet shows "Coming Soon" with correct topic | PASS |
+| TypeScript: build clean, no type errors | PASS |
 
 ### Suite 18 — Student-First Daily Flow (2026-04-17)
 | Test | Result |

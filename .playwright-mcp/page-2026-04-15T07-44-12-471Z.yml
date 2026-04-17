@@ -1,0 +1,91 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: MathStep
+        - link "← Dashboard" [ref=e6] [cursor=pointer]:
+          - /url: /dashboard
+    - main [ref=e7]:
+      - generic [ref=e8]: "Dev mode: showing sample factorization worksheet"
+      - generic [ref=e9]:
+        - heading "Factorization Worksheet" [level=1] [ref=e10]
+        - paragraph [ref=e11]: Alex · Level 9.1
+      - generic [ref=e12]:
+        - generic [ref=e13]: Timer
+        - generic [ref=e14]: 00:00
+        - generic [ref=e15]: Not started
+      - generic [ref=e16]:
+        - generic [ref=e18]:
+          - generic [ref=e19]: "1"
+          - generic [ref=e20]:
+            - generic [ref=e21]:
+              - text: Prime Factorization
+              - paragraph [ref=e22]: Write the prime factorization of 12.
+            - textbox "Your answer" [ref=e23]
+        - generic [ref=e25]:
+          - generic [ref=e26]: "2"
+          - generic [ref=e27]:
+            - generic [ref=e28]:
+              - text: Prime Factorization
+              - paragraph [ref=e29]: Write the prime factorization of 18.
+            - textbox "Your answer" [ref=e30]
+        - generic [ref=e32]:
+          - generic [ref=e33]: "3"
+          - generic [ref=e34]:
+            - generic [ref=e35]:
+              - text: Prime Factorization
+              - paragraph [ref=e36]: Write the prime factorization of 24.
+            - textbox "Your answer" [ref=e37]
+        - generic [ref=e39]:
+          - generic [ref=e40]: "4"
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - text: List Factors
+              - paragraph [ref=e43]: List all factors of 12.
+            - textbox "Your answer" [ref=e44]
+        - generic [ref=e46]:
+          - generic [ref=e47]: "5"
+          - generic [ref=e48]:
+            - generic [ref=e49]:
+              - text: List Factors
+              - paragraph [ref=e50]: List all factors of 18.
+            - textbox "Your answer" [ref=e51]
+        - generic [ref=e53]:
+          - generic [ref=e54]: "6"
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - text: Greatest Common Factor
+              - paragraph [ref=e57]: Find the greatest common factor (GCF) of 12 and 18.
+            - textbox "Your answer" [ref=e58]
+        - generic [ref=e60]:
+          - generic [ref=e61]: "7"
+          - generic [ref=e62]:
+            - generic [ref=e63]:
+              - text: Greatest Common Factor
+              - paragraph [ref=e64]: Find the greatest common factor (GCF) of 24 and 36.
+            - textbox "Your answer" [ref=e65]
+        - generic [ref=e67]:
+          - generic [ref=e68]: "8"
+          - generic [ref=e69]:
+            - generic [ref=e70]:
+              - text: Greatest Common Factor
+              - paragraph [ref=e71]: Find the greatest common factor (GCF) of 30 and 45.
+            - textbox "Your answer" [ref=e72]
+        - generic [ref=e74]:
+          - generic [ref=e75]: "9"
+          - generic [ref=e76]:
+            - generic [ref=e77]:
+              - text: Least Common Multiple
+              - paragraph [ref=e78]: Find the least common multiple (LCM) of 4 and 6.
+            - textbox "Your answer" [ref=e79]
+        - generic [ref=e81]:
+          - generic [ref=e82]: "10"
+          - generic [ref=e83]:
+            - generic [ref=e84]:
+              - text: Least Common Multiple
+              - paragraph [ref=e85]: Find the least common multiple (LCM) of 6 and 9.
+            - textbox "Your answer" [ref=e86]
+        - button "Submit Worksheet" [disabled] [ref=e87]
+  - button "Open Next.js Dev Tools" [ref=e93] [cursor=pointer]:
+    - img [ref=e94]
+  - alert [ref=e97]

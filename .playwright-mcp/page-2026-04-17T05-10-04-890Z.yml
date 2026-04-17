@@ -1,0 +1,84 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e60] [cursor=pointer]:
+    - img [ref=e61]
+  - alert [ref=e64]
+  - generic [ref=e65]:
+    - banner [ref=e66]:
+      - generic [ref=e67]:
+        - generic [ref=e68]:
+          - img "MathStep" [ref=e69]
+          - generic [ref=e70]: MathStep
+        - button "Log out" [ref=e72]
+    - main [ref=e73]:
+      - generic [ref=e74]:
+        - heading "Hello, Alex" [level=1] [ref=e75]
+        - paragraph [ref=e76]: test_1776402555@example.com
+      - generic [ref=e77]:
+        - generic [ref=e78]:
+          - paragraph [ref=e79]: Level
+          - paragraph [ref=e80]: "10"
+        - generic [ref=e81]:
+          - paragraph [ref=e82]: Sublevel
+          - paragraph [ref=e83]: "1"
+        - generic [ref=e84]:
+          - paragraph [ref=e85]: Streak
+          - paragraph [ref=e86]: "0"
+        - generic [ref=e87]:
+          - paragraph [ref=e88]: Points
+          - paragraph [ref=e89]: "0"
+      - generic [ref=e90]:
+        - link "Start Today's Worksheet" [ref=e91] [cursor=pointer]:
+          - /url: /worksheet
+        - link "Open Student View" [ref=e92] [cursor=pointer]:
+          - /url: /play
+      - generic [ref=e93]:
+        - heading "Current Focus" [level=2] [ref=e94]
+        - generic [ref=e95]:
+          - generic [ref=e96]:
+            - generic [ref=e97]:
+              - paragraph [ref=e98]: Linear Equations
+              - paragraph [ref=e99]: Two-step equations
+            - generic [ref=e100]: 0/3 passes
+          - generic [ref=e101]:
+            - generic [ref=e102]:
+              - term [ref=e103]: Speed target
+              - definition [ref=e104]: 10m
+            - generic [ref=e105]:
+              - term [ref=e106]: Accuracy
+              - definition [ref=e107]: 90%
+            - generic [ref=e108]:
+              - term [ref=e109]: Problems
+              - definition [ref=e110]: "20"
+      - generic [ref=e111]:
+        - heading "Set Level" [level=2] [ref=e112]
+        - paragraph [ref=e113]:
+          - text: Currently on
+          - generic [ref=e114]: Level 10.1
+          - text: . Change the placement below.
+        - generic [ref=e115]:
+          - combobox [ref=e116]:
+            - 'option "Level 1.1 — Addition: Single-digit addition"'
+            - 'option "Level 1.2 — Addition: Double-digit addition"'
+            - 'option "Level 2.1 — Subtraction: Single-digit subtraction"'
+            - 'option "Level 2.2 — Subtraction: Double-digit subtraction"'
+            - 'option "Level 3.1 — Multiplication: Basic multiplication facts"'
+            - 'option "Level 3.2 — Multiplication: Multi-digit multiplication"'
+            - 'option "Level 4.1 — Division: Basic division facts"'
+            - 'option "Level 4.2 — Division: Long division"'
+            - 'option "Level 5.1 — Fractions: Fraction addition and subtraction"'
+            - 'option "Level 5.2 — Fractions: Fraction multiplication and division"'
+            - 'option "Level 6.1 — Decimals: Decimal operations"'
+            - 'option "Level 6.2 — Percentages: Percent basics and conversions"'
+            - 'option "Level 7.1 — Negative Numbers: Operations with negative numbers"'
+            - 'option "Level 7.2 — Order of Operations: PEMDAS with integers"'
+            - 'option "Level 8.1 — Algebra: Simplifying expressions"'
+            - 'option "Level 8.2 — Algebra: Solving one-step equations"'
+            - 'option "Level 9.1 — Factorization: Prime factorization and factors"'
+            - 'option "Level 9.2 — Factorization: Factor pairs and common factors"'
+            - 'option "Level 10.1 — Linear Equations: Two-step equations" [selected]'
+            - 'option "Level 10.2 — Linear Equations: Equations with variables on both sides"'
+            - 'option "Level 11.1 — Inequalities: One-variable inequalities"'
+            - 'option "Level 11.2 — Simultaneous Equations: Solving systems of equations"'
+            - 'option "Level 12.1 — Functions: Function notation basics"'
+            - 'option "Level 12.2 — Graphing: Coordinate plane and linear graphs"'
+          - button "Update Placement" [ref=e117]

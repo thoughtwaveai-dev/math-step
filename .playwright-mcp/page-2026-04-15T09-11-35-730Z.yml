@@ -1,0 +1,62 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e66] [cursor=pointer]:
+    - img [ref=e67]
+  - alert [ref=e70]: Create Next App
+  - generic [ref=e84]:
+    - banner [ref=e85]:
+      - generic [ref=e86]:
+        - generic [ref=e87]: MathStep
+        - button "Log out" [ref=e89]
+    - main [ref=e90]:
+      - generic [ref=e91]:
+        - heading "Dashboard" [level=1] [ref=e92]
+        - paragraph [ref=e93]: test1776243812@example.com
+      - generic [ref=e94]:
+        - heading "Sam" [level=2] [ref=e95]
+        - generic [ref=e96]:
+          - generic [ref=e97]:
+            - term [ref=e98]: Level
+            - definition [ref=e99]: "9"
+          - generic [ref=e100]:
+            - term [ref=e101]: Sublevel
+            - definition [ref=e102]: "2"
+          - generic [ref=e103]:
+            - term [ref=e104]: Streak
+            - definition [ref=e105]: "1"
+          - generic [ref=e106]:
+            - term [ref=e107]: Points
+            - definition [ref=e108]: "55"
+      - link "Start Today's Worksheet" [ref=e109] [cursor=pointer]:
+        - /url: /worksheet
+      - generic [ref=e110]:
+        - heading "Last Session" [level=2] [ref=e111]
+        - generic [ref=e113]: ✓ Passed
+        - generic [ref=e114]:
+          - generic [ref=e115]:
+            - term [ref=e116]: Score
+            - definition [ref=e117]: 10/10
+          - generic [ref=e118]:
+            - term [ref=e119]: Accuracy
+            - definition [ref=e120]: 100%
+          - generic [ref=e121]:
+            - term [ref=e122]: Time
+            - definition [ref=e123]: 21s
+      - generic [ref=e124]:
+        - heading "Current Focus" [level=2] [ref=e125]
+        - generic [ref=e126]:
+          - generic [ref=e127]:
+            - paragraph [ref=e128]: Factorization
+            - paragraph [ref=e129]: Factor pairs and common factors
+          - generic [ref=e130]:
+            - generic [ref=e131]:
+              - term [ref=e132]: Speed target
+              - definition [ref=e133]: 10m
+            - generic [ref=e134]:
+              - term [ref=e135]: Accuracy
+              - definition [ref=e136]: 90%
+            - generic [ref=e137]:
+              - term [ref=e138]: Problems/session
+              - definition [ref=e139]: "20"
+            - generic [ref=e140]:
+              - term [ref=e141]: Mastery progress
+              - definition [ref=e142]: 0/3

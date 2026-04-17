@@ -1,0 +1,16 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: MathStep
+        - link "← Dashboard" [ref=e6] [cursor=pointer]:
+          - /url: /dashboard
+    - main [ref=e7]:
+      - generic [ref=e8]:
+        - heading "Coming Soon" [level=2] [ref=e9]
+        - paragraph [ref=e10]: Worksheets for Level 9.2 (Factorization) are not available yet. Check back soon!
+        - link "Back to Dashboard" [ref=e11] [cursor=pointer]:
+          - /url: /dashboard
+  - button "Open Next.js Dev Tools" [ref=e17] [cursor=pointer]:
+    - img [ref=e18]
+  - alert [ref=e21]

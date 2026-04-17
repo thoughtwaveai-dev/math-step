@@ -1,0 +1,63 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - img "MathStep" [ref=e6]
+          - generic [ref=e7]: MathStep
+        - link "Parent view" [ref=e8] [cursor=pointer]:
+          - /url: /dashboard
+    - main [ref=e9]:
+      - generic [ref=e10]:
+        - heading "Hi, TestKid16!" [level=1] [ref=e11]
+        - paragraph [ref=e12]: Ready to practise some maths today?
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - paragraph [ref=e15]: Level
+          - paragraph [ref=e16]: "10"
+        - generic [ref=e17]:
+          - paragraph [ref=e18]: Sublevel
+          - paragraph [ref=e19]: "1"
+        - generic [ref=e20]:
+          - paragraph [ref=e21]: Streak
+          - paragraph [ref=e22]: 1 🔥
+        - generic [ref=e23]:
+          - paragraph [ref=e24]: Points
+          - paragraph [ref=e25]: "45"
+      - link "Start Today's Worksheet" [ref=e26] [cursor=pointer]:
+        - /url: /worksheet
+      - generic [ref=e27]:
+        - heading "What you're working on" [level=2] [ref=e28]
+        - generic [ref=e29]:
+          - generic [ref=e30]:
+            - paragraph [ref=e31]: Linear Equations
+            - paragraph [ref=e32]: Two-step equations
+          - generic [ref=e33]: 0/3 passes
+        - paragraph [ref=e36]: 3 more passing sessions to advance
+        - generic [ref=e37]:
+          - generic [ref=e38]:
+            - term [ref=e39]: Speed target
+            - definition [ref=e40]: 10m
+          - generic [ref=e41]:
+            - term [ref=e42]: Accuracy
+            - definition [ref=e43]: 90%
+          - generic [ref=e44]:
+            - term [ref=e45]: Problems
+            - definition [ref=e46]: "20"
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - heading "Last session" [level=2] [ref=e49]
+          - generic [ref=e50]: ✓ Passed
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - term [ref=e53]: Score
+            - definition [ref=e54]: 20/20
+          - generic [ref=e55]:
+            - term [ref=e56]: Accuracy
+            - definition [ref=e57]: 100%
+          - generic [ref=e58]:
+            - term [ref=e59]: Time
+            - definition [ref=e60]: 5s
+  - button "Open Next.js Dev Tools" [ref=e66] [cursor=pointer]:
+    - img [ref=e67]
+  - alert [ref=e70]

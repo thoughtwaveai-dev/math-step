@@ -1,0 +1,27 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e13] [cursor=pointer]:
+    - img [ref=e14]
+  - alert [ref=e17]
+  - generic [ref=e88]:
+    - banner [ref=e89]:
+      - generic [ref=e90]:
+        - generic [ref=e91]: MathStep
+        - button "Log out" [ref=e93]
+    - main [ref=e94]:
+      - heading "Dashboard" [level=1] [ref=e95]
+      - paragraph [ref=e96]: testuser+1776237543@mathstep.dev
+      - generic [ref=e97]:
+        - heading "Alex" [level=2] [ref=e98]
+        - generic [ref=e99]:
+          - generic [ref=e100]:
+            - term [ref=e101]: Level
+            - definition [ref=e102]: "1"
+          - generic [ref=e103]:
+            - term [ref=e104]: Sublevel
+            - definition [ref=e105]: "1"
+          - generic [ref=e106]:
+            - term [ref=e107]: Streak
+            - definition [ref=e108]: "0"
+          - generic [ref=e109]:
+            - term [ref=e110]: Points
+            - definition [ref=e111]: "0"

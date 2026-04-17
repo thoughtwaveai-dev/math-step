@@ -1,0 +1,198 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e194] [cursor=pointer]:
+    - img [ref=e195]
+  - alert [ref=e198]
+  - generic [ref=e199]:
+    - banner [ref=e200]:
+      - generic [ref=e201]:
+        - generic [ref=e202]:
+          - img "MathStep" [ref=e203]
+          - generic [ref=e204]: MathStep
+        - link "← Play" [ref=e205] [cursor=pointer]:
+          - /url: /play
+    - main [ref=e206]:
+      - heading "Worksheet Results" [level=1] [ref=e207]
+      - generic [ref=e208]:
+        - generic [ref=e210]: ✓ Passed
+        - generic [ref=e211]:
+          - generic [ref=e212]:
+            - term [ref=e213]: Score
+            - definition [ref=e214]: 20/20
+          - generic [ref=e215]:
+            - term [ref=e216]: Accuracy
+            - definition [ref=e217]: 100%
+          - generic [ref=e218]:
+            - term [ref=e219]: Time
+            - definition [ref=e220]: 19s
+      - generic [ref=e221]:
+        - paragraph [ref=e222]:
+          - text: "Mastery progress:"
+          - generic [ref=e223]: 1 / 3 passes
+        - paragraph [ref=e224]: 2 more passing sessions to advance.
+      - generic [ref=e225]:
+        - heading "Problem Review" [level=2] [ref=e226]
+        - generic [ref=e228]:
+          - generic [ref=e229]: ✓
+          - generic [ref=e230]:
+            - paragraph [ref=e231]: Problem 1
+            - paragraph [ref=e232]: "Solve for x: x + 4 = 11"
+            - generic [ref=e234]:
+              - paragraph [ref=e235]: Your answer
+              - paragraph [ref=e236]: "7"
+        - generic [ref=e238]:
+          - generic [ref=e239]: ✓
+          - generic [ref=e240]:
+            - paragraph [ref=e241]: Problem 2
+            - paragraph [ref=e242]: "Solve for x: x + 7 = 15"
+            - generic [ref=e244]:
+              - paragraph [ref=e245]: Your answer
+              - paragraph [ref=e246]: "8"
+        - generic [ref=e248]:
+          - generic [ref=e249]: ✓
+          - generic [ref=e250]:
+            - paragraph [ref=e251]: Problem 3
+            - paragraph [ref=e252]: "Solve for x: x + 9 = 21"
+            - generic [ref=e254]:
+              - paragraph [ref=e255]: Your answer
+              - paragraph [ref=e256]: "12"
+        - generic [ref=e258]:
+          - generic [ref=e259]: ✓
+          - generic [ref=e260]:
+            - paragraph [ref=e261]: Problem 4
+            - paragraph [ref=e262]: "Solve for x: x + 6 = 18"
+            - generic [ref=e264]:
+              - paragraph [ref=e265]: Your answer
+              - paragraph [ref=e266]: "12"
+        - generic [ref=e268]:
+          - generic [ref=e269]: ✓
+          - generic [ref=e270]:
+            - paragraph [ref=e271]: Problem 5
+            - paragraph [ref=e272]: "Solve for x: x + 3 = 10"
+            - generic [ref=e274]:
+              - paragraph [ref=e275]: Your answer
+              - paragraph [ref=e276]: "7"
+        - generic [ref=e278]:
+          - generic [ref=e279]: ✓
+          - generic [ref=e280]:
+            - paragraph [ref=e281]: Problem 6
+            - paragraph [ref=e282]: "Solve for x: x - 6 = 9"
+            - generic [ref=e284]:
+              - paragraph [ref=e285]: Your answer
+              - paragraph [ref=e286]: "15"
+        - generic [ref=e288]:
+          - generic [ref=e289]: ✓
+          - generic [ref=e290]:
+            - paragraph [ref=e291]: Problem 7
+            - paragraph [ref=e292]: "Solve for x: x - 3 = 8"
+            - generic [ref=e294]:
+              - paragraph [ref=e295]: Your answer
+              - paragraph [ref=e296]: "11"
+        - generic [ref=e298]:
+          - generic [ref=e299]: ✓
+          - generic [ref=e300]:
+            - paragraph [ref=e301]: Problem 8
+            - paragraph [ref=e302]: "Solve for x: x - 5 = 12"
+            - generic [ref=e304]:
+              - paragraph [ref=e305]: Your answer
+              - paragraph [ref=e306]: "17"
+        - generic [ref=e308]:
+          - generic [ref=e309]: ✓
+          - generic [ref=e310]:
+            - paragraph [ref=e311]: Problem 9
+            - paragraph [ref=e312]: "Solve for x: x - 8 = 6"
+            - generic [ref=e314]:
+              - paragraph [ref=e315]: Your answer
+              - paragraph [ref=e316]: "14"
+        - generic [ref=e318]:
+          - generic [ref=e319]: ✓
+          - generic [ref=e320]:
+            - paragraph [ref=e321]: Problem 10
+            - paragraph [ref=e322]: "Solve for x: x - 4 = 13"
+            - generic [ref=e324]:
+              - paragraph [ref=e325]: Your answer
+              - paragraph [ref=e326]: "17"
+        - generic [ref=e328]:
+          - generic [ref=e329]: ✓
+          - generic [ref=e330]:
+            - paragraph [ref=e331]: Problem 11
+            - paragraph [ref=e332]: "Solve for x: 3x = 18"
+            - generic [ref=e334]:
+              - paragraph [ref=e335]: Your answer
+              - paragraph [ref=e336]: "6"
+        - generic [ref=e338]:
+          - generic [ref=e339]: ✓
+          - generic [ref=e340]:
+            - paragraph [ref=e341]: Problem 12
+            - paragraph [ref=e342]: "Solve for x: 4x = 20"
+            - generic [ref=e344]:
+              - paragraph [ref=e345]: Your answer
+              - paragraph [ref=e346]: "5"
+        - generic [ref=e348]:
+          - generic [ref=e349]: ✓
+          - generic [ref=e350]:
+            - paragraph [ref=e351]: Problem 13
+            - paragraph [ref=e352]: "Solve for x: 5x = 35"
+            - generic [ref=e354]:
+              - paragraph [ref=e355]: Your answer
+              - paragraph [ref=e356]: "7"
+        - generic [ref=e358]:
+          - generic [ref=e359]: ✓
+          - generic [ref=e360]:
+            - paragraph [ref=e361]: Problem 14
+            - paragraph [ref=e362]: "Solve for x: 2x = 16"
+            - generic [ref=e364]:
+              - paragraph [ref=e365]: Your answer
+              - paragraph [ref=e366]: "8"
+        - generic [ref=e368]:
+          - generic [ref=e369]: ✓
+          - generic [ref=e370]:
+            - paragraph [ref=e371]: Problem 15
+            - paragraph [ref=e372]: "Solve for x: x / 4 = 3"
+            - generic [ref=e374]:
+              - paragraph [ref=e375]: Your answer
+              - paragraph [ref=e376]: "12"
+        - generic [ref=e378]:
+          - generic [ref=e379]: ✓
+          - generic [ref=e380]:
+            - paragraph [ref=e381]: Problem 16
+            - paragraph [ref=e382]: "Solve for x: x / 5 = 4"
+            - generic [ref=e384]:
+              - paragraph [ref=e385]: Your answer
+              - paragraph [ref=e386]: "20"
+        - generic [ref=e388]:
+          - generic [ref=e389]: ✓
+          - generic [ref=e390]:
+            - paragraph [ref=e391]: Problem 17
+            - paragraph [ref=e392]: "Solve for x: x / 3 = 6"
+            - generic [ref=e394]:
+              - paragraph [ref=e395]: Your answer
+              - paragraph [ref=e396]: "18"
+        - generic [ref=e398]:
+          - generic [ref=e399]: ✓
+          - generic [ref=e400]:
+            - paragraph [ref=e401]: Problem 18
+            - paragraph [ref=e402]: "Solve for x: 2x + 5 = 13"
+            - generic [ref=e404]:
+              - paragraph [ref=e405]: Your answer
+              - paragraph [ref=e406]: "4"
+        - generic [ref=e408]:
+          - generic [ref=e409]: ✓
+          - generic [ref=e410]:
+            - paragraph [ref=e411]: Problem 19
+            - paragraph [ref=e412]: "Solve for x: 3x - 4 = 11"
+            - generic [ref=e414]:
+              - paragraph [ref=e415]: Your answer
+              - paragraph [ref=e416]: "5"
+        - generic [ref=e418]:
+          - generic [ref=e419]: ✓
+          - generic [ref=e420]:
+            - paragraph [ref=e421]: Problem 20
+            - paragraph [ref=e422]: "Solve for x: x / 3 - 2 = 4"
+            - generic [ref=e424]:
+              - paragraph [ref=e425]: Your answer
+              - paragraph [ref=e426]: "18"
+      - generic [ref=e427]:
+        - link "Try Again" [ref=e428] [cursor=pointer]:
+          - /url: /worksheet
+        - link "Back to Play" [ref=e429] [cursor=pointer]:
+          - /url: /play

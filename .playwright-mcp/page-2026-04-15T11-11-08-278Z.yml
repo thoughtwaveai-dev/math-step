@@ -1,0 +1,198 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e164] [cursor=pointer]:
+    - img [ref=e165]
+  - alert [ref=e168]
+  - generic [ref=e169]:
+    - banner [ref=e170]:
+      - generic [ref=e171]:
+        - generic [ref=e172]:
+          - img "MathStep" [ref=e173]
+          - generic [ref=e174]: MathStep
+        - link "← Dashboard" [ref=e175] [cursor=pointer]:
+          - /url: /dashboard
+    - main [ref=e176]:
+      - heading "Worksheet Results" [level=1] [ref=e177]
+      - generic [ref=e178]:
+        - generic [ref=e180]: ✓ Passed
+        - generic [ref=e181]:
+          - generic [ref=e182]:
+            - term [ref=e183]: Score
+            - definition [ref=e184]: 20/20
+          - generic [ref=e185]:
+            - term [ref=e186]: Accuracy
+            - definition [ref=e187]: 100%
+          - generic [ref=e188]:
+            - term [ref=e189]: Time
+            - definition [ref=e190]: 26s
+      - generic [ref=e191]:
+        - paragraph [ref=e192]:
+          - text: "Mastery progress:"
+          - generic [ref=e193]: 2 / 3 passes
+        - paragraph [ref=e194]: 1 more passing session to advance.
+      - generic [ref=e195]:
+        - heading "Problem Review" [level=2] [ref=e196]
+        - generic [ref=e198]:
+          - generic [ref=e199]: ✓
+          - generic [ref=e200]:
+            - paragraph [ref=e201]: Problem 1
+            - paragraph [ref=e202]: 12 × 3 = ?
+            - generic [ref=e204]:
+              - paragraph [ref=e205]: Your answer
+              - paragraph [ref=e206]: "36"
+        - generic [ref=e208]:
+          - generic [ref=e209]: ✓
+          - generic [ref=e210]:
+            - paragraph [ref=e211]: Problem 2
+            - paragraph [ref=e212]: 14 × 2 = ?
+            - generic [ref=e214]:
+              - paragraph [ref=e215]: Your answer
+              - paragraph [ref=e216]: "28"
+        - generic [ref=e218]:
+          - generic [ref=e219]: ✓
+          - generic [ref=e220]:
+            - paragraph [ref=e221]: Problem 3
+            - paragraph [ref=e222]: 11 × 5 = ?
+            - generic [ref=e224]:
+              - paragraph [ref=e225]: Your answer
+              - paragraph [ref=e226]: "55"
+        - generic [ref=e228]:
+          - generic [ref=e229]: ✓
+          - generic [ref=e230]:
+            - paragraph [ref=e231]: Problem 4
+            - paragraph [ref=e232]: 13 × 4 = ?
+            - generic [ref=e234]:
+              - paragraph [ref=e235]: Your answer
+              - paragraph [ref=e236]: "52"
+        - generic [ref=e238]:
+          - generic [ref=e239]: ✓
+          - generic [ref=e240]:
+            - paragraph [ref=e241]: Problem 5
+            - paragraph [ref=e242]: 21 × 3 = ?
+            - generic [ref=e244]:
+              - paragraph [ref=e245]: Your answer
+              - paragraph [ref=e246]: "63"
+        - generic [ref=e248]:
+          - generic [ref=e249]: ✓
+          - generic [ref=e250]:
+            - paragraph [ref=e251]: Problem 6
+            - paragraph [ref=e252]: 15 × 4 = ?
+            - generic [ref=e254]:
+              - paragraph [ref=e255]: Your answer
+              - paragraph [ref=e256]: "60"
+        - generic [ref=e258]:
+          - generic [ref=e259]: ✓
+          - generic [ref=e260]:
+            - paragraph [ref=e261]: Problem 7
+            - paragraph [ref=e262]: 22 × 3 = ?
+            - generic [ref=e264]:
+              - paragraph [ref=e265]: Your answer
+              - paragraph [ref=e266]: "66"
+        - generic [ref=e268]:
+          - generic [ref=e269]: ✓
+          - generic [ref=e270]:
+            - paragraph [ref=e271]: Problem 8
+            - paragraph [ref=e272]: 16 × 5 = ?
+            - generic [ref=e274]:
+              - paragraph [ref=e275]: Your answer
+              - paragraph [ref=e276]: "80"
+        - generic [ref=e278]:
+          - generic [ref=e279]: ✓
+          - generic [ref=e280]:
+            - paragraph [ref=e281]: Problem 9
+            - paragraph [ref=e282]: 24 × 3 = ?
+            - generic [ref=e284]:
+              - paragraph [ref=e285]: Your answer
+              - paragraph [ref=e286]: "72"
+        - generic [ref=e288]:
+          - generic [ref=e289]: ✓
+          - generic [ref=e290]:
+            - paragraph [ref=e291]: Problem 10
+            - paragraph [ref=e292]: 31 × 2 = ?
+            - generic [ref=e294]:
+              - paragraph [ref=e295]: Your answer
+              - paragraph [ref=e296]: "62"
+        - generic [ref=e298]:
+          - generic [ref=e299]: ✓
+          - generic [ref=e300]:
+            - paragraph [ref=e301]: Problem 11
+            - paragraph [ref=e302]: 12 × 3 = ?
+            - generic [ref=e304]:
+              - paragraph [ref=e305]: Your answer
+              - paragraph [ref=e306]: "36"
+        - generic [ref=e308]:
+          - generic [ref=e309]: ✓
+          - generic [ref=e310]:
+            - paragraph [ref=e311]: Problem 12
+            - paragraph [ref=e312]: 14 × 2 = ?
+            - generic [ref=e314]:
+              - paragraph [ref=e315]: Your answer
+              - paragraph [ref=e316]: "28"
+        - generic [ref=e318]:
+          - generic [ref=e319]: ✓
+          - generic [ref=e320]:
+            - paragraph [ref=e321]: Problem 13
+            - paragraph [ref=e322]: 11 × 5 = ?
+            - generic [ref=e324]:
+              - paragraph [ref=e325]: Your answer
+              - paragraph [ref=e326]: "55"
+        - generic [ref=e328]:
+          - generic [ref=e329]: ✓
+          - generic [ref=e330]:
+            - paragraph [ref=e331]: Problem 14
+            - paragraph [ref=e332]: 13 × 4 = ?
+            - generic [ref=e334]:
+              - paragraph [ref=e335]: Your answer
+              - paragraph [ref=e336]: "52"
+        - generic [ref=e338]:
+          - generic [ref=e339]: ✓
+          - generic [ref=e340]:
+            - paragraph [ref=e341]: Problem 15
+            - paragraph [ref=e342]: 21 × 3 = ?
+            - generic [ref=e344]:
+              - paragraph [ref=e345]: Your answer
+              - paragraph [ref=e346]: "63"
+        - generic [ref=e348]:
+          - generic [ref=e349]: ✓
+          - generic [ref=e350]:
+            - paragraph [ref=e351]: Problem 16
+            - paragraph [ref=e352]: 15 × 4 = ?
+            - generic [ref=e354]:
+              - paragraph [ref=e355]: Your answer
+              - paragraph [ref=e356]: "60"
+        - generic [ref=e358]:
+          - generic [ref=e359]: ✓
+          - generic [ref=e360]:
+            - paragraph [ref=e361]: Problem 17
+            - paragraph [ref=e362]: 22 × 3 = ?
+            - generic [ref=e364]:
+              - paragraph [ref=e365]: Your answer
+              - paragraph [ref=e366]: "66"
+        - generic [ref=e368]:
+          - generic [ref=e369]: ✓
+          - generic [ref=e370]:
+            - paragraph [ref=e371]: Problem 18
+            - paragraph [ref=e372]: 16 × 5 = ?
+            - generic [ref=e374]:
+              - paragraph [ref=e375]: Your answer
+              - paragraph [ref=e376]: "80"
+        - generic [ref=e378]:
+          - generic [ref=e379]: ✓
+          - generic [ref=e380]:
+            - paragraph [ref=e381]: Problem 19
+            - paragraph [ref=e382]: 24 × 3 = ?
+            - generic [ref=e384]:
+              - paragraph [ref=e385]: Your answer
+              - paragraph [ref=e386]: "72"
+        - generic [ref=e388]:
+          - generic [ref=e389]: ✓
+          - generic [ref=e390]:
+            - paragraph [ref=e391]: Problem 20
+            - paragraph [ref=e392]: 31 × 2 = ?
+            - generic [ref=e394]:
+              - paragraph [ref=e395]: Your answer
+              - paragraph [ref=e396]: "62"
+      - generic [ref=e397]:
+        - link "Try Again" [ref=e398] [cursor=pointer]:
+          - /url: /worksheet
+        - link "Back to Dashboard" [ref=e399] [cursor=pointer]:
+          - /url: /dashboard

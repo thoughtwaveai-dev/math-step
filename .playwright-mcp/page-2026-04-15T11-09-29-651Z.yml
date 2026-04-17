@@ -1,0 +1,62 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - img "MathStep" [ref=e6]
+          - generic [ref=e7]: MathStep
+        - button "Log out" [ref=e9]
+    - main [ref=e10]:
+      - generic [ref=e11]:
+        - heading "Hello, Alex" [level=1] [ref=e12]
+        - paragraph [ref=e13]: testmul10@example.com
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - paragraph [ref=e16]: Level
+          - paragraph [ref=e17]: "3"
+        - generic [ref=e18]:
+          - paragraph [ref=e19]: Sublevel
+          - paragraph [ref=e20]: "2"
+        - generic [ref=e21]:
+          - paragraph [ref=e22]: Streak
+          - paragraph [ref=e23]: "1"
+        - generic [ref=e24]:
+          - paragraph [ref=e25]: Points
+          - paragraph [ref=e26]: "265"
+      - link "Start Today's Worksheet" [ref=e27] [cursor=pointer]:
+        - /url: /worksheet
+      - generic [ref=e28]:
+        - generic [ref=e29]:
+          - heading "Last Session" [level=2] [ref=e30]
+          - generic [ref=e31]: ✓ Passed
+        - generic [ref=e32]:
+          - generic [ref=e33]:
+            - term [ref=e34]: Score
+            - definition [ref=e35]: 20/20
+          - generic [ref=e36]:
+            - term [ref=e37]: Accuracy
+            - definition [ref=e38]: 100%
+          - generic [ref=e39]:
+            - term [ref=e40]: Time
+            - definition [ref=e41]: 12s
+      - generic [ref=e42]:
+        - heading "Current Focus" [level=2] [ref=e43]
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - generic [ref=e46]:
+              - paragraph [ref=e47]: Multiplication
+              - paragraph [ref=e48]: Multi-digit multiplication
+            - generic [ref=e49]: 1/3 passes
+          - generic [ref=e50]:
+            - generic [ref=e51]:
+              - term [ref=e52]: Speed target
+              - definition [ref=e53]: 8m
+            - generic [ref=e54]:
+              - term [ref=e55]: Accuracy
+              - definition [ref=e56]: 90%
+            - generic [ref=e57]:
+              - term [ref=e58]: Problems
+              - definition [ref=e59]: "20"
+  - button "Open Next.js Dev Tools" [ref=e65] [cursor=pointer]:
+    - img [ref=e66]
+  - alert [ref=e69]

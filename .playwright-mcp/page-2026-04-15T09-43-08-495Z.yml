@@ -1,0 +1,277 @@
+- generic [ref=e2]:
+  - complementary [ref=e4]:
+    - link "Open Brain Open Brain" [ref=e5] [cursor=pointer]:
+      - /url: /
+      - img "Open Brain" [ref=e6]
+      - generic [ref=e7]: Open Brain
+    - navigation [ref=e8]:
+      - list [ref=e9]:
+        - listitem [ref=e10]:
+          - link "🏠 Home" [ref=e11] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e12]: 🏠
+            - text: Home
+        - listitem [ref=e13]:
+          - link "💭 Thoughts" [ref=e14] [cursor=pointer]:
+            - /url: /thoughts
+            - generic [ref=e15]: 💭
+            - text: Thoughts
+        - listitem [ref=e16]:
+          - link "📝 Prompt Library" [ref=e17] [cursor=pointer]:
+            - /url: /prompts
+            - generic [ref=e18]: 📝
+            - text: Prompt Library
+        - listitem [ref=e19]:
+          - link "📚 Resources" [ref=e20] [cursor=pointer]:
+            - /url: /resources
+            - generic [ref=e21]: 📚
+            - text: Resources
+        - listitem [ref=e22]:
+          - link "🧠 Wiki" [ref=e23] [cursor=pointer]:
+            - /url: /wiki
+            - generic [ref=e24]: 🧠
+            - text: Wiki
+        - listitem [ref=e25]:
+          - link "🔍 Search" [ref=e26] [cursor=pointer]:
+            - /url: /search
+            - generic [ref=e27]: 🔍
+            - text: Search
+        - listitem [ref=e28]:
+          - link "✍️ Capture" [ref=e29] [cursor=pointer]:
+            - /url: /capture
+            - generic [ref=e30]: ✍️
+            - text: Capture
+        - listitem [ref=e31]:
+          - link "🌅 Daily Brief" [ref=e32] [cursor=pointer]:
+            - /url: /brief
+            - generic [ref=e33]: 🌅
+            - text: Daily Brief
+        - listitem [ref=e34]:
+          - link "🧭 Weekly Review" [ref=e35] [cursor=pointer]:
+            - /url: /weekly-review
+            - generic [ref=e36]: 🧭
+            - text: Weekly Review
+    - paragraph [ref=e38]: Powered by Supabase · OpenRouter · GPT-5 mini
+  - main [ref=e39]:
+    - generic [ref=e41]:
+      - generic [ref=e42]:
+        - heading "Open Brain" [level=1] [ref=e43]
+        - paragraph [ref=e44]: Your personal knowledge base — thoughts, prompts, and resources.
+      - generic [ref=e45]:
+        - link "💭 3 Thoughts" [ref=e46] [cursor=pointer]:
+          - /url: /thoughts
+          - generic [ref=e47]:
+            - generic [ref=e48]: 💭
+            - generic [ref=e49]:
+              - generic [ref=e50]: "3"
+              - generic [ref=e51]: Thoughts
+        - link "📝 376 Prompts" [ref=e52] [cursor=pointer]:
+          - /url: /prompts
+          - generic [ref=e53]:
+            - generic [ref=e54]: 📝
+            - generic [ref=e55]:
+              - generic [ref=e56]: "376"
+              - generic [ref=e57]: Prompts
+        - link "📚 51 Resources" [ref=e58] [cursor=pointer]:
+          - /url: /resources
+          - generic [ref=e59]:
+            - generic [ref=e60]: 📚
+            - generic [ref=e61]:
+              - generic [ref=e62]: "51"
+              - generic [ref=e63]: Resources
+        - link "🧠 → Wiki" [ref=e64] [cursor=pointer]:
+          - /url: /wiki
+          - generic [ref=e65]:
+            - generic [ref=e66]: 🧠
+            - generic [ref=e67]:
+              - generic [ref=e68]: →
+              - generic [ref=e69]: Wiki
+      - generic [ref=e70]:
+        - generic [ref=e71]:
+          - heading "Recent Captures" [level=2] [ref=e72]
+          - paragraph [ref=e73]: Latest across all sources
+        - link "Search all →" [ref=e74] [cursor=pointer]:
+          - /url: /search
+      - generic [ref=e75]:
+        - 'link "resource youtube Apr 15, 2026 Claude Code Chaining Skills Kit Add a single line, \"context fork\", to a Claude Code skill to run nested skills in their own context windows and sequence them from one command into a unified output. For example, a \"launch offer\" skill can run market research, sales copy, email sequences, social posts, and generate a final launch brief PDF while specifying agent behavior and allowed tools. #claude code #context fork #skills chaining #automation" [ref=e76] [cursor=pointer]':
+          - /url: /resources/ae823405-857e-44c1-9998-7a898001e044
+          - generic [ref=e77]:
+            - generic [ref=e78]:
+              - generic [ref=e79]:
+                - generic [ref=e80]: resource
+                - generic [ref=e81]: youtube
+              - generic [ref=e82]: Apr 15, 2026
+            - paragraph [ref=e83]: Claude Code Chaining Skills Kit
+            - paragraph [ref=e84]: Add a single line, "context fork", to a Claude Code skill to run nested skills in their own context windows and sequence them from one command into a unified output. For example, a "launch offer" skill can run market research, sales copy, email sequences, social posts, and generate a final launch brief PDF while specifying agent behavior and allowed tools.
+            - generic [ref=e85]:
+              - generic [ref=e86]: "#claude code"
+              - generic [ref=e87]: "#context fork"
+              - generic [ref=e88]: "#skills chaining"
+              - generic [ref=e89]: "#automation"
+        - 'link "resource guide Apr 15, 2026 Solo Founder Built $1.8B AI-Enabled Company A founder used $20,000 and no employees to assemble existing telehealth, compounding pharmacy, and compliance services into a consumer brand approaching $1.8B revenue—without building a product, raising capital, or inventing a problem. The playbook emphasizes spotting structural market gaps, betting on newly reliable AI capabilities, and absorbing regulatory complexity via an MSO model, but carries serious ethical and legal caveats (FDA warnings, fake endorsements, and an active RICO lawsuit). #ai #solo-founder #market-structure #mso" [ref=e90] [cursor=pointer]':
+          - /url: /resources/d84d3a4f-66f3-4e32-8ca3-069255bb7ada
+          - generic [ref=e91]:
+            - generic [ref=e92]:
+              - generic [ref=e93]:
+                - generic [ref=e94]: resource
+                - generic [ref=e95]: guide
+              - generic [ref=e96]: Apr 15, 2026
+            - paragraph [ref=e97]: Solo Founder Built $1.8B AI-Enabled Company
+            - paragraph [ref=e98]: A founder used $20,000 and no employees to assemble existing telehealth, compounding pharmacy, and compliance services into a consumer brand approaching $1.8B revenue—without building a product, raising capital, or inventing a problem. The playbook emphasizes spotting structural market gaps, betting on newly reliable AI capabilities, and absorbing regulatory complexity via an MSO model, but carries serious ethical and legal caveats (FDA warnings, fake endorsements, and an active RICO lawsuit).
+            - generic [ref=e99]:
+              - generic [ref=e100]: "#ai"
+              - generic [ref=e101]: "#solo-founder"
+              - generic [ref=e102]: "#market-structure"
+              - generic [ref=e103]: "#mso"
+        - 'link "resource youtube Apr 15, 2026 Claude Code Routines: Scheduled Automations Anthropic''s Cloud Code routines let you run prompt-based automations on their web infrastructure, triggered by schedules, API calls, or events. To make them reliable you must attach a GitHub repo (Cloud Code clones it), supply secrets via the cloud environment''s environment variables, set the correct access level (trusted vs full), and design oneshot prompts—common gotchas include default env lookup behavior (explicitly reference env vars for APIs like YouTube) and minimum cadence limits. #anthropic #cloud code #routines #automation" [ref=e104] [cursor=pointer]':
+          - /url: /resources/4630b004-9a8f-48af-9827-9fa57fdd793e
+          - generic [ref=e105]:
+            - generic [ref=e106]:
+              - generic [ref=e107]:
+                - generic [ref=e108]: resource
+                - generic [ref=e109]: youtube
+              - generic [ref=e110]: Apr 15, 2026
+            - paragraph [ref=e111]: "Claude Code Routines: Scheduled Automations"
+            - paragraph [ref=e112]: Anthropic's Cloud Code routines let you run prompt-based automations on their web infrastructure, triggered by schedules, API calls, or events. To make them reliable you must attach a GitHub repo (Cloud Code clones it), supply secrets via the cloud environment's environment variables, set the correct access level (trusted vs full), and design oneshot prompts—common gotchas include default env lookup behavior (explicitly reference env vars for APIs like YouTube) and minimum cadence limits.
+            - generic [ref=e113]:
+              - generic [ref=e114]: "#anthropic"
+              - generic [ref=e115]: "#cloud code"
+              - generic [ref=e116]: "#routines"
+              - generic [ref=e117]: "#automation"
+        - 'link "resource cheatsheet Apr 14, 2026 Second Brain as a Service Build searchable client knowledge bases from scattered Slack, Drive, email, and call data for a $1,500–3,000 setup plus $300–500/month retainer. Target agencies and consultants, stack competitive/client/content vaults to charge $1K–1.5K/month per client and reach ~$60K+ year one with 10 clients. #second brain #knowledge-base #ai-agent #agencies" [ref=e118] [cursor=pointer]':
+          - /url: /resources/01a1210f-4b8e-474a-9d77-b7d265a0be7d
+          - generic [ref=e119]:
+            - generic [ref=e120]:
+              - generic [ref=e121]:
+                - generic [ref=e122]: resource
+                - generic [ref=e123]: cheatsheet
+              - generic [ref=e124]: Apr 14, 2026
+            - paragraph [ref=e125]: Second Brain as a Service
+            - paragraph [ref=e126]: Build searchable client knowledge bases from scattered Slack, Drive, email, and call data for a $1,500–3,000 setup plus $300–500/month retainer. Target agencies and consultants, stack competitive/client/content vaults to charge $1K–1.5K/month per client and reach ~$60K+ year one with 10 clients.
+            - generic [ref=e127]:
+              - generic [ref=e128]: "#second brain"
+              - generic [ref=e129]: "#knowledge-base"
+              - generic [ref=e130]: "#ai-agent"
+              - generic [ref=e131]: "#agencies"
+        - 'link "prompt Apr 14, 2026 Comprehension Gate Reviews code changes for system-level comprehension risks like blast radius and side effects. Use this on every AI-generated PR and critical human PRs. #code-review #quality-assurance #security #devops" [ref=e132] [cursor=pointer]':
+          - /url: /prompts/e48f13ae-c3f1-4f76-9266-f0cda5616c39
+          - generic [ref=e133]:
+            - generic [ref=e134]:
+              - generic [ref=e136]: prompt
+              - generic [ref=e137]: Apr 14, 2026
+            - paragraph [ref=e138]: Comprehension Gate
+            - paragraph [ref=e139]: Reviews code changes for system-level comprehension risks like blast radius and side effects. Use this on every AI-generated PR and critical human PRs.
+            - generic [ref=e140]:
+              - generic [ref=e141]: "#code-review"
+              - generic [ref=e142]: "#quality-assurance"
+              - generic [ref=e143]: "#security"
+              - generic [ref=e144]: "#devops"
+        - 'link "prompt Apr 14, 2026 Context Layer Generator Interviews developers to build structural, semantic, and philosophical context layers for a module. Use this to create self-describing code artifacts for high-risk modules. #documentation #architecture #onboarding #knowledge-management" [ref=e145] [cursor=pointer]':
+          - /url: /prompts/42e56da1-53d0-467e-b701-d3ee9b60359f
+          - generic [ref=e146]:
+            - generic [ref=e147]:
+              - generic [ref=e149]: prompt
+              - generic [ref=e150]: Apr 14, 2026
+            - paragraph [ref=e151]: Context Layer Generator
+            - paragraph [ref=e152]: Interviews developers to build structural, semantic, and philosophical context layers for a module. Use this to create self-describing code artifacts for high-risk modules.
+            - generic [ref=e153]:
+              - generic [ref=e154]: "#documentation"
+              - generic [ref=e155]: "#architecture"
+              - generic [ref=e156]: "#onboarding"
+              - generic [ref=e157]: "#knowledge-management"
+        - 'link "prompt Apr 14, 2026 Dark Code Audit Diagnoses where dark code is accumulating in a system and prioritizes remediation. Use this before starting any major refactoring or security review. #architecture #risk-assessment #technical-debt #security" [ref=e158] [cursor=pointer]':
+          - /url: /prompts/858cb712-7d7b-442b-84a9-8b8f35a0e04e
+          - generic [ref=e159]:
+            - generic [ref=e160]:
+              - generic [ref=e162]: prompt
+              - generic [ref=e163]: Apr 14, 2026
+            - paragraph [ref=e164]: Dark Code Audit
+            - paragraph [ref=e165]: Diagnoses where dark code is accumulating in a system and prioritizes remediation. Use this before starting any major refactoring or security review.
+            - generic [ref=e166]:
+              - generic [ref=e167]: "#architecture"
+              - generic [ref=e168]: "#risk-assessment"
+              - generic [ref=e169]: "#technical-debt"
+              - generic [ref=e170]: "#security"
+        - 'link "resource note Apr 14, 2026 Real AI Agents in Production Breakdown Eric runs five AI agents, 48 daily crons, and a unified vector database ingesting everything every 15 minutes to source candidates, run outbound campaigns, and brief him before he opens his laptop. The strategy: build and prove an internal AI operating system (his content averages 120K views per article), then deploy that intelligence layer to clients—your internal implementation and compounded data become the product and moat, replacing the old service-based agency model. #ai #agents #vector-database #productization" [ref=e171] [cursor=pointer]':
+          - /url: /resources/93985474-230c-4590-b5a9-b3e6ca22e691
+          - generic [ref=e172]:
+            - generic [ref=e173]:
+              - generic [ref=e174]:
+                - generic [ref=e175]: resource
+                - generic [ref=e176]: note
+              - generic [ref=e177]: Apr 14, 2026
+            - paragraph [ref=e178]: Real AI Agents in Production Breakdown
+            - paragraph [ref=e179]: "Eric runs five AI agents, 48 daily crons, and a unified vector database ingesting everything every 15 minutes to source candidates, run outbound campaigns, and brief him before he opens his laptop. The strategy: build and prove an internal AI operating system (his content averages 120K views per article), then deploy that intelligence layer to clients—your internal implementation and compounded data become the product and moat, replacing the old service-based agency model."
+            - generic [ref=e180]:
+              - generic [ref=e181]: "#ai"
+              - generic [ref=e182]: "#agents"
+              - generic [ref=e183]: "#vector-database"
+              - generic [ref=e184]: "#productization"
+        - 'link "prompt Apr 13, 2026 GPU Fleet Compression Calculator Calculates the impact of KV cache compression on infrastructure costs, concurrency, and fleet capacity. Use this to make data-driven decisions about hardware purchases and inference optimization. #infrastructure #gpu #cost-modeling #inference" [ref=e185] [cursor=pointer]':
+          - /url: /prompts/2fbce45d-7052-4b3b-b192-9969e3da7114
+          - generic [ref=e186]:
+            - generic [ref=e187]:
+              - generic [ref=e189]: prompt
+              - generic [ref=e190]: Apr 13, 2026
+            - paragraph [ref=e191]: GPU Fleet Compression Calculator
+            - paragraph [ref=e192]: Calculates the impact of KV cache compression on infrastructure costs, concurrency, and fleet capacity. Use this to make data-driven decisions about hardware purchases and inference optimization.
+            - generic [ref=e193]:
+              - generic [ref=e194]: "#infrastructure"
+              - generic [ref=e195]: "#gpu"
+              - generic [ref=e196]: "#cost-modeling"
+              - generic [ref=e197]: "#inference"
+        - 'link "prompt Apr 13, 2026 Memory Architecture Audit Diagnoses context leakage in AI workflows and provides a prioritized fix list. Use this to identify where you are losing state and how to improve context continuity. #workflow #context #agents #productivity" [ref=e198] [cursor=pointer]':
+          - /url: /prompts/2043652b-0f62-4095-9477-5d3888ff3b79
+          - generic [ref=e199]:
+            - generic [ref=e200]:
+              - generic [ref=e202]: prompt
+              - generic [ref=e203]: Apr 13, 2026
+            - paragraph [ref=e204]: Memory Architecture Audit
+            - paragraph [ref=e205]: Diagnoses context leakage in AI workflows and provides a prioritized fix list. Use this to identify where you are losing state and how to improve context continuity.
+            - generic [ref=e206]:
+              - generic [ref=e207]: "#workflow"
+              - generic [ref=e208]: "#context"
+              - generic [ref=e209]: "#agents"
+              - generic [ref=e210]: "#productivity"
+        - 'link "thought idea Apr 11, 2026 AI Automation Agency for Small Business Efficiency Building an AI automations agency is a great way to generate recurring revenue while helping small businesses save time on repetitive tasks like email follow-ups, data entry, and scheduling. #AI #automations #recurring revenue #small businesses" [ref=e211] [cursor=pointer]':
+          - /url: /thoughts/e7524b2d-35bb-472f-85b4-582014ab1c5b
+          - generic [ref=e212]:
+            - generic [ref=e213]:
+              - generic [ref=e214]:
+                - generic [ref=e215]: thought
+                - generic [ref=e216]: idea
+              - generic [ref=e217]: Apr 11, 2026
+            - paragraph [ref=e218]: AI Automation Agency for Small Business Efficiency
+            - paragraph [ref=e219]: Building an AI automations agency is a great way to generate recurring revenue while helping small businesses save time on repetitive tasks like email follow-ups, data entry, and scheduling.
+            - generic [ref=e220]:
+              - generic [ref=e221]: "#AI"
+              - generic [ref=e222]: "#automations"
+              - generic [ref=e223]: "#recurring revenue"
+              - generic [ref=e224]: "#small businesses"
+        - 'link "thought idea Apr 11, 2026 Lock Your Niche in 15 Minutes 💡Lock Your Niche in 15minutes Here''s the exercise I mentioned. Grab a piece of paper. This takes 15 minutes and it''s the single highest-leverage thing you can do right now. The 3 Locks. You need to #niche marketing #business strategy #target audience" [ref=e225] [cursor=pointer]':
+          - /url: /thoughts/72fcf1da-3251-40a7-9029-e00f8893337a
+          - generic [ref=e226]:
+            - generic [ref=e227]:
+              - generic [ref=e228]:
+                - generic [ref=e229]: thought
+                - generic [ref=e230]: idea
+              - generic [ref=e231]: Apr 11, 2026
+            - paragraph [ref=e232]: Lock Your Niche in 15 Minutes
+            - paragraph [ref=e233]: 💡Lock Your Niche in 15minutes Here's the exercise I mentioned. Grab a piece of paper. This takes 15 minutes and it's the single highest-leverage thing you can do right now. The 3 Locks. You need to
+            - generic [ref=e234]:
+              - generic [ref=e235]: "#niche marketing"
+              - generic [ref=e236]: "#business strategy"
+              - generic [ref=e237]: "#target audience"
+        - 'link "thought idea Apr 10, 2026 Setting Up Your Own Home Server How to setup your own HOME SERVER https://buy.stripe.com/4gMfZh0C01lagQpb4GcQU00 #home server #setup" [ref=e238] [cursor=pointer]':
+          - /url: /thoughts/b912827c-555f-4a8b-b058-30909c10a8ee
+          - generic [ref=e239]:
+            - generic [ref=e240]:
+              - generic [ref=e241]:
+                - generic [ref=e242]: thought
+                - generic [ref=e243]: idea
+              - generic [ref=e244]: Apr 10, 2026
+            - paragraph [ref=e245]: Setting Up Your Own Home Server
+            - paragraph [ref=e246]: How to setup your own HOME SERVER https://buy.stripe.com/4gMfZh0C01lagQpb4GcQU00
+            - generic [ref=e247]:
+              - generic [ref=e248]: "#home server"
+              - generic [ref=e249]: "#setup"

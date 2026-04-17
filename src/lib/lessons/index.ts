@@ -115,6 +115,21 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'For factor pairs, always start with 1×N and work inward. Stop when the two numbers in the pair meet or cross!',
   },
+  '10/1': {
+    title: 'Linear Equations',
+    explanation: 'A linear equation has one unknown, usually called x. Your goal is to find the value of x that makes the equation true. Whatever you do to one side of the equals sign, you must do to the other side too.',
+    example: {
+      problem: '2x + 5 = 13',
+      steps: [
+        'We want x on its own',
+        'Subtract 5 from both sides: 2x + 5 − 5 = 13 − 5 → 2x = 8',
+        'Divide both sides by 2: 2x ÷ 2 = 8 ÷ 2 → x = 4',
+        'Check: 2(4) + 5 = 8 + 5 = 13 ✓',
+      ],
+      answer: 'x = 4',
+    },
+    tip: 'Always check your answer by substituting x back into the original equation — if both sides match, you\'re right!',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

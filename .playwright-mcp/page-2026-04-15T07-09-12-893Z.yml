@@ -1,0 +1,18 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e14] [cursor=pointer]:
+    - img [ref=e15]
+  - alert [ref=e8]
+  - generic [ref=e44]:
+    - heading "Log in to MathStep" [level=1] [ref=e45]
+    - generic [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e48]: Email
+        - textbox "Email" [ref=e49]
+      - generic [ref=e50]:
+        - generic [ref=e51]: Password
+        - textbox "Password" [ref=e52]
+      - button "Log in" [ref=e53]
+    - paragraph [ref=e54]:
+      - text: Don't have an account?
+      - link "Sign up" [ref=e55] [cursor=pointer]:
+        - /url: /signup

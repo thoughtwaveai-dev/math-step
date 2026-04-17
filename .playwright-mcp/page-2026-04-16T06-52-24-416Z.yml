@@ -1,0 +1,81 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e58] [cursor=pointer]:
+    - img [ref=e59]
+  - alert [ref=e62]
+  - generic [ref=e63]:
+    - banner [ref=e64]:
+      - generic [ref=e65]:
+        - generic [ref=e66]:
+          - img "MathStep" [ref=e67]
+          - generic [ref=e68]: MathStep
+        - button "Log out" [ref=e70]
+    - main [ref=e71]:
+      - generic [ref=e72]:
+        - heading "Hello, TestKid" [level=1] [ref=e73]
+        - paragraph [ref=e74]: playwright-test-15@mathstep.test
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - paragraph [ref=e77]: Level
+          - paragraph [ref=e78]: "9"
+        - generic [ref=e79]:
+          - paragraph [ref=e80]: Sublevel
+          - paragraph [ref=e81]: "2"
+        - generic [ref=e82]:
+          - paragraph [ref=e83]: Streak
+          - paragraph [ref=e84]: "0"
+        - generic [ref=e85]:
+          - paragraph [ref=e86]: Points
+          - paragraph [ref=e87]: "0"
+      - link "Start Today's Worksheet" [ref=e88] [cursor=pointer]:
+        - /url: /worksheet
+      - generic [ref=e89]:
+        - heading "Current Focus" [level=2] [ref=e90]
+        - generic [ref=e91]:
+          - generic [ref=e92]:
+            - generic [ref=e93]:
+              - paragraph [ref=e94]: Factorization
+              - paragraph [ref=e95]: Factor pairs and common factors
+            - generic [ref=e96]: 0/3 passes
+          - generic [ref=e97]:
+            - generic [ref=e98]:
+              - term [ref=e99]: Speed target
+              - definition [ref=e100]: 10m
+            - generic [ref=e101]:
+              - term [ref=e102]: Accuracy
+              - definition [ref=e103]: 90%
+            - generic [ref=e104]:
+              - term [ref=e105]: Problems
+              - definition [ref=e106]: "20"
+      - generic [ref=e107]:
+        - heading "Set Level" [level=2] [ref=e108]
+        - paragraph [ref=e109]:
+          - text: Currently on
+          - generic [ref=e110]: Level 9.2
+          - text: . Change the placement below.
+        - generic [ref=e111]:
+          - combobox [ref=e112]:
+            - 'option "Level 1.1 — Addition: Single-digit addition"'
+            - 'option "Level 1.2 — Addition: Double-digit addition"'
+            - 'option "Level 2.1 — Subtraction: Single-digit subtraction"'
+            - 'option "Level 2.2 — Subtraction: Double-digit subtraction"'
+            - 'option "Level 3.1 — Multiplication: Basic multiplication facts"'
+            - 'option "Level 3.2 — Multiplication: Multi-digit multiplication"'
+            - 'option "Level 4.1 — Division: Basic division facts"'
+            - 'option "Level 4.2 — Division: Long division"'
+            - 'option "Level 5.1 — Fractions: Fraction addition and subtraction"'
+            - 'option "Level 5.2 — Fractions: Fraction multiplication and division"'
+            - 'option "Level 6.1 — Decimals: Decimal operations"'
+            - 'option "Level 6.2 — Percentages: Percent basics and conversions"'
+            - 'option "Level 7.1 — Negative Numbers: Operations with negative numbers"'
+            - 'option "Level 7.2 — Order of Operations: PEMDAS with integers"'
+            - 'option "Level 8.1 — Algebra: Simplifying expressions"'
+            - 'option "Level 8.2 — Algebra: Solving one-step equations"'
+            - 'option "Level 9.1 — Factorization: Prime factorization and factors"'
+            - 'option "Level 9.2 — Factorization: Factor pairs and common factors" [selected]'
+            - 'option "Level 10.1 — Linear Equations: Two-step equations"'
+            - 'option "Level 10.2 — Linear Equations: Equations with variables on both sides"'
+            - 'option "Level 11.1 — Inequalities: One-variable inequalities"'
+            - 'option "Level 11.2 — Simultaneous Equations: Solving systems of equations"'
+            - 'option "Level 12.1 — Functions: Function notation basics"'
+            - 'option "Level 12.2 — Graphing: Coordinate plane and linear graphs"'
+          - button "Update Placement" [ref=e113]

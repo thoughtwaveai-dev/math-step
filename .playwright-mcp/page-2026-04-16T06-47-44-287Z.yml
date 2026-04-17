@@ -1,0 +1,81 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e27] [cursor=pointer]:
+    - img [ref=e28]
+  - alert [ref=e31]
+  - generic [ref=e95]:
+    - banner [ref=e96]:
+      - generic [ref=e97]:
+        - generic [ref=e98]:
+          - img "MathStep" [ref=e99]
+          - generic [ref=e100]: MathStep
+        - button "Log out" [ref=e102]
+    - main [ref=e103]:
+      - generic [ref=e104]:
+        - heading "Hello, TestKid" [level=1] [ref=e105]
+        - paragraph [ref=e106]: playwright-test-15@mathstep.test
+      - generic [ref=e107]:
+        - generic [ref=e108]:
+          - paragraph [ref=e109]: Level
+          - paragraph [ref=e110]: "9"
+        - generic [ref=e111]:
+          - paragraph [ref=e112]: Sublevel
+          - paragraph [ref=e113]: "1"
+        - generic [ref=e114]:
+          - paragraph [ref=e115]: Streak
+          - paragraph [ref=e116]: "0"
+        - generic [ref=e117]:
+          - paragraph [ref=e118]: Points
+          - paragraph [ref=e119]: "0"
+      - link "Start Today's Worksheet" [ref=e120] [cursor=pointer]:
+        - /url: /worksheet
+      - generic [ref=e121]:
+        - heading "Current Focus" [level=2] [ref=e122]
+        - generic [ref=e123]:
+          - generic [ref=e124]:
+            - generic [ref=e125]:
+              - paragraph [ref=e126]: Factorization
+              - paragraph [ref=e127]: Prime factorization and factors
+            - generic [ref=e128]: 0/3 passes
+          - generic [ref=e129]:
+            - generic [ref=e130]:
+              - term [ref=e131]: Speed target
+              - definition [ref=e132]: 10m
+            - generic [ref=e133]:
+              - term [ref=e134]: Accuracy
+              - definition [ref=e135]: 90%
+            - generic [ref=e136]:
+              - term [ref=e137]: Problems
+              - definition [ref=e138]: "20"
+      - generic [ref=e139]:
+        - heading "Set Level" [level=2] [ref=e140]
+        - paragraph [ref=e141]:
+          - text: Currently on
+          - generic [ref=e142]: Level 9.1
+          - text: . Change the placement below.
+        - generic [ref=e143]:
+          - combobox [ref=e144]:
+            - 'option "Level 1.1 — Addition: Single-digit addition"'
+            - 'option "Level 1.2 — Addition: Double-digit addition"'
+            - 'option "Level 2.1 — Subtraction: Single-digit subtraction"'
+            - 'option "Level 2.2 — Subtraction: Double-digit subtraction"'
+            - 'option "Level 3.1 — Multiplication: Basic multiplication facts"'
+            - 'option "Level 3.2 — Multiplication: Multi-digit multiplication"'
+            - 'option "Level 4.1 — Division: Basic division facts"'
+            - 'option "Level 4.2 — Division: Long division"'
+            - 'option "Level 5.1 — Fractions: Fraction addition and subtraction"'
+            - 'option "Level 5.2 — Fractions: Fraction multiplication and division"'
+            - 'option "Level 6.1 — Decimals: Decimal operations"'
+            - 'option "Level 6.2 — Percentages: Percent basics and conversions"'
+            - 'option "Level 7.1 — Negative Numbers: Operations with negative numbers"'
+            - 'option "Level 7.2 — Order of Operations: PEMDAS with integers"'
+            - 'option "Level 8.1 — Algebra: Simplifying expressions"'
+            - 'option "Level 8.2 — Algebra: Solving one-step equations"'
+            - 'option "Level 9.1 — Factorization: Prime factorization and factors" [selected]'
+            - 'option "Level 9.2 — Factorization: Factor pairs and common factors"'
+            - 'option "Level 10.1 — Linear Equations: Two-step equations"'
+            - 'option "Level 10.2 — Linear Equations: Equations with variables on both sides"'
+            - 'option "Level 11.1 — Inequalities: One-variable inequalities"'
+            - 'option "Level 11.2 — Simultaneous Equations: Solving systems of equations"'
+            - 'option "Level 12.1 — Functions: Function notation basics"'
+            - 'option "Level 12.2 — Graphing: Coordinate plane and linear graphs"'
+          - button "Update Placement" [ref=e145]

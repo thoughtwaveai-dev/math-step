@@ -1,0 +1,13 @@
+- generic [active] [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e23] [cursor=pointer]:
+    - img [ref=e24]
+  - alert [ref=e27]
+  - generic [ref=e29]:
+    - heading "Set up your student" [level=1] [ref=e30]
+    - paragraph [ref=e31]: Enter your student's name to get started.
+    - generic [ref=e32]:
+      - generic [ref=e33]:
+        - generic [ref=e34]: Student name
+        - textbox "Student name" [ref=e35]:
+          - /placeholder: e.g. Alex
+      - button "Get started" [ref=e36]
