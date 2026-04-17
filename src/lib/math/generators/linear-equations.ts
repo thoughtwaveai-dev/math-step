@@ -64,6 +64,31 @@ const TWO_STEP_POOL: [string, number][] = [
   ['x / 4 + 2 = 6', 16],
 ]
 
+// Fixed pool for Level 10/2 — variables on both sides
+// Format: [prompt, answer] — moving all x to one side yields a positive integer
+const BOTH_SIDES_POOL: [string, number][] = [
+  ['2x + 3 = x + 8', 5],
+  ['3x - 4 = x + 10', 7],
+  ['5x + 2 = 2x + 14', 4],
+  ['4x - 7 = 2x + 9', 8],
+  ['3x + 5 = x + 11', 3],
+  ['6x - 3 = 4x + 9', 6],
+  ['2x + 8 = x + 15', 7],
+  ['5x - 6 = 3x + 4', 5],
+  ['4x + 1 = 2x + 11', 5],
+  ['7x - 5 = 4x + 7', 4],
+]
+
+// Generates problems for Level 10 / Sublevel 2 — Variables on Both Sides
+export function generateVariablesBothSides(count: number = 10): LinearEquationProblem[] {
+  const problems: LinearEquationProblem[] = []
+  for (let i = 0; i < count; i++) {
+    const [prompt, answer] = BOTH_SIDES_POOL[i % BOTH_SIDES_POOL.length]
+    problems.push({ id: `vbs_${i + 1}`, type: 'linear_equation', prompt: `Solve for x: ${prompt}`, answer: String(answer) })
+  }
+  return problems
+}
+
 // Generates problems for Level 10 / Sublevel 1 — Linear Equations
 // Distribution: 25% add, 25% sub, 20% mult, 15% div, remainder two-step
 export function generateLinearEquations(count: number = 10): LinearEquationProblem[] {

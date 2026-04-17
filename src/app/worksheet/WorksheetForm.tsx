@@ -27,7 +27,12 @@ function problemTypeLabel(type: AnyProblemType): string {
     case 'factor_pairs': return 'Factor Pairs'
     case 'common_factors': return 'Common Factors'
     case 'linear_equation': return 'Linear Equation'
+    case 'inequality': return 'Inequality'
   }
+}
+
+function inputModeForType(type: AnyProblemType): 'numeric' | 'text' {
+  return type === 'inequality' ? 'text' : 'numeric'
 }
 
 export default function WorksheetForm({ sessionId, problems }: Props) {
@@ -78,7 +83,7 @@ export default function WorksheetForm({ sessionId, problems }: Props) {
                 name={`answer_${problem.id}`}
                 placeholder="Your answer"
                 autoComplete="off"
-                inputMode="numeric"
+                inputMode={inputModeForType(problem.type)}
                 disabled={pending}
                 className="w-full rounded-lg border border-[#bae0bd] px-3.5 py-3 text-base text-[#1a2e1c] placeholder-[#a0b8a3] focus:border-[#2d6a35] focus:outline-none focus:ring-2 focus:ring-[#bae0bd] disabled:opacity-50"
               />

@@ -191,11 +191,34 @@ Not yet deployed. No CI/CD configured.
 
 ---
 
+## Curriculum Generators
+
+Generators live in `src/lib/math/generators/`. The router is `generateProblems(level, sublevel, count)` in `index.ts`.
+
+| Level | Generator | Answer format | Grading path |
+|-------|-----------|---------------|--------------|
+| 1/1–3/2 | addition, subtraction, multiplication | single integer | exact integer match |
+| 9/1 | factorization (prime, list factors, GCF, LCM) | integer or sorted multi-token | integer or number-sort |
+| 9/2 | factor pairs, common factors, GCF | list or single integer | number-sort or integer |
+| 10/1 | linear equations (one variable, 5 subtypes) | single integer | exact integer match |
+| 10/2 | linear equations (variables on both sides) | single integer | exact integer match |
+| 11/1 | one-variable inequalities (4 types) | `x > 4`, `x < 7`, `x <= 5`, `x >= 12` | inequality normalization |
+| others | not implemented | — | returns [] → "Coming Soon" |
+
+### Grading (`src/app/actions/worksheet.ts`)
+
+`gradeAnswer(studentAnswer, correctAnswer)` has three paths:
+1. **Inequality**: correctAnswer contains `<` or `>` → normalize (lowercase, strip spaces, `≤`→`<=`, `≥`→`>=`) and compare strings
+2. **Single number**: correctAnswer has exactly one number → exact integer match
+3. **Multi-token**: correctAnswer has multiple numbers → extract numbers, sort, compare
+
+### Lesson cards
+
+`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. Supported: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 9/1, 9/2, 10/1, 10/2, 11/1.
+
+---
+
 ## Next Planned Milestone
 
-Build the practice session flow:
-- Generate math problems based on current level
-- Track answers, timing, and accuracy per session
-- On session complete: update `streaks` (points, streak, session count)
-- Evaluate pass/fail against level thresholds
-- If passed N consecutive times: advance `students.current_level` / `current_sublevel`
+- Deploy to Vercel (or similar) to test real mobile install flow
+- Add generators for remaining curriculum levels (4/1 through 8/2) as needed

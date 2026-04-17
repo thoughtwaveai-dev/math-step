@@ -3,10 +3,26 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
+// Normalize an inequality answer string for comparison.
+// Accepts Unicode symbols (≤ ≥) and normalizes whitespace so "x > 4", "x>4", "X > 4" all match.
+function normalizeInequality(s: string): string {
+  return s.trim()
+    .toLowerCase()
+    .replace(/≤/g, '<=')
+    .replace(/≥/g, '>=')
+    .replace(/\s+/g, '')
+}
+
 // For multi-token answers (factors, prime factorization) sort extracted numbers for order-insensitive comparison.
 // For single-number answers (addition, GCF, LCM) compare integers directly so "12" doesn't match "21".
+// For inequality answers (contain < or >) normalize whitespace and operator notation.
 function gradeAnswer(studentAnswer: string, correctAnswer: string): boolean {
   if (!studentAnswer.trim()) return false
+
+  // Inequality answers: correctAnswer contains < or >
+  if (/[<>]/.test(correctAnswer)) {
+    return normalizeInequality(studentAnswer) === normalizeInequality(correctAnswer)
+  }
 
   const correctNums = (correctAnswer.match(/\d+/g) ?? []).map(Number)
 

@@ -115,6 +115,21 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'For factor pairs, always start with 1×N and work inward. Stop when the two numbers in the pair meet or cross!',
   },
+  '10/2': {
+    title: 'Variables on Both Sides',
+    explanation: 'When an equation has x on both sides, collect all the x terms on one side and all the numbers on the other. Subtract the smaller x term from both sides first, then solve as normal.',
+    example: {
+      problem: '3x - 4 = x + 10',
+      steps: [
+        'Subtract x from both sides: 3x - x - 4 = 10 → 2x - 4 = 10',
+        'Add 4 to both sides: 2x = 14',
+        'Divide both sides by 2: x = 7',
+        'Check: 3(7) - 4 = 17 and 7 + 10 = 17 ✓',
+      ],
+      answer: 'x = 7',
+    },
+    tip: 'Always move the smaller x term to avoid negatives — subtract it from both sides so the x coefficient stays positive!',
+  },
   '10/1': {
     title: 'Linear Equations',
     explanation: 'A linear equation has one unknown, usually called x. Your goal is to find the value of x that makes the equation true. Whatever you do to one side of the equals sign, you must do to the other side too.',
@@ -129,6 +144,20 @@ const lessons: Record<LessonKey, Lesson> = {
       answer: 'x = 4',
     },
     tip: 'Always check your answer by substituting x back into the original equation — if both sides match, you\'re right!',
+  },
+  '11/1': {
+    title: 'One-Variable Inequalities',
+    explanation: 'An inequality is like an equation but uses >, <, >= (greater than or equal), or <= (less than or equal) instead of =. Solve it the same way as an equation — but if you multiply or divide by a negative number, flip the direction of the inequality sign.',
+    example: {
+      problem: '2x ≤ 10',
+      steps: [
+        'Divide both sides by 2: x ≤ 5',
+        'The solution is all values of x that are 5 or less',
+        'Write your answer as: x <= 5',
+      ],
+      answer: 'x <= 5',
+    },
+    tip: 'Use >= for ≥ and <= for ≤ when typing your answer. No Unicode needed — just two characters!',
   },
   '9/1': {
     title: 'Factorization',

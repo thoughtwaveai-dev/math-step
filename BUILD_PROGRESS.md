@@ -6,12 +6,34 @@
 
 ## Current Status
 
-**Phase:** Level 10/1 Linear Equations added. Curriculum now extends from 1/1 through 10/1 with real generators.
+**Phase:** Levels 10/2 and 11/1 added. Curriculum now extends from 1/1 through 11/1 with real generators. Grading enhanced for inequalities.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 21 — Level 11/1 Inequalities (2026-04-17)
+- `src/lib/math/generators/inequalities.ts` — new generator for Level 11/1
+  - 4 problem subtypes: x+a>b (x>n), x-a<b (x<n), ax≤b (x<=n), x/a≥b (x>=n)
+  - Fixed deterministic pools (8 per subtype); equal 25% distribution per type
+  - Answers use ASCII operators (>, <, <=, >=) for easy keyboard entry; prompts show Unicode (≤ ≥)
+- `src/lib/math/generators/index.ts` — added route `11/1 → generateInequalities`; exported `InequalityProblem`, `InequalityProblemType`; added to `AnyProblemType` union
+- `src/lib/lessons/index.ts` — added `11/1` lesson: "One-Variable Inequalities", worked example (2x≤10 → x<=5), tip
+- `src/app/worksheet/WorksheetForm.tsx` — added `inequality` case to `problemTypeLabel()`; added `inputModeForType()` helper — inequality inputs use `inputMode="text"` (not numeric) for operator keys
+- `src/app/actions/worksheet.ts` — added `normalizeInequality()` and inequality branch in `gradeAnswer()`:
+  - Detects correctAnswer containing `<` or `>` → uses inequality grading path
+  - Normalizes: lowercase, `≤`→`<=`, `≥`→`>=`, strip all whitespace
+  - Accepts: `x>4`, `X > 6`, `x  >  7`, `x≤4`, `x≥12`, `X>=10` — all grade correctly
+  - Does not affect existing arithmetic/factorization/equation grading
+
+### Milestone 20 — Level 10/2 Variables on Both Sides (2026-04-17)
+- `src/lib/math/generators/linear-equations.ts` — added `generateVariablesBothSides(count)` for Level 10/2
+  - Pool of 10 equations with variables on both sides (e.g. `2x + 3 = x + 8`, answers 3–8)
+  - All answers positive integers; cycles pool for any count; reuses `linear_equation` type — no grading changes
+- `src/lib/math/generators/index.ts` — added route `10/2 → generateVariablesBothSides`
+- `src/lib/lessons/index.ts` — added `10/2` lesson: "Variables on Both Sides", worked example (3x-4=x+10 → x=7), tip
+- No DB schema changes, no new dependencies
 
 ### Milestone 19 — Level 10/1 Linear Equations (2026-04-17)
 - `src/lib/math/generators/linear-equations.ts` — new generator for Level 10/1
@@ -211,6 +233,35 @@
 ---
 
 ## Playwright Test Results
+
+### Suite 20 — Levels 10/2 and 11/1 Bundle (2026-04-17)
+| Test | Result |
+|------|--------|
+| Manual placement to 10/2 via dashboard: Level/Sublevel stats update to 10/2 | PASS |
+| Dashboard "Currently on Level 10.2" label correct | PASS |
+| 10/2 worksheet loads with 20 real variables-both-sides problems (no Coming Soon) | PASS |
+| 10/2 lesson card: "Learn: Variables on Both Sides" with worked example (3x-4=x+10 → x=7) | PASS |
+| 10/2 problem types: all "Linear Equation", prompts include both-sides format (e.g. "2x + 3 = x + 8") | PASS |
+| 10/2 correct answers (20/20): ✓ Passed, mastery 1/3 | PASS |
+| 10/2 wrong answers (all "999"): ✗ Not passed, consecutive passes reset | PASS |
+| Manual placement to 11/1 via dashboard: Level/Sublevel stats update to 11/1 | PASS |
+| 11/1 worksheet loads with 20 real inequality problems (no Coming Soon) | PASS |
+| 11/1 lesson card: "Learn: One-Variable Inequalities" with worked example (2x≤10 → x<=5) | PASS |
+| 11/1 problem types: all 4 inequality types (>, <, <=, >=) across 20 problems | PASS |
+| 11/1 correct answers (20/20, standard format): ✓ Passed, mastery 1/3 | PASS |
+| 11/1 wrong answers (all "x > 999" etc.): ✗ Not passed, reset | PASS |
+| 11/1 normalization: `x>4` (no spaces) accepted | PASS |
+| 11/1 normalization: `X > 6` (uppercase) accepted | PASS |
+| 11/1 normalization: `x  >  7` (extra spaces) accepted | PASS |
+| 11/1 normalization: `x≤4` (Unicode ≤) accepted | PASS |
+| 11/1 normalization: `x≥10` (Unicode ≥) accepted | PASS |
+| 11/1 normalization: `X>=10` (uppercase, no spaces) accepted | PASS |
+| 11/1 normalization session: 20/20 all variants ✓ Passed | PASS |
+| /play flow works at 11/1: student view, topic, progress bar | PASS |
+| Unsupported level 11/2: worksheet shows "Coming Soon — Simultaneous Equations" | PASS |
+| 10/2 → 11/1 natural advancement: 3 passing sessions at 10/2 → "Level Up! Advanced to Level 11.1 — Inequalities" | PASS |
+| URL on advancement: `?advanced=1&nl=11&ns=1&nt=Inequalities` | PASS |
+| TypeScript: build clean, no type errors | PASS |
 
 ### Suite 19 — Level 10/1 Linear Equations (2026-04-17)
 | Test | Result |

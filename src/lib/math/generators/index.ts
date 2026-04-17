@@ -2,13 +2,15 @@ import { generateFactorizationProblems, generateFactorizationPairProblems } from
 import { generateSingleDigitAddition, generateDoubleDigitAddition } from './addition'
 import { generateSingleDigitSubtraction, generateDoubleDigitSubtraction } from './subtraction'
 import { generateBasicMultiplication, generateMultiDigitMultiplication } from './multiplication'
-import { generateLinearEquations } from './linear-equations'
+import { generateLinearEquations, generateVariablesBothSides } from './linear-equations'
+import { generateInequalities } from './inequalities'
 
 export type { MathProblem, ProblemType } from './factorization'
 export type { AdditionProblem, AdditionProblemType } from './addition'
 export type { SubtractionProblem, SubtractionProblemType } from './subtraction'
 export type { MultiplicationProblem, MultiplicationProblemType } from './multiplication'
 export type { LinearEquationProblem, LinearEquationType } from './linear-equations'
+export type { InequalityProblem, InequalityProblemType } from './inequalities'
 
 // Unified problem type covering all generators
 export type AnyProblemType =
@@ -17,6 +19,7 @@ export type AnyProblemType =
   | import('./subtraction').SubtractionProblemType
   | import('./multiplication').MultiplicationProblemType
   | import('./linear-equations').LinearEquationType
+  | import('./inequalities').InequalityProblemType
 
 export function generateProblems(levelNumber: number, sublevelNumber: number, count: number) {
   if (levelNumber === 1 && sublevelNumber === 1) {
@@ -45,6 +48,12 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 10 && sublevelNumber === 1) {
     return generateLinearEquations(count)
+  }
+  if (levelNumber === 10 && sublevelNumber === 2) {
+    return generateVariablesBothSides(count)
+  }
+  if (levelNumber === 11 && sublevelNumber === 1) {
+    return generateInequalities(count)
   }
   return []
 }
