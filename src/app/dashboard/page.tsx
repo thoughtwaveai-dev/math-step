@@ -264,6 +264,17 @@ export default async function DashboardPage({
             )}
           </div>
         </details>
+
+        {/* Footer */}
+        <div className="border-t border-[#bae0bd] pt-6 pb-2 flex flex-wrap items-center justify-between gap-3 text-xs text-[#4a6b4e]">
+          <span>MathStep · Beta</span>
+          <div className="flex flex-wrap gap-4">
+            <a href="/privacy" className="hover:text-[#2d6a35] hover:underline">Privacy</a>
+            <a href="/terms" className="hover:text-[#2d6a35] hover:underline">Terms</a>
+            <a href="/disclaimer" className="hover:text-[#2d6a35] hover:underline">Disclaimer</a>
+            <a href="mailto:feedback@mathstep.app" className="font-medium text-[#2d6a35] hover:underline">Send feedback</a>
+          </div>
+        </div>
       </main>
     </div>
   )

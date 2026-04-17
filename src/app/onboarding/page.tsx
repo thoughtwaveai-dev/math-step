@@ -33,9 +33,17 @@ export default async function OnboardingPage() {
         <h1 className="mb-1 text-center text-2xl font-bold text-[#1a2e1c]">
           {hasStudents ? 'Add another student' : 'Set up your student'}
         </h1>
-        <p className="mb-7 text-center text-sm text-[#4a6b4e]">
-          Enter your child&apos;s name to get started.
+        <p className="mb-2 text-center text-sm text-[#4a6b4e]">
+          Enter your child&apos;s first name or nickname — that&apos;s all we need.
         </p>
+        {!hasStudents && (
+          <ul className="mb-6 mx-auto max-w-xs space-y-1.5 text-xs text-[#4a6b4e] text-left list-none">
+            <li className="flex items-start gap-2"><span className="text-[#2d6a35] font-bold mt-0.5">✓</span>The app adjusts as your child masters each level</li>
+            <li className="flex items-start gap-2"><span className="text-[#2d6a35] font-bold mt-0.5">✓</span>You can add more than one child later</li>
+            <li className="flex items-start gap-2"><span className="text-[#2d6a35] font-bold mt-0.5">✓</span>Works well on tablet and mobile</li>
+          </ul>
+        )}
+        {hasStudents && <div className="mb-6" />}
 
         <div className="rounded-2xl border border-[#bae0bd] bg-white p-6 shadow-sm">
           <OnboardingForm />

@@ -6,12 +6,53 @@
 
 ## Current Status
 
-**Phase:** Multi-student support added — parents can manage multiple children, switch between them, and each student's data is fully isolated.
+**Phase:** Beta-readiness polish — landing page, legal pages, feedback CTA, onboarding clarity.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 24 — Beta Readiness Polish (2026-04-17)
+
+**Phase 1 — Landing page**
+- `src/app/page.tsx` — full rewrite. Sections: hero with logo/headline/CTAs, "How it works" 3-step cards, "Why MathStep?" 4-benefit grid, tablet/mobile note, footer with legal links + feedback mailto.
+- CTAs: "Get started free" → `/signup`, "Log in" → `/login`.
+- Copy clearly targets parents; positions MathStep as mastery-based daily practice, not repetitive busywork.
+
+**Phase 2 — Legal pages**
+- `src/app/privacy/page.tsx` — what we collect, children's privacy, data deletion, Supabase storage disclosure.
+- `src/app/terms/page.tsx` — who can use it, beta limitations, acceptable use, no guarantees.
+- `src/app/disclaimer/page.tsx` — educational tool only, no academic outcome guarantees, parental supervision, beta limitations.
+- All pages: plain English, consistent brand header/footer, links to each other.
+
+**Phase 3 — Feedback CTA**
+- Feedback mailto link (`feedback@mathstep.app`) added to landing page footer and dashboard footer.
+- Also linked from all legal pages.
+- **Placeholder:** update `feedback@mathstep.app` to your real email before sharing publicly.
+
+**Phase 4 — Onboarding clarity**
+- `src/app/onboarding/page.tsx` — improved subtitle ("first name or nickname — that's all we need").
+- For first-time parents: 3 short bullet points explaining mastery progression, multi-student support, and tablet/mobile compatibility.
+- Returning parents (adding a student) see clean form without the intro bullets.
+
+No DB schema changes. No new dependencies.
+
+### Suite 24 — Beta Readiness Polish (2026-04-17)
+| Test | Result |
+|------|--------|
+| Landing page renders: hero, how it works, why mathstep, footer with legal links | PASS |
+| "Get started free" CTA links to /signup | PASS |
+| "Log in" CTA links to /login | PASS |
+| Footer: Privacy, Terms, Disclaimer, Send feedback links all present | PASS |
+| /privacy loads with correct content sections | PASS |
+| /terms loads with correct content sections | PASS |
+| /disclaimer loads with correct content sections | PASS |
+| /onboarding loads with improved subtitle copy | PASS |
+| /dashboard footer shows Privacy, Terms, Disclaimer, Send feedback links | PASS |
+| /play page unaffected — loads, shows student greeting and worksheet link | PASS |
+| No console errors on any page | PASS |
+| TypeScript: build clean, no type errors | PASS |
 
 ### Milestone 23 — Multi-Student Support (2026-04-17)
 
