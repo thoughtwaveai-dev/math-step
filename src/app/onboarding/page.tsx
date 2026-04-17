@@ -23,8 +23,8 @@ export default async function OnboardingPage() {
           <Image
             src="/math-step-logo.png"
             alt="MathStep"
-            width={56}
-            height={56}
+            width={64}
+            height={64}
             className="rounded-xl shadow-sm"
             priority
           />

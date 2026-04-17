@@ -6,13 +6,13 @@ export default function Home() {
     <div className="flex min-h-screen flex-col bg-[#f7faf7]">
       {/* Hero */}
       <main className="flex flex-1 flex-col items-center justify-center px-6 py-16 text-center">
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-8">
           <Image
             src="/math-step-logo.png"
             alt="MathStep"
-            width={88}
-            height={88}
-            className="rounded-2xl shadow-sm"
+            width={112}
+            height={112}
+            className="rounded-2xl shadow-md"
             priority
           />
         </div>
