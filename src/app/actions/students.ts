@@ -92,5 +92,5 @@ export async function createStudent(
 
   if (streakError) return { error: streakError.message }
 
-  redirect('/dashboard')
+  redirect('/play')
 }

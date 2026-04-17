@@ -119,12 +119,14 @@ No RLS — publicly readable. Seeded with curriculum data.
 
 ## Auth Flow
 
-1. User signs up at `/signup` (name, email, password) → Supabase creates auth user → redirect `/dashboard`
-2. Dashboard checks for students → if none → redirect `/onboarding`
-3. User logs in at `/login` (email, password) → redirect `/dashboard`
-4. Logout via server action `signOut` → redirect `/login`
-5. Unauthenticated requests to protected pages → redirect `/login`
-6. Session refresh handled by `middleware.ts` on every non-static request
+1. User signs up at `/signup` (name, email, password) → Supabase creates auth user → redirect `/play`
+2. `/play` checks for students → if none → redirect `/onboarding`
+3. User logs in at `/login` (email, password) → redirect `/play`
+4. Onboarding creates student → redirect `/play`
+5. Logout via server action `signOut` → redirect `/login`
+6. Unauthenticated requests to protected pages → redirect `/login`
+7. Session refresh handled by `middleware.ts` on every non-static request
+8. `/dashboard` remains accessible; reach it from `/play` via "Parent view" link
 
 ---
 

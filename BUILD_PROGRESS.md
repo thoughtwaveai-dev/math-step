@@ -6,12 +6,22 @@
 
 ## Current Status
 
-**Phase:** Dashboard split — parent `/dashboard` and student `/play` both live and tested.
+**Phase:** Student-first daily flow — `/play` is now the default landing page for all authenticated users.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 18 — Student-First Daily Flow (2026-04-17)
+- `src/app/actions/auth.ts` — `signIn` and `signUp` now redirect to `/play` instead of `/dashboard`
+- `src/app/actions/students.ts` — `createStudent` now redirects to `/play` instead of `/dashboard` after onboarding
+- `src/app/worksheet/results/[sessionId]/page.tsx`:
+  - Primary return CTA changed from "Back to Dashboard" → "Back to Play" (`/play`)
+  - Header nav link changed from "← Dashboard" → "← Play" (`/play`)
+- `/play` already redirects to `/onboarding` if no student — new signup flow works without changes to the page
+- `/dashboard` remains fully accessible via "Parent view" link on `/play`
+- No DB changes, no new dependencies
 
 ### Milestone 17 — Parent/Student Dashboard Split (2026-04-16)
 - `src/lib/format.ts` — extracted `formatSpeed()` helper shared by dashboard and play pages
@@ -191,6 +201,22 @@
 ---
 
 ## Playwright Test Results
+
+### Suite 18 — Student-First Daily Flow (2026-04-17)
+| Test | Result |
+|------|--------|
+| Signup (fresh timestamp email, no student) → routes to /onboarding | PASS |
+| Onboarding complete → lands at /play (not /dashboard) | PASS |
+| /play shows student greeting, streak, points, level, topic | PASS |
+| /play has "Parent view" link → /dashboard | PASS |
+| /dashboard accessible from /play via "Parent view" | PASS |
+| "Start Today's Worksheet" from /play → /worksheet | PASS |
+| Worksheet submits (20/20 correct) → lands on results page | PASS |
+| Results page header shows "← Play" linking to /play | PASS |
+| Results page primary CTA shows "Back to Play" linking to /play | PASS |
+| "Back to Play" CTA navigates to /play | PASS |
+| Logout → /login; login with same credentials → lands at /play | PASS |
+| TypeScript: build clean, no type errors | PASS |
 
 ### Suite 17 — Parent/Student Dashboard Split (2026-04-16)
 | Test | Result |

@@ -107,10 +107,10 @@ export default async function ResultsPage({
             <span className="text-base font-bold text-[#1a2e1c]">MathStep</span>
           </div>
           <a
-            href="/dashboard"
+            href="/play"
             className="rounded-lg border border-[#bae0bd] px-3.5 py-2 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
           >
-            ← Dashboard
+            ← Play
           </a>
         </div>
       </header>
@@ -258,10 +258,10 @@ export default async function ResultsPage({
             Try Again
           </a>
           <a
-            href="/dashboard"
+            href="/play"
             className="flex-1 rounded-xl border-2 border-[#bae0bd] bg-white px-6 py-4 text-center text-base font-semibold text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
           >
-            Back to Dashboard
+            Back to Play
           </a>
         </div>
       </main>

@@ -20,7 +20,7 @@ export async function signUp(
 
   if (error) return { error: error.message }
 
-  redirect('/dashboard')
+  redirect('/play')
 }
 
 export async function signIn(
@@ -35,7 +35,7 @@ export async function signIn(
 
   if (error) return { error: error.message }
 
-  redirect('/dashboard')
+  redirect('/play')
 }
 
 export async function signOut() {
