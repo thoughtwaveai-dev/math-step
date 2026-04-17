@@ -94,7 +94,7 @@ export default function TermsPage() {
           <Link href="/" className="hover:text-[#2d6a35] hover:underline">Home</Link>
           <Link href="/privacy" className="hover:text-[#2d6a35] hover:underline">Privacy</Link>
           <Link href="/disclaimer" className="hover:text-[#2d6a35] hover:underline">Disclaimer</Link>
-          <a href="mailto:feedback@mathstep.app" className="hover:text-[#2d6a35] hover:underline">Send feedback</a>
+          <Link href="/feedback" className="hover:text-[#2d6a35] hover:underline">Send feedback</Link>
         </div>
       </footer>
     </div>

@@ -6,12 +6,50 @@
 
 ## Current Status
 
-**Phase:** Beta-readiness polish — landing page, legal pages, feedback CTA, onboarding clarity.
+**Phase:** In-app feedback system live.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
 
 ---
 
 ## Completed Milestones
+
+### Milestone 25 — In-App Feedback System (2026-04-17)
+
+**Phase 1 — Database**
+- `feedback` table created manually in Supabase SQL editor: `id`, `parent_id` (FK → auth.users), `student_id` (nullable FK → students, on delete set null), `category`, `message`, `created_at`.
+- RLS enabled: parents can only insert/select their own rows (`parent_id = auth.uid()`).
+
+**Phase 2 — Feedback form**
+- `src/app/feedback/page.tsx` — protected server page. Auth guard, fetches parent's students and recent feedback. Shows success banner when `?sent=1`. Lists recent submissions below the form.
+- `src/app/feedback/FeedbackForm.tsx` — client component with `useActionState`. Fields: category (select), optional student selector, message (textarea). Inline error display.
+
+**Phase 3 — Replace mailto links**
+- All "Send feedback" footer links updated from `mailto:feedback@mathstep.app` → `/feedback` in: landing page, dashboard, privacy, terms, disclaimer.
+- Inline email address references in legal page body text left as-is (intentional contact address).
+
+**Phase 4 — Feedback list**
+- Recent submissions shown on `/feedback` page below form: category badge (color-coded), linked student name if applicable, date, message preview (line-clamp-3). Up to 20 most recent entries.
+
+**Phase 5 — Server action**
+- `src/app/actions/feedback.ts` — `submitFeedback` server action: validates category against allowlist, verifies student ownership if provided, inserts to `feedback` table, redirects to `/feedback?sent=1`.
+
+No new dependencies. No DB schema changes beyond the new `feedback` table.
+
+### Suite 25 — In-App Feedback (2026-04-17)
+| Test | Result |
+|------|--------|
+| Landing page "Send feedback" footer link → /feedback (not mailto) | PASS |
+| Dashboard "Send feedback" footer link → /feedback (not mailto) | PASS |
+| /feedback loads for authenticated parent | PASS |
+| Form shows category select, optional student selector (Alice, Bob), message textarea | PASS |
+| Submit with category=idea, student=Alice, message → redirects to /feedback?sent=1 | PASS |
+| Success banner shown after submission | PASS |
+| Submission appears in "Your recent feedback" list with Idea badge, Alice name, date, message | PASS |
+| Second submission (bug, no student) → appears in list at top | PASS |
+| Form resets after submission (ready for new entry) | PASS |
+| /play unaffected — loads student view, Start Today's Worksheet link present | PASS |
+| /dashboard unaffected — student switcher, overview, recent worksheets all intact | PASS |
+| TypeScript: build clean, no type errors | PASS |
 
 ### Milestone 24 — Beta Readiness Polish (2026-04-17)
 

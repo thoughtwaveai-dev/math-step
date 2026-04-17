@@ -52,6 +52,10 @@ src/
     actions/
       auth.ts              # signIn, signOut, signUp server actions
       students.ts          # createStudent server action
+      feedback.ts          # submitFeedback server action
+    feedback/
+      page.tsx             # Protected server page — form + recent submissions list
+      FeedbackForm.tsx     # Client component — category/student/message form with useActionState
   lib/
     supabase/
       client.ts            # createBrowserClient (for client components)
@@ -99,6 +103,18 @@ RLS: users can only access rows where `parent_id = auth.uid()`.
 | last_session_date | date | nullable |
 
 RLS: users can only access streak rows for their own students.
+
+### `feedback`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK, gen_random_uuid() |
+| parent_id | uuid | FK → auth.users(id), cascade delete |
+| student_id | uuid | nullable FK → students(id), on delete set null |
+| category | text | one of: bug, idea, confusion, praise |
+| message | text | max 2000 chars enforced in action |
+| created_at | timestamptz | auto |
+
+RLS: parents can only insert/select rows where `parent_id = auth.uid()`.
 
 ### `levels`
 | Column | Type | Notes |

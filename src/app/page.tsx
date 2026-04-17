@@ -106,7 +106,7 @@ export default function Home() {
             <Link href="/privacy" className="hover:text-[#2d6a35] hover:underline">Privacy</Link>
             <Link href="/terms" className="hover:text-[#2d6a35] hover:underline">Terms</Link>
             <Link href="/disclaimer" className="hover:text-[#2d6a35] hover:underline">Disclaimer</Link>
-            <a href="mailto:feedback@mathstep.app" className="hover:text-[#2d6a35] hover:underline">Send feedback</a>
+            <Link href="/feedback" className="hover:text-[#2d6a35] hover:underline">Send feedback</Link>
           </nav>
         </div>
       </footer>
