@@ -6,7 +6,10 @@ import { PLACEMENT_QUESTIONS } from '@/lib/math/placement'
 
 const BAND_LABELS: Record<string, string> = {
   arithmetic: 'Arithmetic',
-  numbertheory: 'Number Theory',
+  mul_div: 'Multiplication & Division',
+  fractions: 'Fractions',
+  decimals_pct: 'Decimals & Percentages',
+  negatives_ops: 'Negative Numbers & Order of Operations',
   algebra: 'Algebra',
 }
 
@@ -115,7 +118,7 @@ export default function PlacementForm({ studentId, studentName }: Props) {
           Placement Quiz for {studentName}
         </h1>
         <p className="mt-1 text-sm text-[#4a6b4e]">
-          10 quick questions to find the right starting level. No timer — just do your best.
+          12 quick questions to find the right starting level. No timer — just do your best.
         </p>
       </div>
 

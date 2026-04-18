@@ -6,8 +6,82 @@
 
 ## Current Status
 
-**Phase:** Milestone 40 — One-step Equations generator: Level 8/2. ✓ Fully validated.
+**Phase:** Milestone 41 — Placement Diagnostic v2. ✓ Fully validated.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 41 — Placement Diagnostic v2 (2026-04-18)
+
+**What changed:**
+Recalibrated the placement diagnostic to cover the full Level 1–8 curriculum. v1 had 10 questions in 3 bands (arithmetic, number theory, algebra) and completely skipped levels 5–8, making any student with basic arithmetic but no fractions jump to level 9/1. v2 fixes this with proper middle-path resolution.
+
+**Strategy — Band Gate v2:**
+- 12 questions, 6 bands of 2 questions each
+- Each band covers a curriculum checkpoint: arithmetic, multiplication/division, fractions, decimals/percentages, negatives/order of operations, algebra
+- Band gate: need ≥1 correct in a band to advance; first band with 0/2 = ceiling
+- Within a passing band with one miss: first-question-right + second-question-wrong = place at the "second-fail" level for that band
+- Q1 typo recovery: if Q1 wrong but Q2 right (band still passes), place at 1/2 rather than 1/1
+- All bands pass → 9/1
+- Placement is conservative: fail at band X → start at the logical bridge level before X
+
+**Questions:**
+| Q | Prompt | Answer | Band | Tests |
+|---|--------|--------|------|-------|
+| 1 | 8 + 6 = ? | 14 | arithmetic | 1/1 |
+| 2 | 45 − 18 = ? | 27 | arithmetic | 2/2 |
+| 3 | 6 × 7 = ? | 42 | mul_div | 3/1 |
+| 4 | 56 ÷ 8 = ? | 7 | mul_div | 4/1 |
+| 5 | 1/3 + 1/3 = ? | 2/3 | fractions | 5/1 |
+| 6 | 1/2 × 2/3 = ? | 1/3 | fractions | 5/2 |
+| 7 | 4.5 + 3.7 = ? | 8.2 | decimals_pct | 6/1 |
+| 8 | What is 25% of 80? | 20 | decimals_pct | 6/2 |
+| 9 | -3 + 8 = ? | 5 | negatives_ops | 7/1 |
+| 10 | 2 + 3 × 4 = ? | 14 | negatives_ops | 7/2 |
+| 11 | Simplify: 3x + 2 + 2x | 5x + 2 | algebra | 8/1 |
+| 12 | Solve for x: 4x = 28 | 7 | algebra | 8/2 |
+
+**Placement mapping:**
+| Profile | Place at |
+|---------|----------|
+| Arithmetic band fails (both Q1,Q2 wrong) | 1/1 |
+| Q1 right, Q2 wrong | 1/2 |
+| Arithmetic passes, mul_div fails (both Q3,Q4 wrong) | 3/1 |
+| Q3 right, Q4 wrong | 3/2 |
+| mul_div passes, fractions fails | 4/2 |
+| Q5 right, Q6 wrong | 5/2 |
+| Fractions passes, decimals_pct fails | 6/1 |
+| Q7 right, Q8 wrong | 6/2 |
+| decimals_pct passes, negatives_ops fails | 7/1 |
+| Q9 right, Q10 wrong | 7/2 |
+| negatives_ops passes, algebra fails | 8/1 |
+| Q11 right, Q12 wrong | 8/2 |
+| All bands pass | 9/1 |
+
+**v2 Design note — band scoring asymmetry (by design):**
+Within each band, "first-right + second-wrong" breaks the chain and places. But "first-wrong + second-right" (excluding band 0) is treated as a band pass and allows advancing. This means a student who guesses correctly on the second question can advance a band. This is intentional: if you can do the harder question in a band, the first miss is likely noise. The Q1 typo recovery in band 0 is the explicit special case. This asymmetry is a v2 limitation — a full adaptive engine would handle it better.
+
+**Files changed:**
+- `src/lib/math/placement.ts` — complete rewrite: new 12-question set, band-gate scoring, import `gradeAnswer` from shared utility (supports fractions, decimals, algebraic expressions), updated PLACEMENT_INFO for all reachable placement levels
+- `src/app/placement/PlacementForm.tsx` — updated BAND_LABELS (6 bands), updated question count copy ("12 quick questions")
+
+**Grading:** Now uses `gradeAnswer` from `src/lib/math/gradeAnswer.ts` — correctly handles fraction answers (cross-multiply), decimal answers, algebraic expression answers (normalize whitespace/case), and integers.
+
+**TypeScript:** Build clean, no type errors.
+
+### Suite 41 — Placement Diagnostic v2 (2026-04-18)
+| Test | Result |
+|------|--------|
+| Page renders: 12 questions, 6 band labels shown | PASS |
+| "12 quick questions" copy shown | PASS |
+| All blank (weak beginner) → 1.1 Addition | PASS |
+| Q1–Q4 correct, rest blank → 4.2 Long Division | PASS |
+| Q1–Q8 correct, rest blank → 7.1 Negative Numbers | PASS |
+| All 12 correct → 9.1 Prime Factorisation | PASS |
+| Q1–Q11 correct, Q12 blank → 8.2 One-step Equations | PASS |
+| Apply recommended level → redirects to /play at correct level | PASS |
+| "Start at Level 1.1 instead" → redirects to /play at 1/1 | PASS |
+| TypeScript: build clean | PASS |
 
 ---
 
