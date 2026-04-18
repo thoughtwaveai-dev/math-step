@@ -8,6 +8,7 @@ import { generateLinearEquations, generateVariablesBothSides } from './linear-eq
 import { generateInequalities } from './inequalities'
 import { generateDecimalProblems } from './decimals'
 import { generatePercentageProblems } from './percentages'
+import { generateNegativeProblems } from './negatives'
 
 export type { MathProblem, ProblemType } from './factorization'
 export type { AdditionProblem, AdditionProblemType } from './addition'
@@ -19,6 +20,7 @@ export type { LinearEquationProblem, LinearEquationType } from './linear-equatio
 export type { InequalityProblem, InequalityProblemType } from './inequalities'
 export type { DecimalProblem, DecimalProblemType } from './decimals'
 export type { PercentageProblem, PercentageProblemType } from './percentages'
+export type { NegativeProblem, NegativeProblemType } from './negatives'
 
 // Unified problem type covering all generators
 export type AnyProblemType =
@@ -32,6 +34,7 @@ export type AnyProblemType =
   | import('./inequalities').InequalityProblemType
   | import('./decimals').DecimalProblemType
   | import('./percentages').PercentageProblemType
+  | import('./negatives').NegativeProblemType
 
 export function generateProblems(levelNumber: number, sublevelNumber: number, count: number) {
   if (levelNumber === 1 && sublevelNumber === 1) {
@@ -69,6 +72,9 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 6 && sublevelNumber === 2) {
     return generatePercentageProblems(count)
+  }
+  if (levelNumber === 7 && sublevelNumber === 1) {
+    return generateNegativeProblems(count)
   }
   if (levelNumber === 9 && sublevelNumber === 1) {
     return generateFactorizationProblems(count)

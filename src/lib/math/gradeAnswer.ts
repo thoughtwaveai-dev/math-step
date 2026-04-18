@@ -40,6 +40,13 @@ export function gradeAnswer(studentAnswer: string, correctAnswer: string): boole
     return !isNaN(student) && Math.abs(student - correct) < 0.001
   }
 
+  // Signed integer (handles negative answers like "-5", "12")
+  if (/^-?\d+$/.test(correctAnswer.trim())) {
+    const correct = parseInt(correctAnswer.trim(), 10)
+    const student = parseInt(studentAnswer.trim(), 10)
+    return !isNaN(student) && student === correct
+  }
+
   const correctNums = (correctAnswer.match(/\d+/g) ?? []).map(Number)
 
   if (correctNums.length === 1) {

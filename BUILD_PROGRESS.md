@@ -6,8 +6,63 @@
 
 ## Current Status
 
-**Phase:** Milestone 36 — Percentage generator: Level 6/2. ✓ Fully validated.
+**Phase:** Milestone 37 — Negative Numbers generator: Level 7/1. ✓ Fully validated.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 37 — Negative Numbers Generator: Level 7/1 (2026-04-18)
+
+**What was added:**
+Negative Numbers — Level 7/1 (Operations with Negative Numbers).
+
+**Files added:**
+- `src/lib/math/generators/negatives.ts` — `generateNegativeProblems(count, rand)` for Level 7/1:
+  - Four problem types: `neg_addition`, `neg_subtraction`, `neg_multiplication`, `neg_division`
+  - Addition: at least one negative operand, operands in [−12, 12]
+  - Subtraction: at least one negative operand or result, operands in [−12, 12]
+  - Multiplication: at least one negative factor (1–9 range), product ≤ 108 in absolute value
+  - Division: quotient-first generation to guarantee integer results, no all-positive pairs
+  - Dedup on prompt string with retry budget (100× count)
+
+**Files changed:**
+- `src/lib/math/gradeAnswer.ts` — added signed integer path (`/^-?\d+$/`) before the existing `correctNums` path; handles negative answers like `"-5"`, `"-42"` without breaking positive integer, fraction, decimal, or inequality grading
+- `src/lib/math/generators/index.ts` — routes 7/1 → `generateNegativeProblems`; exports `NegativeProblem`, `NegativeProblemType`; added to `AnyProblemType` union
+- `src/app/worksheet/page.tsx` — added `[7, 1]` to `SUPPORTED_LEVEL_KEYS` (after `[6, 2]`)
+- `src/app/worksheet/WorksheetForm.tsx` — added all 4 negative type labels (all display as "Negative Numbers"); negative types use `inputMode="text"` so the minus sign can be typed
+- `src/lib/lessons/index.ts` — added `7/1` lesson: "Negative Numbers", number-line analogy, worked example (4 − (−3) = 7), 3 steps, sign-rules tip
+
+**DB:** Level row 7/1 already existed in the `levels` table with topic "Negative Numbers".
+
+**Grading:** Signed integer path added in `gradeAnswer.ts` — fires when correctAnswer matches `/^-?\d+$/`, uses `parseInt` for both sides. No impact on existing fraction, decimal, inequality, or multi-token paths.
+
+**Answer format:** All answers are signed integers stored as strings: `"-5"`, `"24"`, `"-42"`, `"3"`.
+
+**Canonical answer format:** Signed integer string — `"-14"`, `"1"`, `"-3"`, `"24"`.
+
+**Limitations (v1):**
+- Integer operands only (no decimal or fraction negatives)
+- Division limited to clean-quotient pairs (no remainders)
+- Operands capped at ±12 for addition/subtraction; products/dividends up to 81 (9×9) for ×÷
+- No order-of-operations problems (those belong in 7/2)
+
+### Suite 37 — Negative Numbers Generator: Level 7/1 (2026-04-18)
+| Test | Result |
+|------|--------|
+| Manual placement to 7/1 via admin controls | PASS |
+| Dashboard reflects Level 7 / Sublevel 1 / Negative Numbers | PASS |
+| 7/1 worksheet loads (no Coming Soon) | PASS |
+| Worksheet heading: "Negative Numbers Worksheet", subtitle: "NegKid · Level 7.1" | PASS |
+| 20 answer inputs present | PASS |
+| All 4 negative number problem types rendered | PASS |
+| Lesson card title: "Learn: Negative Numbers" | PASS |
+| Lesson card: worked example (4 − (−3) = 7), 3 steps, sign-rules tip shown | PASS |
+| Correct answers (all 20 auto-solved including negatives) → 20/20, 100%, Passed | PASS |
+| Wrong answers (999 for all) → 0/20, Not passed | PASS |
+| Unsupported 7/2 shows "Coming Soon" | PASS |
+| 6/1 regression: loads "Decimals" lesson, no Coming Soon | PASS |
+| TypeScript: build clean, no type errors | PASS |
+| Tablet viewport (768×1024): worksheet renders correctly, screenshot saved | PASS |
 
 ---
 

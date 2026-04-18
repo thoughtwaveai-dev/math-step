@@ -40,6 +40,10 @@ function problemTypeLabel(type: AnyProblemType): string {
     case 'percent_to_decimal': return 'Percentage'
     case 'decimal_to_percent': return 'Percentage'
     case 'fraction_to_percent': return 'Percentage'
+    case 'neg_addition': return 'Negative Numbers'
+    case 'neg_subtraction': return 'Negative Numbers'
+    case 'neg_multiplication': return 'Negative Numbers'
+    case 'neg_division': return 'Negative Numbers'
     case 'linear_equation': return 'Linear Equation'
     case 'inequality': return 'Inequality'
   }
@@ -51,6 +55,8 @@ function inputModeForType(type: AnyProblemType): React.HTMLAttributes<HTMLInputE
   if (type === 'fraction_multiplication' || type === 'fraction_division') return 'text'
   if (type === 'decimal_addition' || type === 'decimal_subtraction' || type === 'decimal_multiplication') return 'decimal'
   if (type === 'percent_to_decimal') return 'decimal'
+  // Negative number types need text mode so the minus sign can be typed
+  if (type === 'neg_addition' || type === 'neg_subtraction' || type === 'neg_multiplication' || type === 'neg_division') return 'text'
   return 'numeric'
 }
 

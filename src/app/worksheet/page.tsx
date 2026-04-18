@@ -12,6 +12,7 @@ import WorksheetScratchpad from './WorksheetScratchpad'
 // Used to find eligible review levels relative to the student's current position.
 const SUPPORTED_LEVEL_KEYS: [number, number][] = [
   [1, 1], [1, 2], [2, 1], [2, 2], [3, 1], [3, 2], [4, 1], [4, 2], [5, 1], [5, 2], [6, 1], [6, 2],
+  [7, 1],
   [9, 1], [9, 2], [10, 1], [10, 2], [11, 1],
 ]
 

@@ -250,6 +250,20 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Memorise the big ones: 10% = ÷10, 50% = ÷2, 25% = ÷4, 75% = ÷4×3. These shortcuts are faster than any calculator!',
   },
+  '7/1': {
+    title: 'Negative Numbers',
+    explanation: 'Numbers can go below zero. Think of a number line stretching left and right — positive numbers are to the right of zero, negative numbers are to the left. A negative number has a minus sign in front: −5 means "five below zero". The further left you go, the smaller the number (so −8 is less than −3). When you add a negative, you move left. When you subtract a negative, the two minuses cancel and you move right.',
+    example: {
+      problem: '4 − (−3) = ?',
+      steps: [
+        'Subtracting a negative is the same as adding a positive',
+        '4 − (−3) = 4 + 3',
+        '4 + 3 = 7',
+      ],
+      answer: '7',
+    },
+    tip: 'Sign rules to memorise: (+) × (+) = +, (−) × (−) = +, (+) × (−) = −. Two negatives multiplied or divided always give a positive!',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',
