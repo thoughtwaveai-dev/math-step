@@ -6,8 +6,58 @@
 
 ## Current Status
 
-**Phase:** Milestone 30 — Self-Correction Flow v1.
+**Phase:** Milestone 31 — Parent Analytics / Progress at a Glance.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 31 — Parent Analytics / Progress at a Glance (2026-04-18)
+
+**What was added:**
+A "Progress at a Glance" card on the parent dashboard, inserted between Recent Worksheets and Admin controls.
+
+**Window:** Last 10 completed sessions (already queried by the dashboard — no extra DB call).
+
+**Metrics shown:**
+- Avg Accuracy % (last 10 sessions)
+- Pass Rate % (N/10 passed)
+- Avg Time per session (formatted)
+- Total Sessions (from `streaks.total_sessions`)
+- Best/Longest Streak (from `streaks.longest_streak`)
+- Micro bar chart: one bar per session, height = accuracy %, green = pass / red = fail, oldest left → newest right
+- Plain-English insight line (shown when ≥4 sessions): compares avg accuracy of newer half vs older half; falls back to pass-rate commentary
+
+**Edge cases handled:**
+- 0 sessions → "No sessions yet — analytics will appear after the first worksheet is completed."
+- 1–3 sessions → stat cards shown, no insight line (insufficient data)
+- Multi-student: all values are computed per selected student
+
+**Files changed:**
+- `src/app/dashboard/page.tsx`:
+  - Streaks query extended to fetch `longest_streak, total_sessions` (was only fetching `current_streak, total_points`)
+  - Added analytics computation block (server-side, pure JS — no library)
+  - Added "Progress at a Glance" section in JSX
+
+No DB schema changes. No new dependencies. No third-party chart libraries.
+
+**Test results:**
+- TypeScript: build clean, no type errors — PASS
+- Next.js production build: `/dashboard` compiles clean — PASS
+- Auth guard (unauthenticated → 307 redirect): PASS
+- UI: could not auto-test (login credentials unavailable to agent); requires manual verification
+
+### Suite 31 — Parent Analytics (2026-04-18)
+| Test | Result |
+|------|--------|
+| TypeScript: build clean, no type errors | PASS |
+| Next.js production build: /dashboard compiles | PASS |
+| Auth guard: unauthenticated → 307 redirect to /login | PASS |
+| Analytics section visible with session history | MANUAL NEEDED |
+| Stat cards: avg accuracy, pass rate, avg time, total sessions render correctly | MANUAL NEEDED |
+| Micro bar chart visible (green/red bars) | MANUAL NEEDED |
+| Insight line shown for ≥4 sessions | MANUAL NEEDED |
+| Empty state for new student (no sessions) | MANUAL NEEDED |
+| Multi-student switching updates analytics | MANUAL NEEDED |
 
 ---
 
