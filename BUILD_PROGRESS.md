@@ -6,8 +6,57 @@
 
 ## Current Status
 
-**Phase:** Milestone 33 — Fraction generator: Level 5/1. ✓ Fully validated (36/36 Playwright tests passing).
+**Phase:** Milestone 34 — Fraction generator: Level 5/2 (Multiplication & Division). ✓ Fully validated.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 34 — Fraction Generator: Level 5/2 (2026-04-18)
+
+**What was added:**
+Fraction multiplication and division — Level 5/2.
+
+**Files changed:**
+- `src/lib/math/generators/fractions.ts` — extended `FractionProblemType` with `'fraction_multiplication' | 'fraction_division'`; added `generateMultDivProblem()` (internal) and `generateFractionMultDivProblems(count, rand)` (exported):
+  - Multiplication: picks two proper fractions (denominators 2–6), multiplies numerators and denominators, simplifies
+  - Division: picks proper fraction dividend (b∈[2,6]) and divisor (d∈[2,6]) using keep-change-flip (a×d)/(b×c), simplifies; filters out results with simplified numerator > 12
+  - Dedup on prompt string with retry budget (100× count)
+  - Answers simplified to lowest terms; whole-number results as plain integers (e.g. `"2"`, `"3"`)
+- `src/lib/math/generators/index.ts` — routes 5/2 → `generateFractionMultDivProblems`; imports added
+- `src/app/worksheet/WorksheetForm.tsx` — added `fraction_multiplication` and `fraction_division` cases to `problemTypeLabel()`; both types use `inputMode="text"` (students need `/` key)
+- `src/app/worksheet/page.tsx` — added `[5, 2]` to `SUPPORTED_LEVEL_KEYS`
+- `src/lib/lessons/index.ts` — added `5/2` lesson: "Fractions: Multiplication & Division", worked example (2/3 ÷ 1/6 = 4), 5 steps, tip covering keep-change-flip
+
+**DB:** Level row 5/2 already existed in the `levels` table with topic "Fractions".
+
+**Grading:** No changes to `gradeAnswer.ts` — the existing fraction cross-multiply path handles multiplication/division answers correctly. Fraction results grade via cross-multiply; whole-number results (e.g. `"2"`) grade via exact integer match.
+
+**Answer format:** `"1/6"`, `"4/3"`, `"5/2"` for fraction results; `"1"`, `"2"`, `"3"` for whole-number results. Always simplified. Equivalent unsimplified fraction inputs accepted (e.g. `"2/4"` for `"1/2"`) — same cross-multiply path as 5/1.
+
+**Limitations (v1):**
+- Whole-number answers must be typed as integers (e.g. `"2"`, not `"4/2"`) — same behavior as 5/1
+- Denominators constrained to 2–6 for age-appropriate difficulty
+- Division results filtered to simplified numerator ≤ 12 to keep answers teachable
+
+### Suite 34 — Fraction Generator: Level 5/2 (2026-04-18)
+| Test | Result |
+|------|--------|
+| Manual placement to 5/2 via admin controls | PASS |
+| Dashboard reflects Level 5 / Sublevel 2 | PASS |
+| 5/2 worksheet loads (no Coming Soon) | PASS |
+| Worksheet heading: "Fractions Worksheet", subtitle: "FracMulKid · Level 5.2" | PASS |
+| 20 answer inputs present | PASS |
+| Both "Fraction Multiplication" and "Fraction Division" problem types shown | PASS |
+| Fraction notation uses × and ÷ symbols | PASS |
+| Lesson card title: "Learn: Fractions: Multiplication & Division" | PASS |
+| Lesson card: worked example (2/3 ÷ 1/6 = 4), 5 steps, tip shown | PASS |
+| Wrong answers (999/999) → 0/20, Not passed | PASS |
+| Correct answers (all 20 auto-solved) → 20/20, Passed, Mastery 1/3 | PASS |
+| Equivalent unsimplified fraction inputs pass (e.g. 2/20 for 1/10, 10/6 for 5/3) → 18/20 (2 whole-number edge cases fail as expected) | PASS |
+| 5/1 regression: loads "Fractions: Addition & Subtraction" lesson, 20 problems, no Coming Soon | PASS |
+| Unsupported 6/1 shows Coming Soon | PASS |
+| TypeScript: build clean, no type errors | PASS |
+| Tablet viewport (768×1024): worksheet renders correctly, screenshot saved | PASS |
 
 ---
 

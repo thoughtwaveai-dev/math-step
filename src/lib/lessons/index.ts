@@ -204,6 +204,22 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Unlike denominators? Find the smallest number both denominators divide into (that\'s the LCM), convert each fraction, then add or subtract. For example: 1/2 + 1/3 → use denominator 6 → 3/6 + 2/6 = 5/6.',
   },
+  '5/2': {
+    title: 'Fractions: Multiplication & Division',
+    explanation: 'To multiply fractions, multiply the numerators together and the denominators together, then simplify. To divide fractions, flip the second fraction (take its reciprocal) and multiply — this is sometimes called "keep, change, flip". Always simplify your answer by dividing the top and bottom by their greatest common factor.',
+    example: {
+      problem: '2/3 ÷ 1/6 = ?',
+      steps: [
+        'Keep the first fraction: 2/3',
+        'Change ÷ to ×',
+        'Flip the second fraction: 1/6 becomes 6/1',
+        'Multiply: 2/3 × 6/1 = (2×6)/(3×1) = 12/3',
+        'Simplify: 12 ÷ 3 = 4',
+      ],
+      answer: '4',
+    },
+    tip: 'For multiplication: 1/2 × 2/3 = 2/6 = 1/3. For division: remember "keep, change, flip" — keep the first fraction, change ÷ to ×, flip the second fraction.',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

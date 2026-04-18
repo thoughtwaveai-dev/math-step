@@ -31,6 +31,8 @@ function problemTypeLabel(type: AnyProblemType): string {
     case 'common_factors': return 'Common Factors'
     case 'fraction_addition': return 'Fraction Addition'
     case 'fraction_subtraction': return 'Fraction Subtraction'
+    case 'fraction_multiplication': return 'Fraction Multiplication'
+    case 'fraction_division': return 'Fraction Division'
     case 'linear_equation': return 'Linear Equation'
     case 'inequality': return 'Inequality'
   }
@@ -39,6 +41,7 @@ function problemTypeLabel(type: AnyProblemType): string {
 function inputModeForType(type: AnyProblemType): 'numeric' | 'text' {
   if (type === 'inequality') return 'text'
   if (type === 'fraction_addition' || type === 'fraction_subtraction') return 'text'
+  if (type === 'fraction_multiplication' || type === 'fraction_division') return 'text'
   return 'numeric'
 }
 

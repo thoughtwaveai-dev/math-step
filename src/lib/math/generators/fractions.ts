@@ -1,6 +1,10 @@
 import { randInt } from './rand'
 
-export type FractionProblemType = 'fraction_addition' | 'fraction_subtraction'
+export type FractionProblemType =
+  | 'fraction_addition'
+  | 'fraction_subtraction'
+  | 'fraction_multiplication'
+  | 'fraction_division'
 
 export interface FractionProblem {
   id: string
@@ -76,6 +80,62 @@ function generateOneProblem(
       answer: simplify(num, L),
     }
   }
+}
+
+// Level 5/2 — Fraction multiplication and division.
+function generateMultDivProblem(
+  rand: () => number
+): { type: FractionProblemType; prompt: string; answer: string } | null {
+  const isMultiply = rand() < 0.5
+
+  if (isMultiply) {
+    const d1 = randInt(2, 6, rand)
+    const d2 = randInt(2, 6, rand)
+    if (d1 < 2 || d2 < 2) return null
+    const a = randInt(1, d1 - 1, rand)
+    const c = randInt(1, d2 - 1, rand)
+    return {
+      type: 'fraction_multiplication',
+      prompt: `${a}/${d1} × ${c}/${d2} = ?`,
+      answer: simplify(a * c, d1 * d2),
+    }
+  } else {
+    // a/b ÷ c/d = (a×d)/(b×c)
+    const b = randInt(2, 6, rand)
+    const d = randInt(2, 6, rand)
+    if (b < 2 || d < 2) return null
+    const a = randInt(1, b - 1, rand)
+    const c = randInt(1, d - 1, rand)
+    const num = a * d
+    const den = b * c
+    const g = gcd(num, den)
+    // Filter out results that are too large to be teachable
+    if (num / g > 12) return null
+    return {
+      type: 'fraction_division',
+      prompt: `${a}/${b} ÷ ${c}/${d} = ?`,
+      answer: simplify(num, den),
+    }
+  }
+}
+
+export function generateFractionMultDivProblems(
+  count = 10,
+  rand: () => number = Math.random
+): FractionProblem[] {
+  const problems: FractionProblem[] = []
+  const seen = new Set<string>()
+  let tries = 0
+
+  while (problems.length < count && tries < count * 100) {
+    tries++
+    const p = generateMultDivProblem(rand)
+    if (!p || seen.has(p.prompt)) continue
+    seen.add(p.prompt)
+    problems.push({ id: `frac52_${problems.length + 1}`, ...p })
+  }
+
+  return problems
 }
 
 // Level 5/1 — Fraction addition and subtraction.

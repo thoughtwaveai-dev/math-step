@@ -3,7 +3,7 @@ import { generateSingleDigitAddition, generateDoubleDigitAddition } from './addi
 import { generateSingleDigitSubtraction, generateDoubleDigitSubtraction } from './subtraction'
 import { generateBasicMultiplication, generateMultiDigitMultiplication } from './multiplication'
 import { generateDivisionFacts, generateLongDivision } from './division'
-import { generateFractionProblems } from './fractions'
+import { generateFractionProblems, generateFractionMultDivProblems } from './fractions'
 import { generateLinearEquations, generateVariablesBothSides } from './linear-equations'
 import { generateInequalities } from './inequalities'
 
@@ -54,6 +54,9 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 5 && sublevelNumber === 1) {
     return generateFractionProblems(count)
+  }
+  if (levelNumber === 5 && sublevelNumber === 2) {
+    return generateFractionMultDivProblems(count)
   }
   if (levelNumber === 9 && sublevelNumber === 1) {
     return generateFactorizationProblems(count)
