@@ -235,6 +235,21 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Always line up the decimal points before adding or subtracting — the dot must stay directly above or below the other dot. For multiplication: 2.5 × 3 → think 25 × 3 = 75, then move the dot one place left → 7.5.',
   },
+  '6/2': {
+    title: 'Percentages: Basics & Conversions',
+    explanation: 'A percentage is a number out of 100. "25%" means 25 out of 100, or 25/100. Percentages show up everywhere — sale discounts, test scores, tips at restaurants. To find a percentage of a number, convert the percentage to a decimal first (move the decimal point two places left), then multiply. To convert a fraction to a percent, ask: what is the equivalent fraction with denominator 100?',
+    example: {
+      problem: 'What is 25% of 80?',
+      steps: [
+        'Convert 25% to a decimal: 25 ÷ 100 = 0.25',
+        'Multiply: 0.25 × 80 = 20',
+        'Answer: 25% of 80 = 20',
+        'Quick check: 25% is a quarter, and 80 ÷ 4 = 20 ✓',
+      ],
+      answer: '20',
+    },
+    tip: 'Memorise the big ones: 10% = ÷10, 50% = ÷2, 25% = ÷4, 75% = ÷4×3. These shortcuts are faster than any calculator!',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

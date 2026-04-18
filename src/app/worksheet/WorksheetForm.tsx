@@ -36,6 +36,10 @@ function problemTypeLabel(type: AnyProblemType): string {
     case 'decimal_addition': return 'Decimal Addition'
     case 'decimal_subtraction': return 'Decimal Subtraction'
     case 'decimal_multiplication': return 'Decimal Multiplication'
+    case 'percent_of_number': return 'Percentage'
+    case 'percent_to_decimal': return 'Percentage'
+    case 'decimal_to_percent': return 'Percentage'
+    case 'fraction_to_percent': return 'Percentage'
     case 'linear_equation': return 'Linear Equation'
     case 'inequality': return 'Inequality'
   }
@@ -46,6 +50,7 @@ function inputModeForType(type: AnyProblemType): React.HTMLAttributes<HTMLInputE
   if (type === 'fraction_addition' || type === 'fraction_subtraction') return 'text'
   if (type === 'fraction_multiplication' || type === 'fraction_division') return 'text'
   if (type === 'decimal_addition' || type === 'decimal_subtraction' || type === 'decimal_multiplication') return 'decimal'
+  if (type === 'percent_to_decimal') return 'decimal'
   return 'numeric'
 }
 

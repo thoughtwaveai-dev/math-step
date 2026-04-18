@@ -6,8 +6,65 @@
 
 ## Current Status
 
-**Phase:** Milestone 35 — Decimal generator: Level 6/1. ✓ Fully validated.
+**Phase:** Milestone 36 — Percentage generator: Level 6/2. ✓ Fully validated.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 36 — Percentage Generator: Level 6/2 (2026-04-18)
+
+**What was added:**
+Percentages — Level 6/2 (Basics & Conversions).
+
+**Files added:**
+- `src/lib/math/generators/percentages.ts` — `generatePercentageProblems(count, rand)` for Level 6/2:
+  - Four problem types: `percent_of_number`, `percent_to_decimal`, `decimal_to_percent`, `fraction_to_percent`
+  - `percent_of_number`: common percentages (10/20/25/50/75) × friendly bases (multiples of 4/10), always integer results
+  - `percent_to_decimal`: converts common % to decimal string (e.g. `"0.25"`)
+  - `decimal_to_percent`: student types the % as integer (e.g. `0.5 = ?%` → `"50"`)
+  - `fraction_to_percent`: 13 clean fraction→percent pairs (e.g. `3/4 = ?%` → `"75"`)
+  - Dedup on prompt string with retry budget (100× count)
+
+**Files changed:**
+- `src/lib/math/generators/index.ts` — routes 6/2 → `generatePercentageProblems`; exports `PercentageProblem`, `PercentageProblemType`; added to `AnyProblemType` union
+- `src/app/worksheet/page.tsx` — added `[6, 2]` to `SUPPORTED_LEVEL_KEYS` (after `[6, 1]`)
+- `src/app/worksheet/WorksheetForm.tsx` — added all 4 percentage type labels (all display as "Percentage"); `percent_to_decimal` gets `inputMode="decimal"`, others `inputMode="numeric"`
+- `src/lib/lessons/index.ts` — added `6/2` lesson: "Percentages: Basics & Conversions", worked example (25% of 80 = 20), 4 steps, tip covering the big-four shortcuts
+
+**DB:** Level row 6/2 already existed in the `levels` table with topic "Percentages".
+
+**Grading:** No changes to `gradeAnswer.ts` — all answer types handled by existing paths:
+- Integer answers (`percent_of_number`, `decimal_to_percent`, `fraction_to_percent`) → existing integer path
+- Decimal answers (`percent_to_decimal`, e.g. `"0.25"`) → existing decimal path (parseFloat with 0.001 tolerance)
+
+**Answer formats:**
+- `percent_of_number`: `"20"`, `"50"`, `"90"` (integer)
+- `percent_to_decimal`: `"0.1"`, `"0.25"`, `"0.75"` (decimal string)
+- `decimal_to_percent`: `"10"`, `"50"`, `"75"` (integer, the % value)
+- `fraction_to_percent`: `"25"`, `"50"`, `"75"` (integer)
+
+**Limitations (v1):**
+- Only clean, common percentages (10/20/25/50/75) to keep answers age-appropriate and integer
+- No percentage increase/decrease problems in v1
+- `percent_to_decimal` answers must match to 3 decimal places (e.g. `"0.25"` or `"0.250"` both pass)
+
+### Suite 36 — Percentage Generator: Level 6/2 (2026-04-18)
+| Test | Result |
+|------|--------|
+| Manual placement to 6/2 via admin controls | PASS |
+| Dashboard reflects Level 6 / Sublevel 2 / Percentages | PASS |
+| 6/2 worksheet loads (no Coming Soon) | PASS |
+| Worksheet heading: "Percentages Worksheet", subtitle: "PctTest · Level 6.2" | PASS |
+| 20 answer inputs present | PASS |
+| All 4 percentage problem types rendered | PASS |
+| Lesson card title: "Learn: Percentages: Basics & Conversions" | PASS |
+| Lesson card: worked example (25% of 80 = 20), 4 steps, tip shown | PASS |
+| Correct answers (all 20 auto-solved) → 20/20, 100%, Passed | PASS |
+| Wrong answers (999 for all) → 0/20, Not passed | PASS |
+| Unsupported 7/1 shows "Coming Soon" | PASS |
+| 5/1 regression: loads "Fractions: Addition & Subtraction" lesson, no Coming Soon | PASS |
+| TypeScript: build clean, no type errors | PASS |
+| Tablet viewport (768×1024): worksheet renders correctly, screenshot saved | PASS |
 
 ---
 

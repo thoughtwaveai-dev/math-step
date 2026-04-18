@@ -7,6 +7,7 @@ import { generateFractionProblems, generateFractionMultDivProblems } from './fra
 import { generateLinearEquations, generateVariablesBothSides } from './linear-equations'
 import { generateInequalities } from './inequalities'
 import { generateDecimalProblems } from './decimals'
+import { generatePercentageProblems } from './percentages'
 
 export type { MathProblem, ProblemType } from './factorization'
 export type { AdditionProblem, AdditionProblemType } from './addition'
@@ -17,6 +18,7 @@ export type { FractionProblem, FractionProblemType } from './fractions'
 export type { LinearEquationProblem, LinearEquationType } from './linear-equations'
 export type { InequalityProblem, InequalityProblemType } from './inequalities'
 export type { DecimalProblem, DecimalProblemType } from './decimals'
+export type { PercentageProblem, PercentageProblemType } from './percentages'
 
 // Unified problem type covering all generators
 export type AnyProblemType =
@@ -29,6 +31,7 @@ export type AnyProblemType =
   | import('./linear-equations').LinearEquationType
   | import('./inequalities').InequalityProblemType
   | import('./decimals').DecimalProblemType
+  | import('./percentages').PercentageProblemType
 
 export function generateProblems(levelNumber: number, sublevelNumber: number, count: number) {
   if (levelNumber === 1 && sublevelNumber === 1) {
@@ -63,6 +66,9 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 6 && sublevelNumber === 1) {
     return generateDecimalProblems(count)
+  }
+  if (levelNumber === 6 && sublevelNumber === 2) {
+    return generatePercentageProblems(count)
   }
   if (levelNumber === 9 && sublevelNumber === 1) {
     return generateFactorizationProblems(count)
