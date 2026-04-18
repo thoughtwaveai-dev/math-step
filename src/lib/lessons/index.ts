@@ -310,6 +310,23 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Undo the operation to isolate x: if it is added, subtract; if it is multiplied, divide. The answer is just one number — no variables needed!',
   },
+  '11/2': {
+    title: 'Simultaneous Equations',
+    explanation: 'Sometimes you have two unknowns (x and y) and two equations that both hold true at the same time. To solve them, use the elimination method: add or subtract the two equations to cancel out one of the variables. Once you know one variable, substitute it back into either equation to find the other. Always check your answer by substituting both values into both equations.',
+    example: {
+      problem: 'x + y = 10\nx − y = 2',
+      steps: [
+        'Add both equations together to eliminate y:',
+        '(x + y) + (x − y) = 10 + 2',
+        '2x = 12, so x = 6',
+        'Substitute x = 6 into the first equation:',
+        '6 + y = 10, so y = 4',
+        'Check: 6 + 4 = 10 ✓ and 6 − 4 = 2 ✓',
+      ],
+      answer: 'x = 6, y = 4',
+    },
+    tip: 'Give your answer with x first, then y — like this: x = 6, y = 4. To check, put both numbers back into both original equations. If both equations balance, your answer is correct!',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

@@ -240,6 +240,7 @@ Generators live in `src/lib/math/generators/`. The router is `generateProblems(l
 | 10/1 | linear equations (one variable, 5 subtypes) | single integer | exact integer match |
 | 10/2 | linear equations (variables on both sides) | single integer | exact integer match |
 | 11/1 | one-variable inequalities (4 types) | `x > 4`, `x < 7`, `x <= 5`, `x >= 12` | inequality normalization |
+| 11/2 | simultaneous equations (3 shapes: x+y/x-y, 2x+y/x-y, x+2y/x+y) | `x = 3, y = 7` | sim-eq pair path (regex by name, normalizes spaces/case) |
 | others | not implemented | — | returns [] → "Coming Soon" |
 
 ### Generator architecture (Milestone 26)
@@ -253,17 +254,18 @@ All generators use **bounded algorithmic random generation** — no more fixed 1
 
 ### Grading (`src/app/actions/worksheet.ts`)
 
-`gradeAnswer(studentAnswer, correctAnswer)` has four paths (in order):
-1. **Inequality**: correctAnswer contains `<` or `>` → normalize (lowercase, strip spaces, `≤`→`<=`, `≥`→`>=`) and compare strings
-2. **Algebraic expression**: correctAnswer contains a letter (`/[a-zA-Z]/`) → normalize (lowercase, strip all whitespace) and compare strings. Handles `"5x"`, `"3x + 7"`, `"8a - 1"`. No term reordering.
-3. **Fraction**: correctAnswer matches `^\d+/\d+$` → cross-multiply equality check
-4. **Decimal**: correctAnswer matches `^\d+\.\d+$` → parseFloat with 0.001 tolerance
-5. **Signed integer**: correctAnswer matches `^-?\d+$` → parseInt exact match
-6. **Multi-token**: correctAnswer has multiple numbers → extract numbers, sort, compare
+`gradeAnswer(studentAnswer, correctAnswer)` has these paths (in order):
+1. **Simultaneous equation pair**: correctAnswer contains both `x=` and `y=` patterns → parse x and y values by regex name match (order-independent), normalize spaces/case, compare integer values
+2. **Inequality**: correctAnswer contains `<` or `>` → normalize (lowercase, strip spaces, `≤`→`<=`, `≥`→`>=`) and compare strings
+3. **Algebraic expression**: correctAnswer contains a letter (`/[a-zA-Z]/`) → normalize (lowercase, strip all whitespace) and compare strings. Handles `"5x"`, `"3x + 7"`, `"8a - 1"`. No term reordering.
+4. **Fraction**: correctAnswer matches `^\d+/\d+$` → cross-multiply equality check
+5. **Decimal**: correctAnswer matches `^\d+\.\d+$` → parseFloat with 0.001 tolerance
+6. **Signed integer**: correctAnswer matches `^-?\d+$` → parseInt exact match
+7. **Multi-token**: correctAnswer has multiple numbers → extract numbers, sort, compare
 
 ### Lesson cards
 
-`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. Supported: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 9/2, 10/1, 10/2, 11/1.
+`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. Supported: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 11/2. Note: 9/2, 10/1, 10/2, 11/1 have generators but no lesson card (renders without card, which is acceptable).
 
 ---
 
@@ -272,7 +274,7 @@ All generators use **bounded algorithmic random generation** — no more fixed 1
 Worksheets can include a small set of review problems from previously mastered levels to improve long-term retention.
 
 **Logic lives in `src/app/worksheet/page.tsx`:**
-- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support: `[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2],[6,1],[6,2],[7,1],[7,2],[8,1],[8,2],[9,1],[9,2],[10,1],[10,2],[11,1]`
+- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support: `[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2],[6,1],[6,2],[7,1],[7,2],[8,1],[8,2],[9,1],[9,2],[10,1],[10,2],[11,1],[11,2]`
 - `REVIEW_PROBLEM_COUNT = 4` — number of review problems in a mixed worksheet
 - For a 20-problem worksheet: 16 current-level + 4 review, shuffled to interleave
 - Review eligibility: `student_level_progress` row must exist with `consecutive_passes > 0 OR last_result_passed = true`. This filters out placement-jumped levels.

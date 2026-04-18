@@ -12,6 +12,7 @@ import { generateNegativeProblems } from './negatives'
 import { generateOrderOfOperationsProblems } from './order-of-operations'
 import { generateSimplifyingProblems } from './simplifying-expressions'
 import { generateOneStepEquations } from './one-step-equations'
+import { generateSimultaneousEquations } from './simultaneous-equations'
 
 export type { MathProblem, ProblemType } from './factorization'
 export type { AdditionProblem, AdditionProblemType } from './addition'
@@ -27,6 +28,7 @@ export type { NegativeProblem, NegativeProblemType } from './negatives'
 export type { OrderOfOperationsProblem, OrderOfOperationsProblemType } from './order-of-operations'
 export type { SimplifyingProblem, SimplifyingProblemType } from './simplifying-expressions'
 export type { OneStepEquationProblem, OneStepEquationType } from './one-step-equations'
+export type { SimultaneousEquationProblem, SimultaneousEquationType } from './simultaneous-equations'
 
 // Unified problem type covering all generators
 export type AnyProblemType =
@@ -44,6 +46,7 @@ export type AnyProblemType =
   | import('./order-of-operations').OrderOfOperationsProblemType
   | import('./simplifying-expressions').SimplifyingProblemType
   | import('./one-step-equations').OneStepEquationType
+  | import('./simultaneous-equations').SimultaneousEquationType
 
 export function generateProblems(levelNumber: number, sublevelNumber: number, count: number) {
   if (levelNumber === 1 && sublevelNumber === 1) {
@@ -108,6 +111,9 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 11 && sublevelNumber === 1) {
     return generateInequalities(count)
+  }
+  if (levelNumber === 11 && sublevelNumber === 2) {
+    return generateSimultaneousEquations(count)
   }
   return []
 }

@@ -57,6 +57,7 @@ function problemTypeLabel(type: AnyProblemType): string {
     case 'eq_div': return 'One-step Equation'
     case 'linear_equation': return 'Linear Equation'
     case 'inequality': return 'Inequality'
+    case 'sim_eq': return 'Simultaneous Equations'
   }
 }
 
@@ -72,6 +73,8 @@ function inputModeForType(type: AnyProblemType): React.HTMLAttributes<HTMLInputE
   if (type === 'eq_add' || type === 'eq_sub' || type === 'eq_mul' || type === 'eq_div') return 'numeric'
   // Algebraic expressions need text mode for letters (e.g. "5x", "3x + 7")
   if (type === 'expr_combine_like' || type === 'expr_multi_terms' || type === 'expr_with_constant') return 'text'
+  // Simultaneous equation answers contain letters and commas (e.g. "x = 3, y = 7")
+  if (type === 'sim_eq') return 'text'
   return 'numeric'
 }
 

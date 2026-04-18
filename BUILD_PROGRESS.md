@@ -6,8 +6,80 @@
 
 ## Current Status
 
-**Phase:** Milestone 41 — Placement Diagnostic v2. ✓ Fully validated.
+**Phase:** Milestone 42 — Simultaneous Equations (Level 11/2). ✓ Fully validated.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 42 — Simultaneous Equations: Level 11/2 (2026-04-18)
+
+**What was added:**
+Simultaneous Equations — Level 11/2. Full generator, grading path, lesson card, and routing support.
+
+**Files added:**
+- `src/lib/math/generators/simultaneous-equations.ts` — `generateSimultaneousEquations(count, rand)`:
+  - Three problem types: `sim_eq` (single type label, three structural shapes)
+  - Type 1: `x + y = S, x − y = D` (x > y so D > 0)
+  - Type 2: `2x + y = C, x − y = D` (x > y so D > 0)
+  - Type 3: `x + 2y = C, x + y = D`
+  - Integer solutions guaranteed by construction (x, y chosen first)
+  - Dedup on prompt string with 50× retry budget
+  - Accepts optional `rand` for deterministic testing
+
+**Files modified:**
+- `src/lib/math/generators/index.ts` — added import, type export, union type, and 11/2 routing case
+- `src/lib/math/gradeAnswer.ts` — added simultaneous-equation grading path: detects `x=` and `y=` in correct answer, parses both values by regex name (not position), normalizes spaces/case
+- `src/app/worksheet/page.tsx` — added `[11, 2]` to `SUPPORTED_LEVEL_KEYS`
+- `src/app/worksheet/WorksheetForm.tsx` — added `sim_eq` case to `problemTypeLabel` switch and `inputModeForType` (text mode)
+- `src/lib/lessons/index.ts` — added lesson for 11/2: title, explanation (elimination method), 6-step worked example, tip
+
+**Canonical answer format:**
+`x = 3, y = 7` (spaces around `=`, comma-space separator)
+
+**Grading normalization accepted:**
+- `x = 3, y = 7` (canonical)
+- `x=3,y=7` (no spaces)
+- `x = 3,  y = 7` (extra spaces)
+- `X = 3, Y = 7` (uppercase)
+- `x=3 y=7` (space separator instead of comma)
+- `y = 7, x = 3` (reversed order — accepted; regex matches by name, not position)
+
+**Limitations of v1:**
+- Answers with letters other than x/y in wrong positions (e.g. `a=3, b=7`) will fail — acceptable
+- No support for fractional or negative solutions (integer-only by design)
+- Three problem shapes only (no 3x+2y style or larger coefficients)
+- x first in lesson example and prompt, but reversed order is silently accepted by grading
+
+**TypeScript:** Build clean, no type errors.
+
+### Suite 42 — Simultaneous Equations Level 11/2 (2026-04-18)
+| Test | Result |
+|------|--------|
+| TypeScript build clean | PASS |
+| Unit: canonical "x = 3, y = 7" graded correct | PASS |
+| Unit: no-spaces "x=3,y=7" graded correct | PASS |
+| Unit: extra spaces graded correct | PASS |
+| Unit: uppercase "X=3, Y=7" graded correct | PASS |
+| Unit: space separator "x=3 y=7" graded correct | PASS |
+| Unit: reversed "y=7, x=3" graded correct (regex by name) | PASS |
+| Unit: wrong x fails | PASS |
+| Unit: wrong y fails | PASS |
+| Unit: empty string fails | PASS |
+| Unit: garbage input fails | PASS |
+| Unit: inequality "x>4" does NOT trigger sim-eq path | PASS |
+| Unit: integer "7" does NOT trigger sim-eq path | PASS |
+| Unit: fraction "3/4" does NOT trigger sim-eq path | PASS |
+| Unit: algebra "5x+2" does NOT trigger sim-eq path | PASS |
+| Unit: 30-round generator correctness (D>0, solutions verify) | PASS |
+| Browser: manual placement to 11/2 works | PASS |
+| Browser: dashboard shows Level 11 / Sublevel 2 / Simultaneous Equations | PASS |
+| Browser: 11/2 worksheet renders 20 problems cleanly | PASS |
+| Browser: lesson card renders correctly with worked example and tip | PASS |
+| Browser: correct answers in all format variants pass (19/20, intentional 1 wrong) | PASS |
+| Browser: wrong answer "x=1,y=1" fails | PASS |
+| Browser: session recorded, 1/3 passes shown on dashboard | PASS |
+| Browser: unsupported 12/1 shows "Coming Soon" | PASS |
+| Browser: tablet viewport (768×1024) renders cleanly | PASS |
 
 ---
 

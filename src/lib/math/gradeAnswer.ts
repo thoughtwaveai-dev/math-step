@@ -17,8 +17,27 @@ function parseFraction(s: string): { num: number; den: number } | null {
   return isNaN(n) ? null : { num: n, den: 1 }
 }
 
+// Parses "x = 3, y = 7" (in any spacing/case) into {x:3, y:7}. Returns null on failure.
+function parseSimultaneousPair(s: string): { x: number; y: number } | null {
+  const norm = s.trim().toLowerCase().replace(/\s+/g, '')
+  const xm = norm.match(/x=(-?\d+)/)
+  const ym = norm.match(/y=(-?\d+)/)
+  if (!xm || !ym) return null
+  const x = parseInt(xm[1], 10)
+  const y = parseInt(ym[1], 10)
+  return isNaN(x) || isNaN(y) ? null : { x, y }
+}
+
 export function gradeAnswer(studentAnswer: string, correctAnswer: string): boolean {
   if (!studentAnswer.trim()) return false
+
+  // Simultaneous equation pair: answer contains "x=" pattern
+  if (/x\s*=/.test(correctAnswer) && /y\s*=/.test(correctAnswer)) {
+    const correct = parseSimultaneousPair(correctAnswer)
+    const student = parseSimultaneousPair(studentAnswer)
+    if (!correct || !student) return false
+    return student.x === correct.x && student.y === correct.y
+  }
 
   if (/[<>]/.test(correctAnswer)) {
     return normalizeInequality(studentAnswer) === normalizeInequality(correctAnswer)
