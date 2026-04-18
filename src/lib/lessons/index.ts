@@ -264,6 +264,21 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Sign rules to memorise: (+) × (+) = +, (−) × (−) = +, (+) × (−) = −. Two negatives multiplied or divided always give a positive!',
   },
+  '7/2': {
+    title: 'Order of Operations',
+    explanation: 'When a calculation has more than one operation, you must follow a specific order — otherwise different people get different answers! The rule is: Brackets first, then Multiplication and Division (left to right), then Addition and Subtraction (left to right). A handy way to remember: BODMAS (Brackets, Orders, Division, Multiplication, Addition, Subtraction). The key insight: multiplication and division are done before addition and subtraction, unless brackets say otherwise.',
+    example: {
+      problem: '3 + 4 × 2 = ?',
+      steps: [
+        'Multiplication comes before addition',
+        'Do 4 × 2 first: 4 × 2 = 8',
+        'Now add: 3 + 8 = 11',
+        'Answer: 11 (not 14, which would be wrong)',
+      ],
+      answer: '11',
+    },
+    tip: 'Brackets always win! If you see (3 + 4) × 2, do the brackets first: 7 × 2 = 14. Without brackets, 3 + 4 × 2 = 11. The brackets completely change the answer.',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

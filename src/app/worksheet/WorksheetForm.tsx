@@ -44,6 +44,10 @@ function problemTypeLabel(type: AnyProblemType): string {
     case 'neg_subtraction': return 'Negative Numbers'
     case 'neg_multiplication': return 'Negative Numbers'
     case 'neg_division': return 'Negative Numbers'
+    case 'order_add_mul': return 'Order of Operations'
+    case 'order_sub_mul': return 'Order of Operations'
+    case 'order_div_add': return 'Order of Operations'
+    case 'order_paren': return 'Order of Operations'
     case 'linear_equation': return 'Linear Equation'
     case 'inequality': return 'Inequality'
   }
@@ -57,6 +61,7 @@ function inputModeForType(type: AnyProblemType): React.HTMLAttributes<HTMLInputE
   if (type === 'percent_to_decimal') return 'decimal'
   // Negative number types need text mode so the minus sign can be typed
   if (type === 'neg_addition' || type === 'neg_subtraction' || type === 'neg_multiplication' || type === 'neg_division') return 'text'
+  if (type === 'order_add_mul' || type === 'order_sub_mul' || type === 'order_div_add' || type === 'order_paren') return 'numeric'
   return 'numeric'
 }
 

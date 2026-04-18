@@ -6,8 +6,61 @@
 
 ## Current Status
 
-**Phase:** Milestone 37 — Negative Numbers generator: Level 7/1. ✓ Fully validated.
+**Phase:** Milestone 38 — Order of Operations generator: Level 7/2. ✓ Fully validated.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 38 — Order of Operations Generator: Level 7/2 (2026-04-18)
+
+**What was added:**
+Order of Operations — Level 7/2 (PEMDAS/BODMAS with integers).
+
+**Files added:**
+- `src/lib/math/generators/order-of-operations.ts` — `generateOrderOfOperationsProblems(count, rand)` for Level 7/2:
+  - Four problem types: `order_add_mul`, `order_sub_mul`, `order_div_add`, `order_paren`
+  - `order_add_mul`: `a + b × c` (multiply first) — a in [1,15], b/c in [2,9]
+  - `order_sub_mul`: `a - b × c` (multiply first) — a always > b×c, answer positive
+  - `order_div_add`: `dividend ÷ divisor + c` — quotient-first generation for clean integers
+  - `order_paren`: `(a + b) × c` or `(a - b) × c` — brackets change the order
+  - All answers are positive integers (≤ 100), dedup on prompt with 100× retry budget
+
+**Files changed:**
+- `src/lib/math/generators/index.ts` — routes 7/2 → `generateOrderOfOperationsProblems`; exports `OrderOfOperationsProblem`, `OrderOfOperationsProblemType`; added to `AnyProblemType` union
+- `src/app/worksheet/page.tsx` — added `[7, 2]` to `SUPPORTED_LEVEL_KEYS` (after `[7, 1]`)
+- `src/app/worksheet/WorksheetForm.tsx` — added all 4 order-of-operations type labels (all display as "Order of Operations"); all use `inputMode="numeric"` (positive integer answers only)
+- `src/lib/lessons/index.ts` — added `7/2` lesson: "Order of Operations", BODMAS explanation, worked example (3 + 4 × 2 = 11), 4 steps, brackets-win tip
+
+**DB:** Level row 7/2 already existed in the `levels` table with topic "Order of Operations".
+
+**Grading:** No changes to `gradeAnswer.ts` — all answers are positive integers handled by the existing signed-integer path (`/^-?\d+$/`).
+
+**Answer format:** All answers are positive integer strings: `"11"`, `"60"`, `"9"`, `"72"`.
+
+**Canonical answer format:** Positive integer string — `"11"`, `"14"`, `"5"`, `"20"`.
+
+**Limitations (v1):**
+- Integer operands only (no decimals or fractions)
+- All answers are positive integers (negative results excluded by construction)
+- No three-operation expressions (all are two-operation: one pair of precedence)
+- No exponents or more complex PEMDAS structures (kept age-appropriate)
+
+### Suite 38 — Order of Operations Generator: Level 7/2 (2026-04-18)
+| Test | Result |
+|------|--------|
+| Manual placement to 7/2 via admin controls | PASS |
+| Dashboard reflects Level 7 / Sublevel 2 / Order of Operations | PASS |
+| 7/2 worksheet loads (no Coming Soon) | PASS |
+| Worksheet heading: "Order of Operations Worksheet", subtitle: "OpsKid · Level 7.2" | PASS |
+| 20 answer inputs present | PASS |
+| All 4 order-of-operations problem types rendered (add_mul, sub_mul, div_add, paren) | PASS |
+| Lesson card title: "Learn: Order of Operations" | PASS |
+| Lesson card: BODMAS explanation, worked example (3 + 4 × 2 = 11), 4 steps, brackets tip | PASS |
+| Correct answers (all 20 auto-solved) → 20/20, 100%, Passed | PASS |
+| Wrong answers (999 for all) → 0/20, Not passed | PASS |
+| Unsupported 8/1 shows "Coming Soon" | PASS |
+| TypeScript: build clean, no type errors | PASS |
+| Tablet viewport (768×1024): worksheet renders correctly, screenshot saved | PASS |
 
 ---
 

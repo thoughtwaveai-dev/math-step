@@ -9,6 +9,7 @@ import { generateInequalities } from './inequalities'
 import { generateDecimalProblems } from './decimals'
 import { generatePercentageProblems } from './percentages'
 import { generateNegativeProblems } from './negatives'
+import { generateOrderOfOperationsProblems } from './order-of-operations'
 
 export type { MathProblem, ProblemType } from './factorization'
 export type { AdditionProblem, AdditionProblemType } from './addition'
@@ -21,6 +22,7 @@ export type { InequalityProblem, InequalityProblemType } from './inequalities'
 export type { DecimalProblem, DecimalProblemType } from './decimals'
 export type { PercentageProblem, PercentageProblemType } from './percentages'
 export type { NegativeProblem, NegativeProblemType } from './negatives'
+export type { OrderOfOperationsProblem, OrderOfOperationsProblemType } from './order-of-operations'
 
 // Unified problem type covering all generators
 export type AnyProblemType =
@@ -35,6 +37,7 @@ export type AnyProblemType =
   | import('./decimals').DecimalProblemType
   | import('./percentages').PercentageProblemType
   | import('./negatives').NegativeProblemType
+  | import('./order-of-operations').OrderOfOperationsProblemType
 
 export function generateProblems(levelNumber: number, sublevelNumber: number, count: number) {
   if (levelNumber === 1 && sublevelNumber === 1) {
@@ -75,6 +78,9 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 7 && sublevelNumber === 1) {
     return generateNegativeProblems(count)
+  }
+  if (levelNumber === 7 && sublevelNumber === 2) {
+    return generateOrderOfOperationsProblems(count)
   }
   if (levelNumber === 9 && sublevelNumber === 1) {
     return generateFactorizationProblems(count)
