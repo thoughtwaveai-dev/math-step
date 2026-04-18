@@ -1,3 +1,5 @@
+import { randInt } from './rand'
+
 export type MultiplicationProblemType = 'multiplication'
 
 export interface MultiplicationProblem {
@@ -7,56 +9,40 @@ export interface MultiplicationProblem {
   answer: string
 }
 
-// --- Level 3/1 — Basic multiplication facts ---
-// 10 fixed pairs, single-digit × single-digit, age-appropriate times tables
-const BASIC_FACTS_PAIRS: [number, number][] = [
-  [2, 3],
-  [4, 5],
-  [3, 6],
-  [7, 2],
-  [5, 4],
-  [6, 3],
-  [8, 2],
-  [4, 7],
-  [9, 3],
-  [6, 6],
-]
-
-export function generateBasicMultiplication(count: number = BASIC_FACTS_PAIRS.length): MultiplicationProblem[] {
-  return Array.from({ length: count }, (_, i) => {
-    const [a, b] = BASIC_FACTS_PAIRS[i % BASIC_FACTS_PAIRS.length]
-    return {
-      id: `mul1_${i + 1}`,
-      type: 'multiplication',
-      prompt: `${a} × ${b} = ?`,
-      answer: String(a * b),
+// Level 3/1 — Basic multiplication facts
+// Domain: a ∈ [2,9], b ∈ [2,9] → 64 unique ordered pairs
+export function generateBasicMultiplication(count = 10, rand: () => number = Math.random): MultiplicationProblem[] {
+  const problems: MultiplicationProblem[] = []
+  const seen = new Set<string>()
+  let tries = 0
+  while (problems.length < count && tries < count * 50) {
+    tries++
+    const a = randInt(2, 9, rand)
+    const b = randInt(2, 9, rand)
+    const prompt = `${a} × ${b} = ?`
+    if (!seen.has(prompt)) {
+      seen.add(prompt)
+      problems.push({ id: `mul1_${problems.length + 1}`, type: 'multiplication', prompt, answer: String(a * b) })
     }
-  })
+  }
+  return problems
 }
 
-// --- Level 3/2 — Multi-digit multiplication ---
-// 10 fixed pairs: two-digit × one-digit, manageable products, no overwhelming numbers
-const MULTI_DIGIT_PAIRS: [number, number][] = [
-  [12, 3],
-  [14, 2],
-  [11, 5],
-  [13, 4],
-  [21, 3],
-  [15, 4],
-  [22, 3],
-  [16, 5],
-  [24, 3],
-  [31, 2],
-]
-
-export function generateMultiDigitMultiplication(count: number = MULTI_DIGIT_PAIRS.length): MultiplicationProblem[] {
-  return Array.from({ length: count }, (_, i) => {
-    const [a, b] = MULTI_DIGIT_PAIRS[i % MULTI_DIGIT_PAIRS.length]
-    return {
-      id: `mul2_${i + 1}`,
-      type: 'multiplication',
-      prompt: `${a} × ${b} = ?`,
-      answer: String(a * b),
+// Level 3/2 — Two-digit × one-digit multiplication
+// Domain: a ∈ [11,25], b ∈ [2,5] → 60 unique pairs; products ≤ 125, matching original difficulty
+export function generateMultiDigitMultiplication(count = 10, rand: () => number = Math.random): MultiplicationProblem[] {
+  const problems: MultiplicationProblem[] = []
+  const seen = new Set<string>()
+  let tries = 0
+  while (problems.length < count && tries < count * 50) {
+    tries++
+    const a = randInt(11, 25, rand)
+    const b = randInt(2, 5, rand)
+    const prompt = `${a} × ${b} = ?`
+    if (!seen.has(prompt)) {
+      seen.add(prompt)
+      problems.push({ id: `mul2_${problems.length + 1}`, type: 'multiplication', prompt, answer: String(a * b) })
     }
-  })
+  }
+  return problems
 }

@@ -1,3 +1,5 @@
+import { randInt } from './rand'
+
 export type SubtractionProblemType = 'subtraction'
 
 export interface SubtractionProblem {
@@ -7,56 +9,40 @@ export interface SubtractionProblem {
   answer: string
 }
 
-// --- Level 2/1 — Single-digit subtraction ---
-// 10 fixed pairs, results are 0–9, no negatives
-const SINGLE_DIGIT_PAIRS: [number, number][] = [
-  [8, 3],
-  [9, 4],
-  [7, 2],
-  [6, 1],
-  [5, 3],
-  [9, 6],
-  [8, 5],
-  [7, 4],
-  [6, 3],
-  [9, 7],
-]
-
-export function generateSingleDigitSubtraction(count: number = SINGLE_DIGIT_PAIRS.length): SubtractionProblem[] {
-  return Array.from({ length: count }, (_, i) => {
-    const [a, b] = SINGLE_DIGIT_PAIRS[i % SINGLE_DIGIT_PAIRS.length]
-    return {
-      id: `sub1_${i + 1}`,
-      type: 'subtraction',
-      prompt: `${a} - ${b} = ?`,
-      answer: String(a - b),
+// Level 2/1 — Single-digit subtraction, no negative results
+// Domain: a ∈ [1,9], b ∈ [0,a] → 54 unique pairs (> 2× max count of 20)
+export function generateSingleDigitSubtraction(count = 10, rand: () => number = Math.random): SubtractionProblem[] {
+  const problems: SubtractionProblem[] = []
+  const seen = new Set<string>()
+  let tries = 0
+  while (problems.length < count && tries < count * 50) {
+    tries++
+    const a = randInt(1, 9, rand)
+    const b = randInt(0, a, rand)
+    const prompt = `${a} - ${b} = ?`
+    if (!seen.has(prompt)) {
+      seen.add(prompt)
+      problems.push({ id: `sub1_${problems.length + 1}`, type: 'subtraction', prompt, answer: String(a - b) })
     }
-  })
+  }
+  return problems
 }
 
-// --- Level 2/2 — Double-digit subtraction ---
-// 10 fixed pairs, age-appropriate, no negatives, manageable borrowing
-const DOUBLE_DIGIT_PAIRS: [number, number][] = [
-  [25, 13],
-  [38, 14],
-  [47, 22],
-  [56, 31],
-  [64, 28],
-  [73, 45],
-  [82, 37],
-  [91, 56],
-  [67, 34],
-  [85, 49],
-]
-
-export function generateDoubleDigitSubtraction(count: number = DOUBLE_DIGIT_PAIRS.length): SubtractionProblem[] {
-  return Array.from({ length: count }, (_, i) => {
-    const [a, b] = DOUBLE_DIGIT_PAIRS[i % DOUBLE_DIGIT_PAIRS.length]
-    return {
-      id: `sub2_${i + 1}`,
-      type: 'subtraction',
-      prompt: `${a} - ${b} = ?`,
-      answer: String(a - b),
+// Level 2/2 — Double-digit subtraction, positive results, manageable borrowing
+// Domain: a ∈ [20,89], b ∈ [11,a-1] → very large; result always ≥ 1
+export function generateDoubleDigitSubtraction(count = 10, rand: () => number = Math.random): SubtractionProblem[] {
+  const problems: SubtractionProblem[] = []
+  const seen = new Set<string>()
+  let tries = 0
+  while (problems.length < count && tries < count * 50) {
+    tries++
+    const a = randInt(20, 89, rand)
+    const b = randInt(11, a - 1, rand)
+    const prompt = `${a} - ${b} = ?`
+    if (!seen.has(prompt)) {
+      seen.add(prompt)
+      problems.push({ id: `sub2_${problems.length + 1}`, type: 'subtraction', prompt, answer: String(a - b) })
     }
-  })
+  }
+  return problems
 }

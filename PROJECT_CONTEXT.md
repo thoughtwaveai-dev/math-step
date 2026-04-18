@@ -221,6 +221,15 @@ Generators live in `src/lib/math/generators/`. The router is `generateProblems(l
 | 11/1 | one-variable inequalities (4 types) | `x > 4`, `x < 7`, `x <= 5`, `x >= 12` | inequality normalization |
 | others | not implemented | — | returns [] → "Coming Soon" |
 
+### Generator architecture (Milestone 26)
+
+All generators use **bounded algorithmic random generation** — no more fixed 10-item cycling pools.
+
+- Each generator accepts an optional `rand: () => number` parameter (default: `Math.random`). Pass `seededRand(seed)` from `rand.ts` in tests for deterministic output.
+- Arithmetic generators (addition, subtraction, multiplication, equations, inequalities): pick operands algorithmically within bounded ranges, dedup on prompt string with a retry budget (max `count × 50` attempts).
+- Factorization generators (9/1, 9/2): shuffle large static pools (25-30 entries) using `shuffled()` and slice to the needed count. Guarantees no repeats within a session.
+- Answer formats are identical to previous generators — no grading changes needed.
+
 ### Grading (`src/app/actions/worksheet.ts`)
 
 `gradeAnswer(studentAnswer, correctAnswer)` has three paths:

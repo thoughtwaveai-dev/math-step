@@ -1,3 +1,5 @@
+import { shuffled } from './rand'
+
 export type ProblemType = 'prime_factorization' | 'list_factors' | 'gcf' | 'lcm' | 'factor_pairs' | 'common_factors'
 
 export interface MathProblem {
@@ -61,32 +63,54 @@ function commonFactors(a: number, b: number): number[] {
   return allFactors(a).filter(f => b % f === 0)
 }
 
-// --- Fixed pools (deterministic, no randomness) ---
+// --- Large pools for Level 9/1 ---
 
-const PF_NUMBERS = [12, 18, 24, 30, 36, 42, 48, 60, 72, 84]
-const LF_NUMBERS = [12, 18, 24, 30, 36, 48, 60, 72]
-const GCF_PAIRS: [number, number][] = [
+const PF_POOL = [
+  12, 18, 20, 24, 28, 30, 36, 40, 42, 45,
+  48, 50, 54, 56, 60, 63, 66, 70, 72, 75,
+  78, 80, 84, 90, 96, 100, 108, 110, 112, 120,
+] as const
+
+const LF_POOL = [
+  12, 15, 16, 18, 20, 21, 24, 25, 28, 30,
+  32, 35, 36, 40, 42, 45, 48, 50, 54, 56,
+  60, 63, 66, 70, 72,
+] as const
+
+const GCF_POOL: [number, number][] = [
   [12, 18], [24, 36], [30, 45], [18, 27], [16, 24],
-]
-const LCM_PAIRS: [number, number][] = [
-  [4, 6], [6, 9], [8, 12],
+  [20, 30], [28, 42], [15, 25], [36, 48], [14, 21],
+  [32, 48], [40, 60], [12, 30], [18, 45], [24, 60],
+  [15, 35], [21, 28], [16, 40], [27, 36], [20, 50],
+  [18, 24], [30, 42], [35, 49], [24, 32], [45, 60],
+  [36, 54], [14, 35], [22, 33], [26, 39], [16, 56],
 ]
 
-// Generates problems for level 9 / sublevel 1 — Factorization
-// Default count is 10. Distribution ratio: 3 PF : 2 LF : 3 GCF : 2 LCM (out of 10).
-// For other counts, the same ratio is scaled proportionally, cycling pools as needed.
-export function generateFactorizationProblems(count: number = 10): MathProblem[] {
-  // Distribute by ratio 3:2:3:2
+const LCM_POOL: [number, number][] = [
+  [4, 6], [6, 9], [8, 12], [3, 5], [4, 10],
+  [6, 8], [5, 6], [4, 14], [6, 10], [8, 10],
+  [3, 8], [4, 9], [5, 7], [6, 14], [8, 14],
+  [3, 7], [4, 15], [5, 8], [6, 15], [9, 12],
+  [10, 15], [4, 18], [6, 20], [8, 15], [9, 15],
+]
+
+// Generates problems for Level 9/1 — Factorization
+// Distribution ratio: 3 PF : 2 LF : 3 GCF : 2 LCM
+export function generateFactorizationProblems(count = 10, rand: () => number = Math.random): MathProblem[] {
   const pfCount = Math.round(count * 0.3)
   const lfCount = Math.round(count * 0.2)
   const gcfCount = Math.round(count * 0.3)
-  // LCM gets the remainder so total always equals count
   const lcmCount = count - pfCount - lfCount - gcfCount
+
+  const pfNums = shuffled(PF_POOL, rand).slice(0, pfCount)
+  const lfNums = shuffled(LF_POOL, rand).slice(0, lfCount)
+  const gcfPairs = shuffled(GCF_POOL, rand).slice(0, gcfCount)
+  const lcmPairs = shuffled(LCM_POOL, rand).slice(0, lcmCount)
 
   const problems: MathProblem[] = []
 
-  for (let i = 0; i < pfCount; i++) {
-    const n = PF_NUMBERS[i % PF_NUMBERS.length]
+  for (let i = 0; i < pfNums.length; i++) {
+    const n = pfNums[i]
     problems.push({
       id: `pf_${i + 1}`,
       type: 'prime_factorization',
@@ -95,8 +119,8 @@ export function generateFactorizationProblems(count: number = 10): MathProblem[]
     })
   }
 
-  for (let i = 0; i < lfCount; i++) {
-    const n = LF_NUMBERS[i % LF_NUMBERS.length]
+  for (let i = 0; i < lfNums.length; i++) {
+    const n = lfNums[i]
     problems.push({
       id: `lf_${i + 1}`,
       type: 'list_factors',
@@ -105,8 +129,8 @@ export function generateFactorizationProblems(count: number = 10): MathProblem[]
     })
   }
 
-  for (let i = 0; i < gcfCount; i++) {
-    const [a, b] = GCF_PAIRS[i % GCF_PAIRS.length]
+  for (let i = 0; i < gcfPairs.length; i++) {
+    const [a, b] = gcfPairs[i]
     problems.push({
       id: `gcf_${i + 1}`,
       type: 'gcf',
@@ -115,8 +139,8 @@ export function generateFactorizationProblems(count: number = 10): MathProblem[]
     })
   }
 
-  for (let i = 0; i < lcmCount; i++) {
-    const [a, b] = LCM_PAIRS[i % LCM_PAIRS.length]
+  for (let i = 0; i < lcmPairs.length; i++) {
+    const [a, b] = lcmPairs[i]
     problems.push({
       id: `lcm_${i + 1}`,
       type: 'lcm',
@@ -128,29 +152,44 @@ export function generateFactorizationProblems(count: number = 10): MathProblem[]
   return problems
 }
 
-// --- Fixed pools for Level 9 / Sublevel 2 ---
+// --- Large pools for Level 9/2 ---
 
-// Numbers chosen to avoid perfect-square pairs (keeps normalize grading clean — no duplicate numbers in answer)
-const FP_NUMBERS = [12, 18, 20, 24, 30, 28, 40, 45, 50, 32]
-const CF_PAIRS: [number, number][] = [
+const FP_POOL = [
+  12, 15, 18, 20, 24, 28, 30, 32, 36, 40,
+  42, 45, 48, 50, 54, 56, 60, 63, 66, 70, 72,
+] as const
+
+const CF_POOL: [number, number][] = [
   [12, 18], [24, 36], [18, 27], [30, 45], [16, 24],
-]
-// GCF pairs distinct from 9/1 to avoid repetition
-const GCF2_PAIRS: [number, number][] = [
-  [15, 25], [20, 30], [28, 42], [14, 21], [36, 48],
+  [12, 30], [18, 45], [15, 25], [14, 21], [20, 30],
+  [28, 42], [16, 40], [24, 60], [36, 48], [12, 20],
+  [18, 24], [30, 42], [21, 28], [15, 35], [24, 32],
+  [36, 54], [20, 50], [12, 36], [18, 54], [15, 45],
 ]
 
-// Generates problems for level 9 / sublevel 2 — Factor Pairs and Common Factors
-// Default count is 10. Distribution ratio: 4 FP : 3 CF : 3 GCF (out of 10).
-export function generateFactorizationPairProblems(count: number = 10): MathProblem[] {
+const GCF2_POOL: [number, number][] = [
+  [15, 25], [20, 30], [28, 42], [14, 21], [36, 48],
+  [10, 25], [12, 28], [18, 30], [24, 40], [15, 45],
+  [16, 32], [20, 45], [24, 56], [14, 49], [21, 35],
+  [18, 42], [22, 44], [25, 75], [30, 50], [16, 48],
+  [12, 42], [18, 36], [20, 60], [14, 56], [21, 42],
+]
+
+// Generates problems for Level 9/2 — Factor Pairs and Common Factors
+// Distribution ratio: 4 FP : 3 CF : 3 GCF
+export function generateFactorizationPairProblems(count = 10, rand: () => number = Math.random): MathProblem[] {
   const fpCount = Math.round(count * 0.4)
   const cfCount = Math.round(count * 0.3)
   const gcfCount = count - fpCount - cfCount
 
+  const fpNums = shuffled(FP_POOL, rand).slice(0, fpCount)
+  const cfPairs = shuffled(CF_POOL, rand).slice(0, cfCount)
+  const gcfPairs = shuffled(GCF2_POOL, rand).slice(0, gcfCount)
+
   const problems: MathProblem[] = []
 
-  for (let i = 0; i < fpCount; i++) {
-    const n = FP_NUMBERS[i % FP_NUMBERS.length]
+  for (let i = 0; i < fpNums.length; i++) {
+    const n = fpNums[i]
     const pairs = factorPairs(n)
     const answer = pairs.map(([a, b]) => `${a}×${b}`).join(', ')
     problems.push({
@@ -161,8 +200,8 @@ export function generateFactorizationPairProblems(count: number = 10): MathProbl
     })
   }
 
-  for (let i = 0; i < cfCount; i++) {
-    const [a, b] = CF_PAIRS[i % CF_PAIRS.length]
+  for (let i = 0; i < cfPairs.length; i++) {
+    const [a, b] = cfPairs[i]
     const answer = commonFactors(a, b).join(', ')
     problems.push({
       id: `cf_${i + 1}`,
@@ -172,8 +211,8 @@ export function generateFactorizationPairProblems(count: number = 10): MathProbl
     })
   }
 
-  for (let i = 0; i < gcfCount; i++) {
-    const [a, b] = GCF2_PAIRS[i % GCF2_PAIRS.length]
+  for (let i = 0; i < gcfPairs.length; i++) {
+    const [a, b] = gcfPairs[i]
     problems.push({
       id: `gcf2_${i + 1}`,
       type: 'gcf',

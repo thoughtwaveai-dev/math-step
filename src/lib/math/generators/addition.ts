@@ -1,3 +1,5 @@
+import { randInt } from './rand'
+
 export type AdditionProblemType = 'addition'
 
 export interface AdditionProblem {
@@ -7,56 +9,40 @@ export interface AdditionProblem {
   answer: string
 }
 
-// --- Level 1/1 — Single-digit addition ---
-// 10 fixed pairs, sums within 10 to keep it age-appropriate for beginners
-const SINGLE_DIGIT_PAIRS: [number, number][] = [
-  [2, 3],
-  [4, 5],
-  [1, 6],
-  [3, 4],
-  [5, 3],
-  [2, 7],
-  [6, 2],
-  [4, 4],
-  [1, 8],
-  [3, 6],
-]
-
-export function generateSingleDigitAddition(count: number = SINGLE_DIGIT_PAIRS.length): AdditionProblem[] {
-  return Array.from({ length: count }, (_, i) => {
-    const [a, b] = SINGLE_DIGIT_PAIRS[i % SINGLE_DIGIT_PAIRS.length]
-    return {
-      id: `add1_${i + 1}`,
-      type: 'addition',
-      prompt: `${a} + ${b} = ?`,
-      answer: String(a + b),
+// Level 1/1 — Single-digit addition
+// Domain: a ∈ [1,9], b ∈ [1,9] → 81 unique ordered pairs (well above 3× max count of 20)
+export function generateSingleDigitAddition(count = 10, rand: () => number = Math.random): AdditionProblem[] {
+  const problems: AdditionProblem[] = []
+  const seen = new Set<string>()
+  let tries = 0
+  while (problems.length < count && tries < count * 50) {
+    tries++
+    const a = randInt(1, 9, rand)
+    const b = randInt(1, 9, rand)
+    const prompt = `${a} + ${b} = ?`
+    if (!seen.has(prompt)) {
+      seen.add(prompt)
+      problems.push({ id: `add1_${problems.length + 1}`, type: 'addition', prompt, answer: String(a + b) })
     }
-  })
+  }
+  return problems
 }
 
-// --- Level 1/2 — Double-digit addition ---
-// 10 fixed pairs using tens and units, no carrying at first few then mild carrying
-const DOUBLE_DIGIT_PAIRS: [number, number][] = [
-  [10, 15],
-  [20, 13],
-  [11, 12],
-  [14, 21],
-  [23, 16],
-  [17, 22],
-  [25, 14],
-  [18, 21],
-  [34, 25],
-  [27, 36],
-]
-
-export function generateDoubleDigitAddition(count: number = DOUBLE_DIGIT_PAIRS.length): AdditionProblem[] {
-  return Array.from({ length: count }, (_, i) => {
-    const [a, b] = DOUBLE_DIGIT_PAIRS[i % DOUBLE_DIGIT_PAIRS.length]
-    return {
-      id: `add2_${i + 1}`,
-      type: 'addition',
-      prompt: `${a} + ${b} = ?`,
-      answer: String(a + b),
+// Level 1/2 — Double-digit addition
+// Domain: a ∈ [10,49], b ∈ [10,49] → ~1600 unique pairs; mild carrying naturally occurs
+export function generateDoubleDigitAddition(count = 10, rand: () => number = Math.random): AdditionProblem[] {
+  const problems: AdditionProblem[] = []
+  const seen = new Set<string>()
+  let tries = 0
+  while (problems.length < count && tries < count * 50) {
+    tries++
+    const a = randInt(10, 49, rand)
+    const b = randInt(10, 49, rand)
+    const prompt = `${a} + ${b} = ?`
+    if (!seen.has(prompt)) {
+      seen.add(prompt)
+      problems.push({ id: `add2_${problems.length + 1}`, type: 'addition', prompt, answer: String(a + b) })
     }
-  })
+  }
+  return problems
 }
