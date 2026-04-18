@@ -8,11 +8,13 @@ interface PersistedProblem {
   id: string
   prompt: string
   type: AnyProblemType
+  isReview?: boolean
 }
 
 interface Props {
   sessionId: string
   problems: PersistedProblem[]
+  reviewProblemIds: string[]
 }
 
 function problemTypeLabel(type: AnyProblemType): string {
@@ -35,7 +37,7 @@ function inputModeForType(type: AnyProblemType): 'numeric' | 'text' {
   return type === 'inequality' ? 'text' : 'numeric'
 }
 
-export default function WorksheetForm({ sessionId, problems }: Props) {
+export default function WorksheetForm({ sessionId, problems, reviewProblemIds }: Props) {
   const [state, formAction, pending] = useActionState(submitWorksheet, null)
   const [elapsed, setElapsed] = useState(0)
 
@@ -51,6 +53,7 @@ export default function WorksheetForm({ sessionId, problems }: Props) {
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="session_id" value={sessionId} />
       <input type="hidden" name="time_taken_seconds" value={elapsed} />
+      <input type="hidden" name="review_problem_ids" value={reviewProblemIds.join(',')} />
 
       {/* Live timer */}
       <div className="flex items-center gap-3 rounded-xl border border-[#bae0bd] bg-white px-5 py-3.5">
@@ -73,9 +76,16 @@ export default function WorksheetForm({ sessionId, problems }: Props) {
             </span>
             <div className="flex-1 space-y-3">
               <div>
-                <span className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">
-                  {problemTypeLabel(problem.type)}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">
+                    {problemTypeLabel(problem.type)}
+                  </span>
+                  {problem.isReview && (
+                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                      Review
+                    </span>
+                  )}
+                </div>
                 <p className="mt-1 text-lg font-semibold text-[#1a2e1c]">{problem.prompt}</p>
               </div>
               <input

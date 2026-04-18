@@ -44,6 +44,10 @@ export async function submitWorksheet(
 ): Promise<{ error: string } | null> {
   const sessionId = formData.get('session_id') as string
   const timeTaken = parseInt((formData.get('time_taken_seconds') as string) ?? '0', 10)
+  // IDs of review problems — excluded from mastery/advancement calculation
+  const reviewIdSet = new Set(
+    ((formData.get('review_problem_ids') as string) ?? '').split(',').filter(Boolean)
+  )
 
   if (!sessionId) return { error: 'Session ID missing.' }
 
@@ -74,10 +78,17 @@ export async function submitWorksheet(
 
   // Grade each problem and update the row
   let correctCount = 0
+  let currentLevelCorrect = 0
+  let currentLevelTotal = 0
   for (const problem of problems) {
     const studentAnswer = ((formData.get(`answer_${problem.id}`) as string) ?? '').trim()
     const isCorrect = gradeAnswer(studentAnswer, problem.correct_answer)
     if (isCorrect) correctCount++
+
+    if (!reviewIdSet.has(problem.id)) {
+      currentLevelTotal++
+      if (isCorrect) currentLevelCorrect++
+    }
 
     const { error: updateErr } = await supabase
       .from('problems')
@@ -88,8 +99,14 @@ export async function submitWorksheet(
   }
 
   const totalProblems = problems.length
-  // numeric(5,2) — store as a float rounded to 2 decimal places
+  // Overall accuracy stored in session for display (includes review problems)
   const accuracy = Math.round((correctCount / totalProblems) * 10000) / 100
+
+  // Current-level-only accuracy used for pass/fail and mastery advancement.
+  // Review problems do not count toward mastery evaluation.
+  const effectiveTotal = currentLevelTotal > 0 ? currentLevelTotal : totalProblems
+  const effectiveCorrect = currentLevelTotal > 0 ? currentLevelCorrect : correctCount
+  const currentLevelAccuracy = Math.round((effectiveCorrect / effectiveTotal) * 10000) / 100
 
   // Fetch level thresholds + consecutive passes required
   const { data: level } = await supabase
@@ -100,9 +117,9 @@ export async function submitWorksheet(
 
   const threshold = level?.accuracy_threshold ?? 90
   const speedTarget = level?.speed_target_seconds ?? null
-  // Pass requires accuracy threshold AND (if speed target set) time within target
+  // Pass is determined by current-level accuracy only — review problems don't affect mastery
   const passed =
-    accuracy >= threshold &&
+    currentLevelAccuracy >= threshold &&
     (speedTarget === null || timeTaken <= speedTarget)
 
   // Complete the session

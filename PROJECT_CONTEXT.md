@@ -243,6 +243,24 @@ All generators use **bounded algorithmic random generation** — no more fixed 1
 
 ---
 
+## Worksheet Interleaving (Milestone 28)
+
+Worksheets can include a small set of review problems from previously mastered levels to improve long-term retention.
+
+**Logic lives in `src/app/worksheet/page.tsx`:**
+- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support
+- `REVIEW_PROBLEM_COUNT = 4` — number of review problems in a mixed worksheet
+- For a 20-problem worksheet: 16 current-level + 4 review, shuffled to interleave
+- Review eligibility: `student_level_progress` row must exist with `consecutive_passes > 0 OR last_result_passed = true`. This filters out placement-jumped levels.
+- Up to 2 most recent eligible supported levels are used for review (split 2+2)
+- Unsupported levels are detected via `SUPPORTED_LEVEL_KEYS` check and show "Coming Soon" immediately — before interleaving runs
+
+**Display:** `WorksheetForm.tsx` renders an amber "Review" badge on review problems. The `isReview` flag is in-memory only and not persisted to DB.
+
+**Grading/progression:** Review problems count toward the session total and accuracy. The session `level_id` stays as the current level — only current-level mastery progress is tracked.
+
+---
+
 ## Next Planned Milestone
 
 - Deploy to Vercel (or similar) to test real mobile install flow

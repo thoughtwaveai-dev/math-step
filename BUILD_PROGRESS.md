@@ -6,8 +6,64 @@
 
 ## Current Status
 
-**Phase:** Milestone 27 — Placement Diagnostic v1.
+**Phase:** Milestone 28 — Interleaving v1.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 28 — Interleaving v1 (2026-04-18)
+
+**Interleaving strategy:**
+When a student opens a worksheet, the system checks for previously mastered supported levels and includes a small set of review problems to improve long-term retention.
+
+**Rules:**
+- A "mastered" level requires a `student_level_progress` row with `consecutive_passes > 0 OR last_result_passed = true`. This prevents review from levels the student jumped past via placement diagnostic or admin set-level.
+- Eligible review levels = supported levels ordered before the student's current level, filtered to mastered only.
+- Up to the 2 most recent eligible levels are selected (closest to current).
+- A 20-problem worksheet becomes: 16 current-level + 4 review problems, shuffled to interleave.
+- If the current level has `problems_per_session < 8` (< REVIEW_COUNT + 4), interleaving is skipped and the worksheet is all current-level problems.
+- If review generators return fewer than expected, the shortfall is topped up with extra current-level problems.
+- Students with no prior mastered supported levels get a normal full worksheet (no change).
+
+**Unsupported levels:**
+- An explicit `currentLevelSupported` check (against `SUPPORTED_LEVEL_KEYS`) now runs before interleaving. This ensures unsupported levels immediately show "Coming Soon" and never accidentally show a worksheet of only review problems.
+
+**Files changed:**
+- `src/app/worksheet/page.tsx` — interleaving logic, `SUPPORTED_LEVEL_KEYS` constant, explicit unsupported level check
+- `src/app/worksheet/WorksheetForm.tsx` — `isReview?: boolean` on `PersistedProblem`, amber "Review" badge shown when true
+
+No DB schema changes. No new dependencies.
+
+### Milestone 28b — Interleaving: Isolate Mastery from Review (2026-04-18)
+
+Review problems no longer affect pass/fail or level advancement.
+
+**Change:** `submitWorksheet` now reads a `review_problem_ids` hidden form field (comma-separated UUIDs). Current-level-only accuracy is computed by excluding those IDs from the mastery calculation. `session.passed` and `student_level_progress` use current-level accuracy; `session.accuracy` and `session.correct_count` use all problems for display.
+
+**What users see:** Overall score (e.g. 16/20, 80%) — includes review problems.
+**What drives mastery/advancement:** Current-level accuracy only (e.g. 16/16, 100%) — review problems excluded.
+**Fallback:** If `review_problem_ids` is empty (no interleaving), effective total = total problems, behaves identically to before.
+
+**Files changed:**
+- `src/app/worksheet/page.tsx` — passes `reviewProblemIds` prop to `WorksheetForm`
+- `src/app/worksheet/WorksheetForm.tsx` — renders `<input type="hidden" name="review_problem_ids" …>`
+- `src/app/actions/worksheet.ts` — reads review IDs, computes separate current-level accuracy for `passed`
+
+No DB schema changes.
+
+### Suite 28 — Interleaving v1 (2026-04-18)
+| Test | Result |
+|------|--------|
+| Student at 1/1 (no prior mastered levels): worksheet shows 20 addition problems, zero Review tags | PASS |
+| Student passes 1/1, admin-set to 1/2: worksheet shows 4 single-digit review (1/1) + 16 double-digit main (1/2) | PASS |
+| Review problems show amber "Review" badge; main problems show no badge | PASS |
+| Mixed worksheet submits correctly: 20/20, 100%, ✓ Passed | PASS |
+| Progression tracking (consecutive_passes, mastery) still works after mixed submit | PASS |
+| Unsupported level (4/1) with prior mastered levels: shows "Coming Soon", not a worksheet of review problems | PASS |
+| TypeScript: build clean, no type errors | PASS |
+| Logic: 16/16 current + 0/4 review → overall 80%, mastery 100% → passed=true | PASS (unit verified) |
+| Logic: 14/16 current + 4/4 review → overall 90%, mastery 87.5% → passed=false | PASS (unit verified) |
+| Logic: no review (empty reviewIdSet), 18/20 → same accuracy both paths | PASS (unit verified) |
 
 ---
 
