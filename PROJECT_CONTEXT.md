@@ -226,6 +226,8 @@ Generators live in `src/lib/math/generators/`. The router is `generateProblems(l
 | Level | Generator | Answer format | Grading path |
 |-------|-----------|---------------|--------------|
 | 1/1–3/2 | addition, subtraction, multiplication | single integer | exact integer match |
+| 4/1 | division facts (divisor ∈ [1,9], quotient ∈ [1,9]) | single integer | exact integer match |
+| 4/2 | long division (divisor ∈ [2,9], quotient ∈ [11,25], no remainders) | single integer | exact integer match |
 | 9/1 | factorization (prime, list factors, GCF, LCM) | integer or sorted multi-token | integer or number-sort |
 | 9/2 | factor pairs, common factors, GCF | list or single integer | number-sort or integer |
 | 10/1 | linear equations (one variable, 5 subtypes) | single integer | exact integer match |
@@ -260,7 +262,7 @@ All generators use **bounded algorithmic random generation** — no more fixed 1
 Worksheets can include a small set of review problems from previously mastered levels to improve long-term retention.
 
 **Logic lives in `src/app/worksheet/page.tsx`:**
-- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support
+- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support: `[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[9,1],[9,2],[10,1],[10,2],[11,1]`
 - `REVIEW_PROBLEM_COUNT = 4` — number of review problems in a mixed worksheet
 - For a 20-problem worksheet: 16 current-level + 4 review, shuffled to interleave
 - Review eligibility: `student_level_progress` row must exist with `consecutive_passes > 0 OR last_result_passed = true`. This filters out placement-jumped levels.

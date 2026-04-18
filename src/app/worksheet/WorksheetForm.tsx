@@ -22,6 +22,7 @@ function problemTypeLabel(type: AnyProblemType): string {
     case 'addition': return 'Addition'
     case 'subtraction': return 'Subtraction'
     case 'multiplication': return 'Multiplication'
+    case 'division': return 'Division'
     case 'prime_factorization': return 'Prime Factorization'
     case 'list_factors': return 'List Factors'
     case 'gcf': return 'Greatest Common Factor'

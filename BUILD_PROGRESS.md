@@ -6,8 +6,71 @@
 
 ## Current Status
 
-**Phase:** Milestone 31 — Parent Analytics / Progress at a Glance.
+**Phase:** Milestone 32 — Division generators (4/1 and 4/2).
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 32 — Division Generators: Levels 4/1 and 4/2 (2026-04-18)
+
+**What was added:**
+Division support extending the beginner curriculum path past multiplication.
+
+**Files added:**
+- `src/lib/math/generators/division.ts` — two generators:
+  - `generateDivisionFacts(count)` — Level 4/1: basic facts, divisor ∈ [1,9], quotient ∈ [1,9], 81 unique pairs. Dedup on prompt string. Whole-number answers only, no remainders by construction.
+  - `generateLongDivision(count)` — Level 4/2: two-digit ÷ one-digit. divisor ∈ [2,9], quotient ∈ [11,25], max dividend 225. No remainders by construction.
+
+**Files changed:**
+- `src/lib/math/generators/index.ts` — routes 4/1 → `generateDivisionFacts`, 4/2 → `generateLongDivision`; exports `DivisionProblem`, `DivisionProblemType`; added `DivisionProblemType` to `AnyProblemType` union
+- `src/app/worksheet/page.tsx` — added `[4, 1]` and `[4, 2]` to `SUPPORTED_LEVEL_KEYS`
+- `src/app/worksheet/WorksheetForm.tsx` — added `'division'` case to `problemTypeLabel()`
+- `src/lib/lessons/index.ts` — added `4/1` lesson (Division Facts) and `4/2` lesson (Long Division), each with title, explanation, worked example, steps, and tip
+
+**DB:** Level rows 4/1 (id=7) and 4/2 (id=8) already existed in the `levels` table with 20 problems/session, 90% accuracy threshold, 3 consecutive passes required.
+
+**Generation approach:**
+- 4/1: pick factors a,b ∈ [1,9] → prompt `(a×b) ÷ b = ?`, answer = a. Inverse of multiplication facts.
+- 4/2: pick divisor b ∈ [2,9], quotient q ∈ [11,25] → prompt `(b×q) ÷ b = ?`, answer = q. Guarantees no remainders.
+
+**Answer format:** single integer — compatible with existing exact-match grading. No grading changes needed.
+
+**Limitations (v1):**
+- No remainders. Division with remainders is deferred to a future milestone.
+- 4/2 domain: quotients 11–25, dividends up to 225. Not true "long division" format (no written algorithm), just larger-number single-step division. Suitable for this age/level.
+
+### Suite 32 — Division Generators (2026-04-18)
+| Test | Result |
+|------|--------|
+| TypeScript: build clean, no type errors | PASS |
+| Next.js production build: all routes compile | PASS |
+| 4/1: 20 unique problems generated (seed 42) | PASS |
+| 4/1: all answers mathematically correct (dividend÷divisor=answer) | PASS |
+| 4/1: all answers in range 1–9 (age-appropriate facts) | PASS |
+| 4/2: 20 unique problems generated (seed 99) | PASS |
+| 4/2: all answers mathematically correct | PASS |
+| 4/2: max dividend 162 ≤ 225 (manageable numbers) | PASS |
+| Level rows 4/1 (id=7) and 4/2 (id=8) confirmed in DB | PASS |
+| SUPPORTED_LEVEL_KEYS includes [4,1] and [4,2] | PASS |
+| Manual placement to 4/1 via admin controls → Level 4 / Sublevel 1 / Division stats updated | PASS |
+| 4/1 worksheet loads: "Division Worksheet", "DivKid · Level 4.1", 20 problems | PASS |
+| 4/1 lesson card: "Learn: Division Facts", worked example (35÷7=5), tip shown | PASS |
+| 4/1 problem type label: "Division" on all problems | PASS |
+| 4/1 sample problems: basic facts format (e.g. "63 ÷ 7 = ?", "45 ÷ 5 = ?") | PASS |
+| 4/1 wrong answers (all 999): 0/20, 0%, ✗ Not passed, consecutive passes reset | PASS |
+| 4/1 correct answers (20/20): 100%, ✓ Passed, mastery 1/3 | PASS |
+| 4/1 → 4/2 progression: 3 passing sessions → "Level Up! Advanced to Level 4.2 — Division" | PASS |
+| URL on advancement: ?advanced=1&nl=4&ns=2&nt=Division | PASS |
+| 4/2 worksheet loads: "Division Worksheet", "DivKid · Level 4.2", 20 problems | PASS |
+| 4/2 lesson card: "Learn: Long Division", worked example (96÷4=24), 5 steps, tip shown | PASS |
+| 4/2 problems: long division format (e.g. "168 ÷ 8 = ?", "225 ÷ 9 = ?", "84 ÷ 7 = ?") | PASS |
+| 4/2 interleaving: 4 review problems from 4/1 mixed in (single-digit facts as review) | PASS |
+| 4/2 wrong answers (all 999): 0/20, 0%, ✗ Not passed, consecutive passes reset | PASS |
+| 4/2 correct answers (20/20): 100%, ✓ Passed, mastery 1/3 | PASS |
+| Unsupported level 5/1: "Coming Soon — Worksheets for Level 5.1 (Fractions) are not available yet." | PASS |
+| Tablet layout (768×1024): lesson card, worked example, problems all render cleanly | PASS |
+| TypeScript: build clean, no type errors | PASS |
+| Next.js production build: all routes compile | PASS |
 
 ---
 

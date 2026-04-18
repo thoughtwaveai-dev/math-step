@@ -84,6 +84,36 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'The order doesn\'t matter — 4 × 6 = 6 × 4 = 24. Use whichever you know better!',
   },
+  '4/1': {
+    title: 'Division Facts',
+    explanation: 'Division means splitting a number into equal groups. If 3 × 4 = 12, then 12 ÷ 3 = 4 and 12 ÷ 4 = 3. Knowing your multiplication facts makes division easy!',
+    example: {
+      problem: '35 ÷ 7 = ?',
+      steps: [
+        'Ask: what number times 7 equals 35?',
+        '7 × 5 = 35',
+        'So 35 ÷ 7 = 5',
+      ],
+      answer: '5',
+    },
+    tip: 'Division is the reverse of multiplication — think of each division problem as a missing multiplication fact!',
+  },
+  '4/2': {
+    title: 'Long Division',
+    explanation: 'Long division splits a larger number by a one-digit number. Work through the digits from left to right: divide, multiply, subtract, then bring down the next digit.',
+    example: {
+      problem: '96 ÷ 4 = ?',
+      steps: [
+        'How many times does 4 go into 9? → 2 times (2 × 4 = 8)',
+        'Write 2 above the 9. Subtract: 9 - 8 = 1',
+        'Bring down the 6 → now you have 16',
+        'How many times does 4 go into 16? → 4 times (4 × 4 = 16)',
+        '96 ÷ 4 = 24',
+      ],
+      answer: '24',
+    },
+    tip: 'Check your answer by multiplying: 24 × 4 = 96 ✓. If it matches, you\'re correct!',
+  },
   '3/2': {
     title: 'Multi-Digit Multiplication',
     explanation: 'To multiply a two-digit number by a one-digit number, split the big number into tens and ones, multiply each part, then add the results together.',
