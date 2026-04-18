@@ -6,8 +6,56 @@
 
 ## Current Status
 
-**Phase:** Milestone 28 — Interleaving v1.
+**Phase:** Milestone 29 — Stuck Detector v1.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 29 — Stuck Detector v1 (2026-04-18)
+
+**Detection rule:**
+A student is marked as stuck on their current level when, looking at the last 5 completed sessions for that student + level:
+- Rule 1: the 3 most recent sessions all failed (3 consecutive fails), OR
+- Rule 2: 4 or more of the last 5 sessions failed
+
+Requires a minimum of 3 sessions before the stuck state can trigger (prevents false positives on new students).
+
+**No DB schema changes.** Uses existing `sessions` table (`passed`, `completed_at`, `student_id`, `level_id`).
+
+**Files added:**
+- `src/lib/stuckDetector.ts` — pure `isStudentStuck(results: boolean[]): boolean` function
+
+**Files changed:**
+- `src/app/worksheet/results/[sessionId]/page.tsx` — queries last 5 sessions for student+level, calls `isStudentStuck`, shows amber supportive message when stuck AND current session failed
+- `src/app/dashboard/page.tsx` — same query, shows calm parent notice inside Current Focus when student is stuck
+- `src/app/play/page.tsx` — same query, shows child-friendly encouragement banner between worksheet CTA and topic card when student is stuck
+
+**Scope:** Detection + messaging only. No automatic level drop or backtracking.
+
+### Suite 29 — Stuck Detector v1 (2026-04-18)
+| Test | Result |
+|------|--------|
+| Logic: empty results → not stuck | PASS |
+| Logic: 2 fails (too few sessions) → not stuck | PASS |
+| Logic: most recent passed, only 3 sessions → not stuck | PASS |
+| Logic: 3 consecutive fails (rule 1) → stuck | PASS |
+| Logic: 3 consecutive fails with older passes → stuck | PASS |
+| Logic: 4 fails in 5 sessions (rule 2) → stuck | PASS |
+| Logic: 5 fails → stuck | PASS |
+| Logic: 4 fails in 5, non-consecutive (rule 2) → stuck | PASS |
+| Logic: 4 fails in 5, pass in middle (rule 2) → stuck | PASS |
+| Logic: 4 fails in 5, most recent passed (rule 2) → stuck | PASS |
+| Logic: 3 fails in 5, no 3 consecutive → not stuck | PASS |
+| Logic: 2 fails in 5 → not stuck | PASS |
+| Fresh student (0 sessions): /play shows NO stuck message | PASS |
+| After 1 fail: results page shows NO stuck message | PASS |
+| After 2 fails: results page shows NO stuck message | PASS |
+| After 3 consecutive fails: results page shows supportive message | PASS |
+| After 3 consecutive fails: /play shows child encouragement banner | PASS |
+| After 3 consecutive fails: /dashboard shows parent notice in Current Focus | PASS |
+| After 1 passing session (3 fails + 1 pass): results page passes 20/20, NO stuck message | PASS |
+| After 1 passing session: /play shows NO stuck message | PASS |
+| TypeScript: build clean, no type errors | PASS |
 
 ---
 

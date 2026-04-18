@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
 import CelebrationEffect from './CelebrationEffect'
+import { isStudentStuck } from '@/lib/stuckDetector'
 
 function formatTime(seconds: number | null): string {
   if (!seconds) return '—'
@@ -92,6 +93,19 @@ export default async function ResultsPage({
 
   const consecutivePasses = levelProgress?.consecutive_passes ?? 0
   const passesRequired = levelMeta?.consecutive_passes_required ?? null
+
+  // Stuck detection: last 5 sessions for this student at this level, most recent first
+  const { data: recentLevelSessions } = await supabase
+    .from('sessions')
+    .select('passed')
+    .eq('student_id', studentId)
+    .eq('level_id', typedSession.level_id)
+    .not('completed_at', 'is', null)
+    .order('completed_at', { ascending: false })
+    .limit(5)
+
+  const recentResults = (recentLevelSessions ?? []).map(s => s.passed ?? false)
+  const isStuck = isStudentStuck(recentResults)
 
   const problems = [...typedSession.problems].sort((a, b) => a.order_index - b.order_index)
 
@@ -194,6 +208,17 @@ export default async function ResultsPage({
                 Consecutive passes reset. Keep practicing!
               </p>
             )}
+          </div>
+        )}
+
+        {/* Stuck support message — shown when student has failed multiple recent sessions */}
+        {isStuck && !passed && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
+            <p className="text-sm font-semibold text-amber-900">This level is feeling tough right now — that&apos;s okay.</p>
+            <p className="mt-1 text-sm text-amber-800">
+              Try again tomorrow, or ask a parent to go through the worked example together before the next session.
+              If it keeps feeling hard, a parent can adjust the starting level from the dashboard.
+            </p>
           </div>
         )}
 

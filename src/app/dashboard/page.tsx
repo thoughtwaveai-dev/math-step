@@ -4,6 +4,7 @@ import { signOut } from '@/app/actions/auth'
 import Image from 'next/image'
 import SetLevelForm from './SetLevelForm'
 import { formatSpeed } from '@/lib/format'
+import { isStudentStuck } from '@/lib/stuckDetector'
 
 function formatDate(iso: string): string {
   const d = new Date(iso)
@@ -74,6 +75,21 @@ export default async function DashboardPage({
     : { data: null }
 
   const consecutivePasses = levelProgress?.consecutive_passes ?? 0
+
+  // Stuck detection: last 5 sessions for this student at the current level
+  const { data: recentLevelSessions } = level
+    ? await supabase
+        .from('sessions')
+        .select('passed')
+        .eq('student_id', student.id)
+        .eq('level_id', level.id)
+        .not('completed_at', 'is', null)
+        .order('completed_at', { ascending: false })
+        .limit(5)
+    : { data: null }
+
+  const recentResults = (recentLevelSessions ?? []).map(s => s.passed ?? false)
+  const isStuck = isStudentStuck(recentResults)
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f7faf7]">
@@ -178,6 +194,19 @@ export default async function DashboardPage({
                   {consecutivePasses}/{level.consecutive_passes_required} passes
                 </span>
               </div>
+
+              {/* Stuck notice for parent */}
+              {isStuck && (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-amber-900">
+                    {student.name} is finding this level difficult
+                  </p>
+                  <p className="mt-1 text-xs text-amber-800">
+                    They have failed most of their recent sessions at Level {student.current_level}.{student.current_sublevel}.
+                    You may want to review the worked example together, or use Admin controls to adjust their starting level.
+                  </p>
+                </div>
+              )}
 
               <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <div className="rounded-lg bg-[#f7faf7] p-3">

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
 import { formatSpeed } from '@/lib/format'
+import { isStudentStuck } from '@/lib/stuckDetector'
 
 export default async function PlayPage({
   searchParams,
@@ -60,6 +61,21 @@ export default async function PlayPage({
     : { data: null }
 
   const consecutivePasses = levelProgress?.consecutive_passes ?? 0
+
+  // Stuck detection: last 5 sessions for this student at the current level
+  const { data: recentLevelSessions } = level
+    ? await supabase
+        .from('sessions')
+        .select('passed')
+        .eq('student_id', student.id)
+        .eq('level_id', level.id)
+        .not('completed_at', 'is', null)
+        .order('completed_at', { ascending: false })
+        .limit(5)
+    : { data: null }
+
+  const recentResults = (recentLevelSessions ?? []).map(s => s.passed ?? false)
+  const isStuck = isStudentStuck(recentResults)
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f7faf7]">
@@ -138,6 +154,16 @@ export default async function PlayPage({
         >
           Start Today&apos;s Worksheet
         </a>
+
+        {/* Encouragement nudge when student is stuck */}
+        {isStuck && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+            <p className="text-sm font-semibold text-amber-900">This topic is taking a bit more practice — keep going!</p>
+            <p className="mt-1 text-xs text-amber-800">
+              You&apos;re getting better with every session. It&apos;s okay if it feels hard — that means you&apos;re learning.
+            </p>
+          </div>
+        )}
 
         {/* Current topic */}
         {level && (
