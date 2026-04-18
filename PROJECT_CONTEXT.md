@@ -116,6 +116,18 @@ RLS: users can only access streak rows for their own students.
 
 RLS: parents can only insert/select rows where `parent_id = auth.uid()`.
 
+### `problems`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK |
+| session_id | uuid | FK → sessions(id) |
+| problem_text | text | display string, e.g. "6 + 3 = ?" |
+| correct_answer | text | canonical answer string |
+| student_answer | text | nullable, filled on submission |
+| is_correct | bool | nullable, set on submission |
+| self_corrected | bool | nullable, set when student corrects a wrong answer post-results |
+| order_index | int | display order within session |
+
 ### `levels`
 | Column | Type | Notes |
 |--------|------|-------|
@@ -260,6 +272,17 @@ Worksheets can include a small set of review problems from previously mastered l
 **Grading/progression:** Review problems count toward the session total and accuracy. The session `level_id` stays as the current level — only current-level mastery progress is tracked.
 
 ---
+
+## Self-Correction Flow (Milestone 30)
+
+After a worksheet is submitted and graded, the results page shows a `CorrectionInput` (client component, `useActionState`) below each incorrect problem. The student can type a corrected answer and check it:
+- Correct → `problems.self_corrected = true` (via `submitSelfCorrection` server action), badge shown
+- Wrong → inline error, input stays open
+- Already-correct problems → no correction UI
+
+**Scope:** Only `problems.self_corrected` is updated. Session metrics (`correct_count`, `accuracy`, `passed`), mastery, streaks, and points are never touched. The `revalidatePath` pattern is used for in-place page refresh.
+
+**Shared grading utility:** `src/lib/math/gradeAnswer.ts` — `gradeAnswer()` extracted here so it can be imported from both `worksheet.ts` and `selfCorrection.ts` without the `'use server'` export restriction.
 
 ## Next Planned Milestone
 

@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
 import CelebrationEffect from './CelebrationEffect'
+import CorrectionInput from './CorrectionInput'
 import { isStudentStuck } from '@/lib/stuckDetector'
 
 function formatTime(seconds: number | null): string {
@@ -20,6 +21,7 @@ interface Problem {
   correct_answer: string
   student_answer: string | null
   is_correct: boolean | null
+  self_corrected: boolean | null
 }
 
 interface Session {
@@ -115,6 +117,10 @@ export default async function ResultsPage({
   const passed = typedSession.passed ?? false
 
   const showCelebration = accuracy === 100
+
+  const incorrectProblems = problems.filter(p => !p.is_correct)
+  const correctedCount = incorrectProblems.filter(p => p.self_corrected).length
+  const allCorrected = incorrectProblems.length > 0 && correctedCount === incorrectProblems.length
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f7faf7]">
@@ -222,6 +228,29 @@ export default async function ResultsPage({
           </div>
         )}
 
+        {/* Self-correction completion message */}
+        {incorrectProblems.length > 0 && (
+          allCorrected ? (
+            <div className="rounded-xl border border-[#bae0bd] bg-[#e1f4e3] p-5">
+              <p className="text-sm font-semibold text-[#1a2e1c]">Great work fixing your mistakes!</p>
+              <p className="mt-1 text-sm text-[#2d6a35]">
+                You went back and corrected every wrong answer. That&apos;s exactly how learning works.
+              </p>
+            </div>
+          ) : (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
+              <p className="text-sm font-semibold text-amber-900">
+                {correctedCount > 0
+                  ? `Good start — ${incorrectProblems.length - correctedCount} more to go.`
+                  : 'Try to fix the ones you got wrong below.'}
+              </p>
+              <p className="mt-1 text-sm text-amber-800">
+                Correcting your mistakes helps you remember. Give it a try — no pressure.
+              </p>
+            </div>
+          )
+        )}
+
         {/* Problem review */}
         <div className="space-y-3">
           <h2 className="text-lg font-bold text-[#1a2e1c]">Problem Review</h2>
@@ -275,6 +304,23 @@ export default async function ResultsPage({
                       </div>
                     )}
                   </div>
+
+                  {/* Self-correction UI — only for incorrect problems */}
+                  {!problem.is_correct && (
+                    problem.self_corrected ? (
+                      <div className="mt-3">
+                        <span className="inline-flex items-center rounded-full bg-[#2d6a35] px-2.5 py-0.5 text-xs font-semibold text-white">
+                          ✓ Corrected
+                        </span>
+                      </div>
+                    ) : (
+                      <CorrectionInput
+                        problemId={problem.id}
+                        sessionId={typedSession.id}
+                        correctAnswer={problem.correct_answer}
+                      />
+                    )
+                  )}
                 </div>
               </div>
             </div>

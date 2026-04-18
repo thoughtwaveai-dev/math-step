@@ -6,8 +6,55 @@
 
 ## Current Status
 
-**Phase:** Milestone 29 — Stuck Detector v1.
+**Phase:** Milestone 30 — Self-Correction Flow v1.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 30 — Self-Correction Flow v1 (2026-04-18)
+
+**Behavior:**
+After a worksheet is graded, incorrect problems show a correction input inline in the Problem Review section. Students can type the correct answer and hit "Check." If right, the problem is marked `self_corrected = true` in DB and shows a green "✓ Corrected" badge. If wrong, inline error "That's not quite right — try again." Input stays open. Already-correct problems show no correction UI at all.
+
+**Completion messaging:**
+- No incorrect problems → no correction section shown (e.g. perfect session)
+- Wrong answers not yet corrected → amber "Try to fix the ones you got wrong below."
+- Some corrected → amber "Good start — N more to go."
+- All corrected → green "Great work fixing your mistakes!"
+
+**Scope preserved:**
+- `session.correct_count`, `session.accuracy`, `session.passed` — never modified by self-correction
+- `student_level_progress`, mastery, streaks, points — untouched
+- Only `problems.self_corrected` is updated
+
+**Files added:**
+- `src/lib/math/gradeAnswer.ts` — shared grading utility (extracted from worksheet.ts to avoid 'use server' export conflict)
+- `src/app/actions/selfCorrection.ts` — `submitSelfCorrection` server action with ownership verification
+- `src/app/worksheet/results/[sessionId]/CorrectionInput.tsx` — client component with `useActionState`
+
+**Files changed:**
+- `src/app/actions/worksheet.ts` — now imports `gradeAnswer` from shared utility (was inline)
+- `src/app/worksheet/results/[sessionId]/page.tsx` — added `self_corrected` to Problem interface, correction UI per incorrect problem, completion message section
+
+No DB schema changes. `problems.self_corrected` already existed in live DB.
+
+### Suite 30 — Self-Correction Flow v1 (2026-04-18)
+| Test | Result |
+|------|--------|
+| Results page loads for failing session (5/20, 25%) | PASS |
+| Correct problems (1–5) show NO correction input | PASS |
+| Incorrect problems (6–20) show correction input + "Correct answer" reveal | PASS |
+| Completion message shown: "Try to fix the ones you got wrong below." | PASS |
+| Submitting wrong correction → inline error "That's not quite right — try again." | PASS |
+| Wrong correction leaves self_corrected = false in DB | PASS (DB verified) |
+| Submitting correct correction → "✓ Corrected" badge appears | PASS |
+| Correct correction sets self_corrected = true in DB | PASS (DB verified) |
+| Completion message updates: "Good start — 14 more to go." after 1 corrected | PASS |
+| Original score/pass/fail unchanged after correction (5/20, 25%, Not passed) | PASS (DB verified) |
+| session.correct_count, accuracy, passed NOT modified by self-correction | PASS (DB verified) |
+| Perfect session (20/20): no correction section, no correction inputs | PASS |
+| Perfect session: results page works normally (Passed, mastery 1/3) | PASS |
+| TypeScript: build clean, no type errors | PASS |
 
 ---
 
