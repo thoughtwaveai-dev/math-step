@@ -6,8 +6,99 @@
 
 ## Current Status
 
-**Phase:** Milestone 32 — Division generators (4/1 and 4/2).
+**Phase:** Milestone 33 — Fraction generator: Level 5/1. ✓ Fully validated (36/36 Playwright tests passing).
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 33 — Fraction Generator: Level 5/1 (2026-04-18)
+
+**What was added:**
+Fraction support — Level 5/1 (Addition & Subtraction of Fractions).
+
+**Files added:**
+- `src/lib/math/generators/fractions.ts` — `generateFractionProblems(count)` for Level 5/1:
+  - Two problem types: `fraction_addition`, `fraction_subtraction`
+  - Same-denominator: d ∈ [2–9], proper fraction operands
+  - Unlike-denominator: curated pairs (2,3), (2,4), (2,6), (3,4), (3,6), (4,6), (2,8), (3,8), (4,8), (3,9), (2,9) — all with manageable LCM ≤ 18
+  - Dedup on prompt string with retry budget (100× count attempts)
+  - Answers simplified to lowest terms; whole numbers returned as plain integers (e.g. `"1"`, `"2"`)
+  - No mixed numbers in v1; improper fractions like `"4/3"` are valid answers
+
+**Files changed:**
+- `src/lib/math/gradeAnswer.ts` — added fraction grading path before multi-token path:
+  - Detects correctAnswer matching `/^\d+\/\d+$/`
+  - Parses both student and correct answer as fractions (accepts `"3/4"` or `"2"`)
+  - Cross-multiply equality check: accepts equivalent unsimplified forms (e.g. `"6/8"` for `"3/4"`)
+  - Does not affect integers, multi-token, or inequality grading
+- `src/lib/math/generators/index.ts` — routes 5/1 → `generateFractionProblems`; exports `FractionProblem`, `FractionProblemType`; added to `AnyProblemType` union
+- `src/app/worksheet/page.tsx` — added `[5, 1]` to `SUPPORTED_LEVEL_KEYS`
+- `src/app/worksheet/WorksheetForm.tsx` — added `fraction_addition` and `fraction_subtraction` cases to `problemTypeLabel()`; fraction types use `inputMode="text"` (students need `/` key)
+- `src/lib/lessons/index.ts` — added `5/1` lesson: "Fractions: Addition & Subtraction", worked example (1/4 + 2/4 = 3/4), 4 steps, tip covering unlike denominators
+
+**DB:** Level row 5/1 already existed in the `levels` table with topic "Fractions".
+
+**Answer format:** `"3/4"`, `"5/6"`, `"4/3"` for fractions; `"1"`, `"2"` for whole-number results. Always simplified. Student may enter equivalent unsimplified forms (e.g. `"6/8"` for `"3/4"`) and they pass.
+
+**Grading approach:** Fraction path added in `gradeAnswer.ts` — `parseFraction()` handles `"3/4"` and `"2"` (whole number), then cross-multiplies for mathematical equivalence. Fires only when correctAnswer matches `/^\d+\/\d+$/`, so no impact on existing grading paths.
+
+**Limitations (v1):**
+- No mixed numbers (e.g. `"1 1/2"`) — improper fractions used instead
+- Unlike-denominator pairs are constrained to manageable LCMs — not all denominator combinations are generated
+- No negative results — subtraction always picks larger − smaller
+
+### Suite 33 — Fraction Generator: Level 5/1 (2026-04-18)
+| Test | Result |
+|------|--------|
+| 20 unique problems generated (seed 42) | PASS |
+| No duplicate prompts | PASS |
+| All problem types valid (fraction_addition or fraction_subtraction) | PASS |
+| All answers in fraction or integer format | PASS |
+| Exact fraction match grades correctly (3/4 == 3/4) | PASS |
+| Exact fraction match grades correctly (5/6 == 5/6) | PASS |
+| Equivalent unsimplified form passes (6/8 for 3/4) | PASS |
+| Equivalent unsimplified form passes (2/4 for 1/2) | PASS |
+| Equivalent unsimplified form passes (4/6 for 2/3) | PASS |
+| Wrong fraction fails (1/4 for 3/4) | PASS |
+| Wrong fraction fails (2/3 for 3/4) | PASS |
+| Wrong integer for fraction fails (3 for 3/4) | PASS |
+| Whole number integer answer (1) grades correctly | PASS |
+| Integer grading path unaffected | PASS |
+| Inequality grading path unaffected | PASS |
+| All answers simplified to lowest terms (50 problems, seed 99) | PASS |
+| Both addition and subtraction types present in 50 problems | PASS |
+| All answers positive | PASS |
+| TypeScript: build clean, no type errors | PASS |
+| Next.js production build: all routes compile | PASS |
+| 5/1 lesson content: title, example, steps, tip correct | PASS |
+| 5/2 lesson: returns null (not yet supported) | PASS |
+| SUPPORTED_LEVEL_KEYS includes [5, 1] | PASS |
+| Unsupported 5/2 shows Coming Soon (no generator) | PASS (by design — [] returned) |
+
+### Suite 33b — Level 5/1 Fractions: Playwright End-to-End (2026-04-18)
+| Test | Result |
+|------|--------|
+| Signup + onboarding (FracKid) | PASS |
+| Manual placement to 5/1 via admin controls | PASS |
+| Dashboard reflects Level 5 / Sublevel 1 / Fractions | PASS |
+| 5/1 worksheet loads (no Coming Soon, heading says Fraction) | PASS |
+| Shows FracKid name and Level 5.1 label | PASS |
+| 20 answer inputs present | PASS |
+| Fraction notation in problems (a/b ± c/d) | PASS |
+| Lesson card title: Fractions: Addition & Subtraction | PASS |
+| Lesson card has worked example (1/4) | PASS |
+| Lesson card has tip (unlike denominators) | PASS |
+| Wrong answers (999/999) → 0/20, Not passed | PASS |
+| Fraction answers displayed in results page | PASS |
+| Correct answers (all 20 auto-solved) → 20/20, Passed | PASS |
+| Mastery progress shown in results | PASS |
+| Equivalent fraction grading validated via unit tests (6/8==3/4 etc.) | PASS |
+| 5/2 shows Coming Soon (Worksheets for Level 5.2 not available yet) | PASS |
+| Prior level 4/2: Division worksheet loads (no regression) | PASS |
+| 4/2: 20 inputs, Division label confirmed | PASS |
+| Viewport 768×1024 (tablet) throughout | PASS |
+| Worksheet content at tablet size renders correctly | PASS |
+| Screenshot saved: fraction-5-1-tablet.png | PASS |
 
 ---
 

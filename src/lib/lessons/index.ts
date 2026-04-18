@@ -189,6 +189,21 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Use >= for ≥ and <= for ≤ when typing your answer. No Unicode needed — just two characters!',
   },
+  '5/1': {
+    title: 'Fractions: Addition & Subtraction',
+    explanation: 'A fraction like 3/4 means "3 out of 4 equal parts". To add or subtract fractions, the denominators (bottom numbers) must be the same. If they already match, just add or subtract the numerators and keep the denominator. If they are different, find a common denominator first, then add or subtract. Always simplify your answer — divide the top and bottom by their greatest common factor.',
+    example: {
+      problem: '1/4 + 2/4 = ?',
+      steps: [
+        'The denominators are both 4 — they already match!',
+        'Add the numerators: 1 + 2 = 3',
+        'Keep the denominator: 3/4',
+        'Check if it simplifies: 3 and 4 share no common factor, so 3/4 is already simplified',
+      ],
+      answer: '3/4',
+    },
+    tip: 'Unlike denominators? Find the smallest number both denominators divide into (that\'s the LCM), convert each fraction, then add or subtract. For example: 1/2 + 1/3 → use denominator 6 → 3/6 + 2/6 = 5/6.',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

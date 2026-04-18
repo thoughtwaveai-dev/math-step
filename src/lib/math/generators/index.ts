@@ -3,6 +3,7 @@ import { generateSingleDigitAddition, generateDoubleDigitAddition } from './addi
 import { generateSingleDigitSubtraction, generateDoubleDigitSubtraction } from './subtraction'
 import { generateBasicMultiplication, generateMultiDigitMultiplication } from './multiplication'
 import { generateDivisionFacts, generateLongDivision } from './division'
+import { generateFractionProblems } from './fractions'
 import { generateLinearEquations, generateVariablesBothSides } from './linear-equations'
 import { generateInequalities } from './inequalities'
 
@@ -11,6 +12,7 @@ export type { AdditionProblem, AdditionProblemType } from './addition'
 export type { SubtractionProblem, SubtractionProblemType } from './subtraction'
 export type { MultiplicationProblem, MultiplicationProblemType } from './multiplication'
 export type { DivisionProblem, DivisionProblemType } from './division'
+export type { FractionProblem, FractionProblemType } from './fractions'
 export type { LinearEquationProblem, LinearEquationType } from './linear-equations'
 export type { InequalityProblem, InequalityProblemType } from './inequalities'
 
@@ -21,6 +23,7 @@ export type AnyProblemType =
   | import('./subtraction').SubtractionProblemType
   | import('./multiplication').MultiplicationProblemType
   | import('./division').DivisionProblemType
+  | import('./fractions').FractionProblemType
   | import('./linear-equations').LinearEquationType
   | import('./inequalities').InequalityProblemType
 
@@ -48,6 +51,9 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 4 && sublevelNumber === 2) {
     return generateLongDivision(count)
+  }
+  if (levelNumber === 5 && sublevelNumber === 1) {
+    return generateFractionProblems(count)
   }
   if (levelNumber === 9 && sublevelNumber === 1) {
     return generateFactorizationProblems(count)

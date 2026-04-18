@@ -29,13 +29,17 @@ function problemTypeLabel(type: AnyProblemType): string {
     case 'lcm': return 'Least Common Multiple'
     case 'factor_pairs': return 'Factor Pairs'
     case 'common_factors': return 'Common Factors'
+    case 'fraction_addition': return 'Fraction Addition'
+    case 'fraction_subtraction': return 'Fraction Subtraction'
     case 'linear_equation': return 'Linear Equation'
     case 'inequality': return 'Inequality'
   }
 }
 
 function inputModeForType(type: AnyProblemType): 'numeric' | 'text' {
-  return type === 'inequality' ? 'text' : 'numeric'
+  if (type === 'inequality') return 'text'
+  if (type === 'fraction_addition' || type === 'fraction_subtraction') return 'text'
+  return 'numeric'
 }
 
 export default function WorksheetForm({ sessionId, problems, reviewProblemIds }: Props) {
