@@ -230,6 +230,7 @@ Generators live in `src/lib/math/generators/`. The router is `generateProblems(l
 | 4/2 | long division (divisor ∈ [2,9], quotient ∈ [11,25], no remainders) | single integer | exact integer match |
 | 5/1 | fractions: addition & subtraction (same-denom + simple unlike-denom pairs) | `"3/4"`, `"5/6"`, `"1"` (simplified, no mixed numbers) | fraction cross-multiply or integer match |
 | 5/2 | fractions: multiplication & division (proper fractions, denominators 2–6, keep-change-flip for division) | `"1/6"`, `"4/3"`, `"2"` (simplified, whole numbers as integers) | fraction cross-multiply or integer match |
+| 6/1 | decimals: addition, subtraction, multiplication by whole number (1-decimal-place operands, results ≤ 20) | `"8.1"`, `"0.6"`, `"4"` (whole-number results as integers) | decimal parseFloat with 0.001 tolerance; whole-number results via integer match |
 | 9/1 | factorization (prime, list factors, GCF, LCM) | integer or sorted multi-token | integer or number-sort |
 | 9/2 | factor pairs, common factors, GCF | list or single integer | number-sort or integer |
 | 10/1 | linear equations (one variable, 5 subtypes) | single integer | exact integer match |
@@ -255,7 +256,7 @@ All generators use **bounded algorithmic random generation** — no more fixed 1
 
 ### Lesson cards
 
-`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. Supported: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 9/1, 9/2, 10/1, 10/2, 11/1.
+`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. Supported: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 9/1, 9/2, 10/1, 10/2, 11/1.
 
 ---
 
@@ -264,7 +265,7 @@ All generators use **bounded algorithmic random generation** — no more fixed 1
 Worksheets can include a small set of review problems from previously mastered levels to improve long-term retention.
 
 **Logic lives in `src/app/worksheet/page.tsx`:**
-- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support: `[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2],[9,1],[9,2],[10,1],[10,2],[11,1]`
+- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support: `[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2],[6,1],[9,1],[9,2],[10,1],[10,2],[11,1]`
 - `REVIEW_PROBLEM_COUNT = 4` — number of review problems in a mixed worksheet
 - For a 20-problem worksheet: 16 current-level + 4 review, shuffled to interleave
 - Review eligibility: `student_level_progress` row must exist with `consecutive_passes > 0 OR last_result_passed = true`. This filters out placement-jumped levels.

@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useState } from 'react'
+import React, { useActionState, useEffect, useState } from 'react'
 import { submitWorksheet } from '@/app/actions/worksheet'
 import type { AnyProblemType } from '@/lib/math/generators'
 
@@ -33,15 +33,19 @@ function problemTypeLabel(type: AnyProblemType): string {
     case 'fraction_subtraction': return 'Fraction Subtraction'
     case 'fraction_multiplication': return 'Fraction Multiplication'
     case 'fraction_division': return 'Fraction Division'
+    case 'decimal_addition': return 'Decimal Addition'
+    case 'decimal_subtraction': return 'Decimal Subtraction'
+    case 'decimal_multiplication': return 'Decimal Multiplication'
     case 'linear_equation': return 'Linear Equation'
     case 'inequality': return 'Inequality'
   }
 }
 
-function inputModeForType(type: AnyProblemType): 'numeric' | 'text' {
+function inputModeForType(type: AnyProblemType): React.HTMLAttributes<HTMLInputElement>['inputMode'] {
   if (type === 'inequality') return 'text'
   if (type === 'fraction_addition' || type === 'fraction_subtraction') return 'text'
   if (type === 'fraction_multiplication' || type === 'fraction_division') return 'text'
+  if (type === 'decimal_addition' || type === 'decimal_subtraction' || type === 'decimal_multiplication') return 'decimal'
   return 'numeric'
 }
 

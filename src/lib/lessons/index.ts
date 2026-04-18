@@ -220,6 +220,21 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'For multiplication: 1/2 × 2/3 = 2/6 = 1/3. For division: remember "keep, change, flip" — keep the first fraction, change ÷ to ×, flip the second fraction.',
   },
+  '6/1': {
+    title: 'Decimals: Addition, Subtraction & Multiplication',
+    explanation: 'A decimal number uses a dot (called the decimal point) to show parts smaller than one. The digit after the dot is tenths (0.1 = one tenth). Line up the decimal points when adding or subtracting — then it works just like whole numbers. To multiply a decimal by a whole number, ignore the dot, multiply, then put the dot back in the right place.',
+    example: {
+      problem: '2.4 + 1.3 = ?',
+      steps: [
+        'Line up the decimal points',
+        'Add the tenths column: 4 + 3 = 7',
+        'Add the ones column: 2 + 1 = 3',
+        '2.4 + 1.3 = 3.7',
+      ],
+      answer: '3.7',
+    },
+    tip: 'Always line up the decimal points before adding or subtracting — the dot must stay directly above or below the other dot. For multiplication: 2.5 × 3 → think 25 × 3 = 75, then move the dot one place left → 7.5.',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

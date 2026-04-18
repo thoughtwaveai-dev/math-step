@@ -6,8 +6,66 @@
 
 ## Current Status
 
-**Phase:** Milestone 34 — Fraction generator: Level 5/2 (Multiplication & Division). ✓ Fully validated.
+**Phase:** Milestone 35 — Decimal generator: Level 6/1. ✓ Fully validated.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 35 — Decimal Generator: Level 6/1 (2026-04-18)
+
+**What was added:**
+Decimal operations — Level 6/1 (Addition, Subtraction & Multiplication with decimals).
+
+**Files added:**
+- `src/lib/math/generators/decimals.ts` — `generateDecimalProblems(count, rand)` for Level 6/1:
+  - Three problem types: `decimal_addition`, `decimal_subtraction`, `decimal_multiplication`
+  - Addition: two 1-decimal-place operands (0.1–9.9), sum ≤ 19.9
+  - Subtraction: a > b, both 1-decimal-place, difference > 0
+  - Multiplication: 1-decimal-place number × whole number (2–5), product ≤ 19.9
+  - Dedup on prompt string with retry budget (100× count)
+  - Answer format: `parseFloat(n.toFixed(1)).toString()` — strips trailing zeros, whole-number results as integers (e.g. `"4"` not `"4.0"`)
+
+**Files changed:**
+- `src/lib/math/gradeAnswer.ts` — added decimal grading path before the integer check:
+  - Detects correctAnswer matching `/^\d+\.\d+$/`
+  - Parses both student and correct answer as `parseFloat`, compares within tolerance 0.001
+  - Handles `"3.50"` vs `"3.5"` — both pass
+  - No impact on existing inequality, fraction, integer, or multi-token grading paths
+- `src/lib/math/generators/index.ts` — routes 6/1 → `generateDecimalProblems`; exports `DecimalProblem`, `DecimalProblemType`; added to `AnyProblemType` union
+- `src/app/worksheet/page.tsx` — added `[6, 1]` to `SUPPORTED_LEVEL_KEYS` (after `[5, 2]`)
+- `src/app/worksheet/WorksheetForm.tsx` — added `decimal_addition`, `decimal_subtraction`, `decimal_multiplication` to `problemTypeLabel()`; decimal types use `inputMode="decimal"` (shows decimal keyboard on mobile); import updated to `React` namespace for correct `HTMLAttributes` typing
+- `src/lib/lessons/index.ts` — added `6/1` lesson: "Decimals: Addition, Subtraction & Multiplication", worked example (2.4 + 1.3 = 3.7), 4 steps, tip covering decimal point alignment and the multiply-then-shift mental model
+
+**DB:** Level row 6/1 already existed in the `levels` table with topic "Decimals".
+
+**Answer format:** `"8.1"`, `"0.6"`, `"12.5"` for decimal results; `"4"`, `"18"` for whole-number results. Always 1 decimal place input, trailing zeros accepted (e.g. `"8.10"` for `"8.1"`).
+
+**Grading:** Decimal path added in `gradeAnswer.ts` — fires only when correctAnswer matches `/^\d+\.\d+$/`, parseFloat comparison with 0.001 tolerance. Whole-number decimal results (e.g. `"4"`) grade via existing integer path. No grading changes needed for other levels.
+
+**Limitations (v1):**
+- All operands are 1-decimal-place only (e.g. 2.5, not 2.75) — keeps problems age-appropriate and avoids messy 2-decimal answers
+- Multiplication limited to decimal × whole number (no decimal × decimal)
+- No rounding or comparison problem types in v1
+
+### Suite 35 — Decimal Generator: Level 6/1 (2026-04-18)
+| Test | Result |
+|------|--------|
+| Manual placement to 6/1 via admin controls | PASS |
+| Dashboard reflects Level 6 / Sublevel 1 / Decimals | PASS |
+| 6/1 worksheet loads (no Coming Soon) | PASS |
+| Worksheet heading: "Decimals Worksheet", subtitle: "DecTest · Level 6.1" | PASS |
+| 20 answer inputs present | PASS |
+| All three decimal problem types shown (Addition, Subtraction, Multiplication) | PASS |
+| Lesson card title: "Learn: Decimals: Addition, Subtraction & Multiplication" | PASS |
+| Lesson card: worked example (2.4 + 1.3 = 3.7), 4 steps, tip shown | PASS |
+| Correct answers (all 20 auto-solved) → 20/20, 100%, Passed | PASS |
+| Wrong answers (999 for all) → 0/20, Not passed | PASS |
+| Trailing-zero format variations (e.g. "8.10", "4.80") pass → 20/20 | PASS |
+| Whole-number results (e.g. "18" for 4.5×4) grade correctly | PASS |
+| 5/1 regression: loads "Fractions: Addition & Subtraction" lesson, no Coming Soon | PASS |
+| Unsupported 6/2 shows "Coming Soon" | PASS |
+| TypeScript: build clean, no type errors | PASS |
+| Tablet viewport (768×1024): worksheet renders correctly, screenshot saved | PASS |
 
 ---
 

@@ -33,6 +33,13 @@ export function gradeAnswer(studentAnswer: string, correctAnswer: string): boole
     return student.num * correct.den === correct.num * student.den
   }
 
+  // Decimal answers (e.g. "3.5", "2.75") — before integer check
+  if (/^\d+\.\d+$/.test(correctAnswer)) {
+    const correct = parseFloat(correctAnswer)
+    const student = parseFloat(studentAnswer.trim())
+    return !isNaN(student) && Math.abs(student - correct) < 0.001
+  }
+
   const correctNums = (correctAnswer.match(/\d+/g) ?? []).map(Number)
 
   if (correctNums.length === 1) {
