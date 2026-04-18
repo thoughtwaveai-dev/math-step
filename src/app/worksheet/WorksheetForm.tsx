@@ -84,8 +84,7 @@ export default function WorksheetForm({ sessionId, problems }: Props) {
                 placeholder="Your answer"
                 autoComplete="off"
                 inputMode={inputModeForType(problem.type)}
-                disabled={pending}
-                className="w-full rounded-lg border border-[#bae0bd] px-3.5 py-3 text-base text-[#1a2e1c] placeholder-[#a0b8a3] focus:border-[#2d6a35] focus:outline-none focus:ring-2 focus:ring-[#bae0bd] disabled:opacity-50"
+                className="w-full rounded-lg border border-[#bae0bd] px-3.5 py-3 text-base text-[#1a2e1c] placeholder-[#a0b8a3] focus:border-[#2d6a35] focus:outline-none focus:ring-2 focus:ring-[#bae0bd]"
               />
             </div>
           </div>

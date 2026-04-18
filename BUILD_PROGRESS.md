@@ -6,8 +6,30 @@
 
 ## Current Status
 
-**Phase:** Bounded algorithmic random problem generation live for all supported levels.
+**Phase:** Production bug fix — worksheet answer capture.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Bug Fix — Worksheet Answer Capture (2026-04-18)
+
+**Bug:** Results page showed blank "Your answer" values after tablet/browser submission in production.
+
+**Root cause:** `disabled={pending}` was applied to all answer `<input>` elements in `WorksheetForm.tsx`. HTML spec excludes disabled controls from `FormData`. In React 19's concurrent rendering (production build), the pending state transition could disable the inputs before `new FormData(form)` was collected, causing all answer fields to be missing from the payload. The server action then stored empty strings for all `student_answer` values.
+
+**Fix:** Removed `disabled={pending}` from answer inputs only (`src/app/worksheet/WorksheetForm.tsx`). Kept `disabled={pending}` on the submit button to prevent double-submission. One-line change.
+
+**Files changed:** `src/app/worksheet/WorksheetForm.tsx`
+
+### Suite 27 — Worksheet Answer Capture Fix (2026-04-18)
+| Test | Result |
+|------|--------|
+| Worksheet loads (Level 1/1, 20 problems, tablet 768×1024) | PASS |
+| All 20 answers typed and captured after submit | PASS |
+| Results page: all 20 "Your answer" values shown correctly | PASS |
+| Score 20/20, 100%, ✓ Passed — grading correct | PASS |
+| Mastery progress increments (1/3) | PASS |
+| No regression in worksheet/results navigation flow | PASS |
 
 ---
 

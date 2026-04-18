@@ -100,7 +100,7 @@ export default async function ResultsPage({
   const accuracy = typedSession.accuracy ? Number(typedSession.accuracy) : 0
   const passed = typedSession.passed ?? false
 
-  const showCelebration = accuracy === 100 || didAdvance
+  const showCelebration = accuracy === 100
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f7faf7]">
