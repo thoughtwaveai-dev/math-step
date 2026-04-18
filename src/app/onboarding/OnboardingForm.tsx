@@ -30,10 +30,22 @@ export default function OnboardingForm() {
 
       <button
         type="submit"
+        name="start_mode"
+        value="default"
         disabled={pending}
         className="rounded-xl bg-[#2d6a35] px-4 py-3.5 text-sm font-semibold text-white hover:bg-[#1f4d26] disabled:opacity-50 transition-colors"
       >
-        {pending ? 'Setting up…' : 'Get started'}
+        {pending ? 'Setting up…' : 'Start at Level 1'}
+      </button>
+
+      <button
+        type="submit"
+        name="start_mode"
+        value="diagnostic"
+        disabled={pending}
+        className="rounded-xl border border-[#bae0bd] bg-white px-4 py-3.5 text-sm font-semibold text-[#2d6a35] hover:bg-[#f2faf3] disabled:opacity-50 transition-colors"
+      >
+        {pending ? 'Setting up…' : 'Take a short placement quiz →'}
       </button>
     </form>
   )

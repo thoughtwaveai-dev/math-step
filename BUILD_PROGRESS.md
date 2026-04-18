@@ -6,8 +6,64 @@
 
 ## Current Status
 
-**Phase:** Production bug fix — worksheet answer capture.
+**Phase:** Milestone 27 — Placement Diagnostic v1.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 27 — Placement Diagnostic v1 (2026-04-18)
+
+**Placement strategy:**
+10 hardcoded questions across 3 bands. All-at-once display, two-step form (questions → recommendation → confirm).
+
+- Band A — Arithmetic (Q1–Q4): basic addition, double-digit addition, subtraction, multiplication
+- Band B — Number Theory (Q5–Q7): prime factorisation, list factors, GCF
+- Band C — Algebra (Q8–Q10): simple linear equation, both-sides equation, inequality
+
+**Scoring algorithm (highest-band-wins with gates):**
+```
+algScore=3        → 11/1 (Inequalities)
+algScore=2        → 10/2 (Variables Both Sides)
+algScore=1 AND numScore≥1 → 10/1 (Linear Equations)
+numScore≥2        → 9/2  (Factor Pairs)
+numScore≥1        → 9/1  (Factorisation)
+Q4 right          → 3/2  (Multi-digit Multiplication)
+Q3 right          → 3/1  (Basic Multiplication)
+Q2 right          → 2/1  (Subtraction)
+Q1 right          → 1/2  (Double-digit Addition)
+default           → 1/1  (Single-digit Addition)
+```
+
+**Files added:**
+- `src/lib/math/placement.ts` — questions, gradeAnswer, scorePlacement, PLACEMENT_INFO map
+- `src/app/actions/placement.ts` — `runPlacementDiagnostic` (score, return state), `applyPlacement` (save + redirect)
+- `src/app/placement/page.tsx` — protected server page with auth + student ownership check
+- `src/app/placement/PlacementForm.tsx` — 2-step client form: questions → recommendation → confirm or override
+
+**Files modified:**
+- `src/app/onboarding/OnboardingForm.tsx` — two submit buttons: "Start at Level 1" and "Take a short placement quiz →" (uses button name/value to set start_mode)
+- `src/app/actions/students.ts` — `createStudent` reads `start_mode`; if "diagnostic" redirects to `/placement?student=ID`
+- `src/app/dashboard/page.tsx` — admin controls section now includes "Run Placement Diagnostic →" link
+
+No DB schema changes. No new dependencies.
+
+### Suite 27 — Placement Diagnostic v1 (2026-04-18)
+| Test | Result |
+|------|--------|
+| Onboarding shows two buttons: "Start at Level 1" and "Take a short placement quiz →" | PASS |
+| "Take a short placement quiz →" creates student at 1/1 → redirects to /placement?student=ID | PASS |
+| /placement shows 10 questions in 3 bands (Arithmetic, Number Theory, Algebra) | PASS |
+| All correct answers → recommended Level 11.1 — One-Variable Inequalities | PASS |
+| All empty answers → recommended Level 1.1 — Addition | PASS |
+| Q1-Q4 correct, rest blank → recommended Level 3.2 — Multiplication | PASS |
+| Q1-Q7 correct, algebra blank → recommended Level 9.2 — Factor Pairs and Common Factors | PASS |
+| "Start at Level 11.1" confirm → redirects to /play at Level 11/1 | PASS |
+| "Start at Level 1.1 instead" override → redirects to /play at Level 1/1 | PASS |
+| Dashboard admin controls show "Run Placement Diagnostic →" link with correct student param | PASS |
+| Default onboarding path ("Start at Level 1") still redirects to /play at Level 1/1 | PASS |
+| /placement protected — unauthenticated redirects to /login (code verified) | PASS |
+| Student ownership enforced in runPlacementDiagnostic and applyPlacement (parent_id check) | PASS |
+| TypeScript: build clean, no type errors | PASS |
 
 ---
 

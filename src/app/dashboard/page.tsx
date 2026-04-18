@@ -253,7 +253,7 @@ export default async function DashboardPage({
             <span>Admin controls</span>
             <span className="text-xs text-[#4a6b4e]">▾</span>
           </summary>
-          <div className="px-5 pb-5">
+          <div className="px-5 pb-5 space-y-4">
             {allLevels && allLevels.length > 0 && (
               <SetLevelForm
                 studentId={student.id}
@@ -262,6 +262,17 @@ export default async function DashboardPage({
                 levels={allLevels}
               />
             )}
+            <div>
+              <p className="text-xs text-[#4a6b4e] mb-2">
+                Not sure about the placement? Run the short diagnostic quiz to get a recommendation.
+              </p>
+              <a
+                href={`/placement?student=${student.id}`}
+                className="inline-block rounded-lg border border-[#bae0bd] bg-[#f7faf7] px-4 py-2.5 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
+              >
+                Run Placement Diagnostic →
+              </a>
+            </div>
           </div>
         </details>
 

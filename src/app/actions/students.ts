@@ -92,6 +92,12 @@ export async function createStudent(
 
   if (streakError) return { error: streakError.message }
 
+  const startMode = (formData.get('start_mode') as string) ?? 'default'
+
+  if (startMode === 'diagnostic') {
+    redirect(`/placement?student=${student.id}`)
+  }
+
   // Count students owned before this insert to decide where to land
   const { count } = await supabase
     .from('students')
