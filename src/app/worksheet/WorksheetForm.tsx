@@ -48,6 +48,9 @@ function problemTypeLabel(type: AnyProblemType): string {
     case 'order_sub_mul': return 'Order of Operations'
     case 'order_div_add': return 'Order of Operations'
     case 'order_paren': return 'Order of Operations'
+    case 'expr_combine_like': return 'Simplifying Expressions'
+    case 'expr_multi_terms': return 'Simplifying Expressions'
+    case 'expr_with_constant': return 'Simplifying Expressions'
     case 'linear_equation': return 'Linear Equation'
     case 'inequality': return 'Inequality'
   }
@@ -62,6 +65,8 @@ function inputModeForType(type: AnyProblemType): React.HTMLAttributes<HTMLInputE
   // Negative number types need text mode so the minus sign can be typed
   if (type === 'neg_addition' || type === 'neg_subtraction' || type === 'neg_multiplication' || type === 'neg_division') return 'text'
   if (type === 'order_add_mul' || type === 'order_sub_mul' || type === 'order_div_add' || type === 'order_paren') return 'numeric'
+  // Algebraic expressions need text mode for letters (e.g. "5x", "3x + 7")
+  if (type === 'expr_combine_like' || type === 'expr_multi_terms' || type === 'expr_with_constant') return 'text'
   return 'numeric'
 }
 

@@ -279,6 +279,22 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Brackets always win! If you see (3 + 4) × 2, do the brackets first: 7 × 2 = 14. Without brackets, 3 + 4 × 2 = 11. The brackets completely change the answer.',
   },
+  '8/1': {
+    title: 'Simplifying Expressions',
+    explanation: 'An algebraic expression has numbers and letters (called variables). The letter stands for an unknown number. "Like terms" are terms that have the same variable — you can add or subtract them just like regular numbers. Terms with different variables, or a variable and a plain number, are unlike terms and must stay separate. Simplifying means collecting all like terms together to write the expression in its shortest form.',
+    example: {
+      problem: '2x + 3 + x + 4 = ?',
+      steps: [
+        'Identify the variable terms: 2x and x',
+        'Combine them: 2x + x = 3x',
+        'Identify the constant terms: 3 and 4',
+        'Combine them: 3 + 4 = 7',
+        'Write the simplified expression: 3x + 7',
+      ],
+      answer: '3x + 7',
+    },
+    tip: 'Only combine terms that are alike — 3x and 5x can be added (same variable), but 3x and 5 cannot (one has a variable, one does not). Think of x as a mystery box: you can count the boxes, but you cannot mix boxes with plain numbers.',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

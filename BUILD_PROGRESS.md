@@ -6,8 +6,71 @@
 
 ## Current Status
 
-**Phase:** Milestone 38 — Order of Operations generator: Level 7/2. ✓ Fully validated.
+**Phase:** Milestone 39 — Simplifying Expressions generator: Level 8/1. ✓ Fully validated.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 39 — Simplifying Expressions Generator: Level 8/1 (2026-04-18)
+
+**What was added:**
+Simplifying Expressions — Level 8/1 (algebra: combining like terms).
+
+**Files added:**
+- `src/lib/math/generators/simplifying-expressions.ts` — `generateSimplifyingProblems(count, rand)` for Level 8/1:
+  - Three problem types: `expr_combine_like`, `expr_multi_terms`, `expr_with_constant`
+  - `expr_combine_like`: `ax ± bx` — two like terms, e.g. `3x + 2x = ?`
+  - `expr_multi_terms`: `ax ± bx ± cx` — three like terms, e.g. `2x + 3x − x = ?`
+  - `expr_with_constant`: `ax + c1 + bx ± c2` — variable and constant groups, e.g. `2x + 3 + x + 4 = ?`
+  - Variables drawn from `['a','b','m','n','x','y']`; coefficients reject if result < 2
+  - Dedup on prompt string with 100× retry budget
+
+**Files changed:**
+- `src/lib/math/gradeAnswer.ts` — added algebraic expression path: detects `/[a-zA-Z]/` in correctAnswer, placed after inequality check and before fraction/integer paths. Normalizer strips all whitespace and lowercases; strict string match (no term reordering)
+- `src/lib/math/generators/index.ts` — routes 8/1 → `generateSimplifyingProblems`; exports `SimplifyingProblem`, `SimplifyingProblemType`; added to `AnyProblemType` union
+- `src/app/worksheet/page.tsx` — added `[8, 1]` to `SUPPORTED_LEVEL_KEYS` (after `[7, 2]`)
+- `src/app/worksheet/WorksheetForm.tsx` — added all 3 simplifying type labels (display as "Simplifying Expressions"); all use `inputMode="text"` (algebraic answers need letters)
+- `src/lib/lessons/index.ts` — added `8/1` lesson: "Simplifying Expressions", like-terms explanation, worked example (2x + 3 + x + 4 = 3x + 7), 5 steps, "mystery box" tip
+
+**DB:** Level row 8/1 already existed in the `levels` table with topic "Algebra" / description "Simplifying expressions".
+
+**Grading:** Algebraic expression path added in `gradeAnswer.ts`. Detection: `/[a-zA-Z]/` in correctAnswer. Normalization: lowercase + strip all spaces. Accepts `"3x+7"`, `"3x + 7"`, `"3X + 7"` — all normalize to `"3x+7"`. Rejects `"7+3x"` (reordered — not in canonical form). No impact on existing fraction, decimal, inequality, or integer grading paths.
+
+**Answer format:**
+- Pure like terms: `"5x"`, `"3a"`, `"12m"` — variable coefficient always ≥ 2
+- With constant (positive): `"3x + 7"`, `"9m + 11"` — spaces around `+`
+- With constant (negative): `"5a - 2"`, `"7n - 1"` — spaces around `-`
+
+**Canonical answer format:** `"Cx"` or `"Cx + K"` or `"Cx - K"` where C ≥ 2, K ≥ 1.
+
+**Limitations (v1):**
+- One variable per problem (no mixed-variable expressions)
+- No parentheses or distribution
+- No coefficient-1 answers (generator rejects results where variable coefficient < 2)
+- `1x` may appear in prompts (when b=1 in multi-term types) but answer coefficient is always ≥ 2
+- Strict canonical-string grading: `"7 + 3x"` would not be accepted even if mathematically equivalent
+- No simplification of variable-only terms to bare `x` (always `2x` or higher)
+
+### Suite 39 — Simplifying Expressions Generator: Level 8/1 (2026-04-18)
+| Test | Result |
+|------|--------|
+| Manual placement to 8/1 via admin controls | PASS |
+| Dashboard reflects Level 8 / Sublevel 1 / Algebra / Simplifying expressions | PASS |
+| 8/1 worksheet loads (no Coming Soon) | PASS |
+| Worksheet heading: "Algebra Worksheet", subtitle: "TestKid · Level 8.1" | PASS |
+| 20 answer inputs present | PASS |
+| All 3 simplifying problem types rendered (combine_like, multi_terms, with_constant) | PASS |
+| Type label displays as "Simplifying Expressions" | PASS |
+| Lesson card title: "Learn: Simplifying Expressions" | PASS |
+| Lesson card: like-terms explanation, worked example (2x+3+x+4=3x+7), 5 steps, mystery box tip | PASS |
+| Correct answers (all 20 auto-solved) → 20/20, 100%, Passed | PASS |
+| Wrong answers (999 for all) → 0/20, Not passed | PASS |
+| Spacing normalization: `"3x+7"` accepted where canonical is `"3x + 7"` | PASS |
+| Spacing normalization: `"9m-1"` accepted where canonical is `"9m - 1"` | PASS |
+| 20/20 with mixed-format answers → Passed | PASS |
+| Unsupported 8/2 shows "Coming Soon" | PASS |
+| TypeScript: build clean, no type errors | PASS |
+| Tablet viewport (768×1024): worksheet renders correctly, screenshot saved | PASS |
 
 ---
 

@@ -24,6 +24,12 @@ export function gradeAnswer(studentAnswer: string, correctAnswer: string): boole
     return normalizeInequality(studentAnswer) === normalizeInequality(correctAnswer)
   }
 
+  // Algebraic expression answers (e.g. "5x", "3x + 7", "8a - 1")
+  if (/[a-zA-Z]/.test(correctAnswer)) {
+    const normalizeExpr = (s: string) => s.trim().toLowerCase().replace(/\s+/g, '')
+    return normalizeExpr(studentAnswer) === normalizeExpr(correctAnswer)
+  }
+
   // Fraction answers (e.g. "3/4", "5/6", "4/3")
   if (/^\d+\/\d+$/.test(correctAnswer)) {
     const correct = parseFraction(correctAnswer)
