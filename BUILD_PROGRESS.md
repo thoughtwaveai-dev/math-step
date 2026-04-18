@@ -6,8 +6,63 @@
 
 ## Current Status
 
-**Phase:** Milestone 39 — Simplifying Expressions generator: Level 8/1. ✓ Fully validated.
+**Phase:** Milestone 40 — One-step Equations generator: Level 8/2. ✓ Fully validated.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 40 — One-step Equations Generator: Level 8/2 (2026-04-18)
+
+**What was added:**
+One-step Equations — Level 8/2 (algebra: solving one-step equations with a single integer answer).
+
+**Files added:**
+- `src/lib/math/generators/one-step-equations.ts` — `generateOneStepEquations(count, rand)` for Level 8/2:
+  - Four problem types: `eq_add`, `eq_sub`, `eq_mul`, `eq_div`
+  - `eq_add`: `x + a = b` — x ∈ [1,12], a ∈ [1,10], answer always positive
+  - `eq_sub`: `x - a = b` — x ∈ [5,18], a ∈ [1,x-1], answer always positive
+  - `eq_mul`: `ax = b` — a ∈ [2,9], x ∈ [1,10], answer always positive
+  - `eq_div`: `x / a = b` — a ∈ [2,9], b ∈ [1,10], answer always positive
+  - Dedup on prompt string with 50× retry budget
+
+**Files changed:**
+- `src/lib/math/generators/index.ts` — routes 8/2 → `generateOneStepEquations`; exports `OneStepEquationProblem`, `OneStepEquationType`; added to `AnyProblemType` union
+- `src/app/worksheet/page.tsx` — added `[8, 2]` to `SUPPORTED_LEVEL_KEYS` (after `[8, 1]`)
+- `src/app/worksheet/WorksheetForm.tsx` — added all 4 one-step equation type labels (display as "One-step Equation"); all use `inputMode="numeric"` (positive integer answers only)
+- `src/lib/lessons/index.ts` — added `8/2` lesson: "One-step Equations", balanced-scale explanation, worked example (3x = 12 → x = 4), 4 steps, undo-the-operation tip
+
+**DB:** Level row 8/2 already existed in the `levels` table with topic "Algebra" / description "Solving one-step equations".
+
+**Grading:** No changes to `gradeAnswer.ts` — all answers are positive integers handled by the existing signed-integer path (`/^-?\d+$/`).
+
+**Answer format:** Single positive integer string: `"3"`, `"16"`, `"20"`, `"1"`.
+
+**Canonical answer format:** Integer only (e.g. `"4"`, `"12"`, `"9"`). No variables in answer.
+
+**Limitations (v1):**
+- All answers are positive integers only (no negative x values)
+- Single variable x only in all problem types
+- Division problems: x/a = b form only (not a/x = b)
+- No multi-step or combined operations
+
+### Suite 40 — One-step Equations Generator: Level 8/2 (2026-04-18)
+| Test | Result |
+|------|--------|
+| Manual placement to 8/2 via admin controls | PASS |
+| Dashboard reflects Level 8 / Sublevel 2 / Algebra / Solving one-step equations | PASS |
+| 8/2 worksheet loads (no Coming Soon) | PASS |
+| Worksheet heading: "Algebra Worksheet", subtitle: "TestKid · Level 8.2" | PASS |
+| 20 answer inputs present | PASS |
+| All 4 one-step equation types rendered (eq_add, eq_sub, eq_mul, eq_div) | PASS |
+| Type label displays as "One-step Equation" | PASS |
+| Review problems from 8/1 (Simplifying Expressions) show "Review" badge | PASS |
+| Lesson card title: "Learn: One-step Equations" | PASS |
+| Lesson card: balanced-scale explanation, worked example (3x=12→x=4), 4 steps, undo-operation tip | PASS |
+| Correct answers (all 20 auto-solved) → 20/20, 100%, Passed | PASS |
+| Wrong answers (999 for all) → 0/20, Not passed | PASS |
+| 9/1 still works (Factorization Worksheet · Level 9.1) | PASS |
+| TypeScript: build clean, no type errors | PASS |
+| Tablet viewport (768×1024): worksheet renders correctly, screenshot saved | PASS |
 
 ---
 

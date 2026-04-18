@@ -11,6 +11,7 @@ import { generatePercentageProblems } from './percentages'
 import { generateNegativeProblems } from './negatives'
 import { generateOrderOfOperationsProblems } from './order-of-operations'
 import { generateSimplifyingProblems } from './simplifying-expressions'
+import { generateOneStepEquations } from './one-step-equations'
 
 export type { MathProblem, ProblemType } from './factorization'
 export type { AdditionProblem, AdditionProblemType } from './addition'
@@ -25,6 +26,7 @@ export type { PercentageProblem, PercentageProblemType } from './percentages'
 export type { NegativeProblem, NegativeProblemType } from './negatives'
 export type { OrderOfOperationsProblem, OrderOfOperationsProblemType } from './order-of-operations'
 export type { SimplifyingProblem, SimplifyingProblemType } from './simplifying-expressions'
+export type { OneStepEquationProblem, OneStepEquationType } from './one-step-equations'
 
 // Unified problem type covering all generators
 export type AnyProblemType =
@@ -41,6 +43,7 @@ export type AnyProblemType =
   | import('./negatives').NegativeProblemType
   | import('./order-of-operations').OrderOfOperationsProblemType
   | import('./simplifying-expressions').SimplifyingProblemType
+  | import('./one-step-equations').OneStepEquationType
 
 export function generateProblems(levelNumber: number, sublevelNumber: number, count: number) {
   if (levelNumber === 1 && sublevelNumber === 1) {
@@ -87,6 +90,9 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 8 && sublevelNumber === 1) {
     return generateSimplifyingProblems(count)
+  }
+  if (levelNumber === 8 && sublevelNumber === 2) {
+    return generateOneStepEquations(count)
   }
   if (levelNumber === 9 && sublevelNumber === 1) {
     return generateFactorizationProblems(count)

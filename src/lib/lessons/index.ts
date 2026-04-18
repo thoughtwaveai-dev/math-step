@@ -295,6 +295,21 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Only combine terms that are alike — 3x and 5x can be added (same variable), but 3x and 5 cannot (one has a variable, one does not). Think of x as a mystery box: you can count the boxes, but you cannot mix boxes with plain numbers.',
   },
+  '8/2': {
+    title: 'One-step Equations',
+    explanation: 'An equation is like a balanced scale — both sides must be equal. To solve it, you do one operation to find the value of x. The key idea: whatever you do to one side, do the same to the other side.',
+    example: {
+      problem: '3x = 12',
+      steps: [
+        'We need to get x by itself',
+        'Both sides are divided by 3',
+        '3x ÷ 3 = 12 ÷ 3',
+        'x = 4',
+      ],
+      answer: '4',
+    },
+    tip: 'Undo the operation to isolate x: if it is added, subtract; if it is multiplied, divide. The answer is just one number — no variables needed!',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',
