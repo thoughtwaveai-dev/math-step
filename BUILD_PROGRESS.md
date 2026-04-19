@@ -6,8 +6,48 @@
 
 ## Current Status
 
-**Phase:** Milestone 47 — UX/Copy Clarity Pass. ✓ FAQ added to landing, onboarding buttons clarified, scratchpad hint added to worksheet, "Speed target" → "Time target" on dashboard and play. Pages load cleanly, 0 console errors.
+**Phase:** Milestone 48 — Beta UX Polish (feedback, back-to-top, nav speed). ✓ Link replacement, query parallelization, feedback entry on play page, back-to-top on results. TypeScript clean, 0 console errors.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 48 — Beta UX Polish (2026-04-19)
+
+**Goal:** Reduce friction for beta testers — easier feedback submission, back-to-top on long results page, and faster perceived navigation.
+
+**Files changed:**
+- `src/app/dashboard/page.tsx` — added `Link` import; replaced all internal `<a href>` with `<Link>`; parallelized Supabase queries (4 parallel in group 1, 2 in group 2)
+- `src/app/play/page.tsx` — added `Link` import; replaced `<a href>` with `<Link>`; parallelized Supabase queries (2 parallel then 3 parallel); added "Send feedback" footer link
+- `src/app/worksheet/page.tsx` — added `Link` import; replaced `<a href>` with `<Link>` on all nav links
+- `src/app/worksheet/results/[sessionId]/page.tsx` — added `Link` import; replaced `<a href>` with `<Link>`; added `BackToTop` component
+- `src/app/worksheet/results/[sessionId]/BackToTop.tsx` — new client component: fixed floating ↑ button, appears after 400px scroll
+
+**Key findings:**
+
+*Phase 1 — Feedback UX:*
+- Feedback page itself is clean and functional; discoverability was the gap
+- Added "Send feedback" link to play page footer (the main parent-facing surface after the student view)
+- The `/feedback` link already exists in the dashboard footer; no change needed there
+
+*Phase 2 — Back-to-top:*
+- Added to results page only — up to 20 problem cards makes it genuinely long
+- Not added to dashboard (card-list, parent scrolls to read, no scroll-and-return workflow)
+- Not added to landing page (marketing page, back-to-top isn't a parent's workflow)
+
+*Phase 3 — Navigation slowness:*
+- **Root cause identified:** All internal navigation used `<a href>` instead of `<Link>`, causing full page reloads on every click. Every transition re-downloaded the page, re-initialized JS, and triggered a new server render from scratch.
+- **Fix:** Replaced all internal `<a href>` with `<Link>` across dashboard, play, worksheet, results, and feedback pages. Next.js `<Link>` provides client-side SPA navigation with prefetch-on-hover.
+- **Remaining floor:** Even with `<Link>`, App Router server components still perform auth check + Supabase round-trips on each navigation. This is expected — the server must re-validate session and fetch fresh data. The parallelization reduces the query waterfall from ~7 sequential to ~3 parallel groups on dashboard and play, which should cut per-page latency noticeably.
+- **Dashboard query groups before → after:** 8 sequential → auth+students, then 4 parallel (streaks/level/allLevels/recentSessions), then 2 parallel (levelProgress/stuckSessions)
+- **Play query groups before → after:** 7 sequential → auth+students, then 2 parallel (streaks/level), then 3 parallel (lastSession/levelProgress/stuckSessions)
+
+**Validation:**
+- TypeScript: clean (`npx tsc --noEmit`, 0 errors)
+- `/` → 200, 0 console errors
+- `/login` → 200, 0 console errors
+- `/signup` → 200, 0 console errors (not tested — no test credentials)
+- `/dashboard`, `/play`, `/feedback` → 307 redirect to /login (correct auth guard behavior)
+- Zero remaining `<a href>` in dashboard, play, worksheet, results pages
 
 ---
 

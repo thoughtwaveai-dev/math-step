@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/app/actions/auth'
 import Image from 'next/image'
+import Link from 'next/link'
 import SetLevelForm from './SetLevelForm'
 import { formatSpeed } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
@@ -33,63 +34,64 @@ export default async function DashboardPage({
   const selectedId = sp.student
   const student = (selectedId ? students.find(s => s.id === selectedId) : null) ?? students[0]
 
-  const { data: streakRow } = await supabase
-    .from('streaks')
-    .select('current_streak, longest_streak, total_sessions, total_points')
-    .eq('student_id', student.id)
-    .maybeSingle()
+  // Parallel: these all depend only on student.id / student.current_level, not each other
+  const [
+    { data: streakRow },
+    { data: level },
+    { data: allLevels },
+    { data: recentSessions },
+  ] = await Promise.all([
+    supabase.from('streaks')
+      .select('current_streak, longest_streak, total_sessions, total_points')
+      .eq('student_id', student.id)
+      .maybeSingle(),
+    supabase.from('levels')
+      .select('*')
+      .eq('level_number', student.current_level)
+      .eq('sublevel_number', student.current_sublevel)
+      .maybeSingle(),
+    supabase.from('levels')
+      .select('id, level_number, sublevel_number, topic, description')
+      .order('level_number', { ascending: true })
+      .order('sublevel_number', { ascending: true }),
+    supabase.from('sessions')
+      .select('id, completed_at, correct_count, total_problems, accuracy, time_taken_seconds, passed, level_id')
+      .eq('student_id', student.id)
+      .not('completed_at', 'is', null)
+      .order('completed_at', { ascending: false })
+      .limit(10),
+  ])
 
   const streak = streakRow?.current_streak ?? 0
   const longestStreak = streakRow?.longest_streak ?? 0
   const totalSessions = streakRow?.total_sessions ?? 0
   const totalPoints = streakRow?.total_points ?? 0
-
-  const { data: level } = await supabase
-    .from('levels')
-    .select('*')
-    .eq('level_number', student.current_level)
-    .eq('sublevel_number', student.current_sublevel)
-    .maybeSingle()
-
-  const { data: allLevels } = await supabase
-    .from('levels')
-    .select('id, level_number, sublevel_number, topic, description')
-    .order('level_number', { ascending: true })
-    .order('sublevel_number', { ascending: true })
-
   const levelMap = new Map(allLevels?.map(l => [l.id, l]) ?? [])
 
-  const { data: recentSessions } = await supabase
-    .from('sessions')
-    .select('id, completed_at, correct_count, total_problems, accuracy, time_taken_seconds, passed, level_id')
-    .eq('student_id', student.id)
-    .not('completed_at', 'is', null)
-    .order('completed_at', { ascending: false })
-    .limit(10)
-
-  const { data: levelProgress } = level
-    ? await supabase
-        .from('student_level_progress')
-        .select('consecutive_passes')
-        .eq('student_id', student.id)
-        .eq('level_id', level.id)
-        .maybeSingle()
-    : { data: null }
+  // Parallel: stuck detection + level progress both need level.id
+  const [
+    { data: levelProgress },
+    { data: recentLevelSessions },
+  ] = await Promise.all([
+    level
+      ? supabase.from('student_level_progress')
+          .select('consecutive_passes')
+          .eq('student_id', student.id)
+          .eq('level_id', level.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    level
+      ? supabase.from('sessions')
+          .select('passed')
+          .eq('student_id', student.id)
+          .eq('level_id', level.id)
+          .not('completed_at', 'is', null)
+          .order('completed_at', { ascending: false })
+          .limit(5)
+      : Promise.resolve({ data: null }),
+  ])
 
   const consecutivePasses = levelProgress?.consecutive_passes ?? 0
-
-  // Stuck detection: last 5 sessions for this student at the current level
-  const { data: recentLevelSessions } = level
-    ? await supabase
-        .from('sessions')
-        .select('passed')
-        .eq('student_id', student.id)
-        .eq('level_id', level.id)
-        .not('completed_at', 'is', null)
-        .order('completed_at', { ascending: false })
-        .limit(5)
-    : { data: null }
-
   const recentResults = (recentLevelSessions ?? []).map(s => s.passed ?? false)
   const isStuck = isStudentStuck(recentResults)
 
@@ -157,7 +159,7 @@ export default async function DashboardPage({
         {students.length > 1 && (
           <div className="flex flex-wrap items-center gap-2">
             {students.map(s => (
-              <a
+              <Link
                 key={s.id}
                 href={`/dashboard?student=${s.id}`}
                 className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
@@ -167,7 +169,7 @@ export default async function DashboardPage({
                 }`}
               >
                 {s.name}
-              </a>
+              </Link>
             ))}
           </div>
         )}
@@ -194,18 +196,18 @@ export default async function DashboardPage({
 
         {/* Action buttons row */}
         <div className="flex flex-col gap-3 sm:flex-row">
-          <a
+          <Link
             href={`/play?student=${student.id}`}
             className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#bae0bd] bg-white px-6 py-4 text-base font-semibold text-[#2d6a35] hover:bg-[#f2faf3] transition-colors shadow-sm"
           >
             Open Student View
-          </a>
-          <a
+          </Link>
+          <Link
             href="/onboarding"
             className="flex items-center justify-center gap-2 rounded-xl border border-[#bae0bd] bg-white px-5 py-4 text-sm font-semibold text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors shadow-sm sm:w-auto"
           >
             + Add Student
-          </a>
+          </Link>
         </div>
 
         {/* Current Focus */}
@@ -270,7 +272,7 @@ export default async function DashboardPage({
               {recentSessions.map((s) => {
                 const lvl = levelMap.get(s.level_id)
                 return (
-                  <a
+                  <Link
                     key={s.id}
                     href={`/worksheet/results/${s.id}`}
                     className="flex items-center justify-between gap-3 rounded-lg border border-[#e8f5e9] bg-[#f7faf7] px-4 py-3 hover:bg-[#f2faf3] transition-colors"
@@ -296,7 +298,7 @@ export default async function DashboardPage({
                     >
                       {s.passed ? '✓' : '✗'}
                     </span>
-                  </a>
+                  </Link>
                 )
               })}
             </div>
@@ -386,12 +388,12 @@ export default async function DashboardPage({
               <p className="text-xs text-[#4a6b4e] mb-2">
                 Not sure about the placement? Run the short diagnostic quiz to get a recommendation.
               </p>
-              <a
+              <Link
                 href={`/placement?student=${student.id}`}
                 className="inline-block rounded-lg border border-[#bae0bd] bg-[#f7faf7] px-4 py-2.5 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
               >
                 Run Placement Diagnostic →
-              </a>
+              </Link>
             </div>
           </div>
         </details>
@@ -400,10 +402,10 @@ export default async function DashboardPage({
         <div className="border-t border-[#bae0bd] pt-6 pb-2 flex flex-wrap items-center justify-between gap-3 text-xs text-[#4a6b4e]">
           <span>MathStep · Beta</span>
           <div className="flex flex-wrap gap-4">
-            <a href="/privacy" className="hover:text-[#2d6a35] hover:underline">Privacy</a>
-            <a href="/terms" className="hover:text-[#2d6a35] hover:underline">Terms</a>
-            <a href="/disclaimer" className="hover:text-[#2d6a35] hover:underline">Disclaimer</a>
-            <a href="/feedback" className="font-medium text-[#2d6a35] hover:underline">Send feedback</a>
+            <Link href="/privacy" className="hover:text-[#2d6a35] hover:underline">Privacy</Link>
+            <Link href="/terms" className="hover:text-[#2d6a35] hover:underline">Terms</Link>
+            <Link href="/disclaimer" className="hover:text-[#2d6a35] hover:underline">Disclaimer</Link>
+            <Link href="/feedback" className="font-medium text-[#2d6a35] hover:underline">Send feedback</Link>
           </div>
         </div>
       </main>

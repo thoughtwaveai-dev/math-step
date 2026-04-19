@@ -1,8 +1,10 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
+import Link from 'next/link'
 import CelebrationEffect from './CelebrationEffect'
 import CorrectionInput from './CorrectionInput'
+import BackToTop from './BackToTop'
 import { isStudentStuck } from '@/lib/stuckDetector'
 
 function formatTime(seconds: number | null): string {
@@ -125,6 +127,7 @@ export default async function ResultsPage({
   return (
     <div className="flex min-h-screen flex-col bg-[#f7faf7]">
       {showCelebration && <CelebrationEffect />}
+      <BackToTop />
       {/* Header */}
       <header className="border-b border-[#bae0bd] bg-white px-6 py-4">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
@@ -132,12 +135,12 @@ export default async function ResultsPage({
             <Image src="/math-step-logo.png" alt="MathStep" width={32} height={32} className="rounded-lg" />
             <span className="text-base font-bold text-[#1a2e1c]">MathStep</span>
           </div>
-          <a
+          <Link
             href={`/play?student=${studentId}`}
             className="rounded-lg border border-[#bae0bd] px-3.5 py-2 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
           >
             ← Play
-          </a>
+          </Link>
         </div>
       </header>
 
@@ -328,18 +331,18 @@ export default async function ResultsPage({
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <a
+          <Link
             href={`/worksheet?student=${studentId}`}
             className="flex-1 rounded-xl bg-[#2d6a35] px-6 py-4 text-center text-base font-semibold text-white hover:bg-[#1f4d26] transition-colors"
           >
             Try Again
-          </a>
-          <a
+          </Link>
+          <Link
             href={`/play?student=${studentId}`}
             className="flex-1 rounded-xl border-2 border-[#bae0bd] bg-white px-6 py-4 text-center text-base font-semibold text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
           >
             Back to Play
-          </a>
+          </Link>
         </div>
       </main>
     </div>

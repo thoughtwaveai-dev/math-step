@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import Image from 'next/image'
+import Link from 'next/link'
 import { formatSpeed } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
 
@@ -26,57 +27,60 @@ export default async function PlayPage({
   const selectedId = sp.student
   const student = (selectedId ? students.find(s => s.id === selectedId) : null) ?? students[0]
 
-  const { data: streakRow } = await supabase
-    .from('streaks')
-    .select('current_streak, total_points')
-    .eq('student_id', student.id)
-    .maybeSingle()
+  // Parallel: streaks and level don't depend on each other
+  const [
+    { data: streakRow },
+    { data: level },
+  ] = await Promise.all([
+    supabase.from('streaks')
+      .select('current_streak, total_points')
+      .eq('student_id', student.id)
+      .maybeSingle(),
+    supabase.from('levels')
+      .select('*')
+      .eq('level_number', student.current_level)
+      .eq('sublevel_number', student.current_sublevel)
+      .maybeSingle(),
+  ])
 
   const streak = streakRow?.current_streak ?? 0
   const totalPoints = streakRow?.total_points ?? 0
 
-  const { data: level } = await supabase
-    .from('levels')
-    .select('*')
-    .eq('level_number', student.current_level)
-    .eq('sublevel_number', student.current_sublevel)
-    .maybeSingle()
-
-  const { data: lastSession } = level
-    ? await supabase
-        .from('sessions')
-        .select('correct_count, total_problems, accuracy, time_taken_seconds, passed, completed_at')
-        .eq('student_id', student.id)
-        .eq('level_id', level.id)
-        .not('completed_at', 'is', null)
-        .order('completed_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-    : { data: null }
-
-  const { data: levelProgress } = level
-    ? await supabase
-        .from('student_level_progress')
-        .select('consecutive_passes')
-        .eq('student_id', student.id)
-        .eq('level_id', level.id)
-        .maybeSingle()
-    : { data: null }
+  // Parallel: all three depend on level.id but not each other
+  const [
+    { data: lastSession },
+    { data: levelProgress },
+    { data: recentLevelSessions },
+  ] = await Promise.all([
+    level
+      ? supabase.from('sessions')
+          .select('correct_count, total_problems, accuracy, time_taken_seconds, passed, completed_at')
+          .eq('student_id', student.id)
+          .eq('level_id', level.id)
+          .not('completed_at', 'is', null)
+          .order('completed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    level
+      ? supabase.from('student_level_progress')
+          .select('consecutive_passes')
+          .eq('student_id', student.id)
+          .eq('level_id', level.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null }),
+    level
+      ? supabase.from('sessions')
+          .select('passed')
+          .eq('student_id', student.id)
+          .eq('level_id', level.id)
+          .not('completed_at', 'is', null)
+          .order('completed_at', { ascending: false })
+          .limit(5)
+      : Promise.resolve({ data: null }),
+  ])
 
   const consecutivePasses = levelProgress?.consecutive_passes ?? 0
-
-  // Stuck detection: last 5 sessions for this student at the current level
-  const { data: recentLevelSessions } = level
-    ? await supabase
-        .from('sessions')
-        .select('passed')
-        .eq('student_id', student.id)
-        .eq('level_id', level.id)
-        .not('completed_at', 'is', null)
-        .order('completed_at', { ascending: false })
-        .limit(5)
-    : { data: null }
-
   const recentResults = (recentLevelSessions ?? []).map(s => s.passed ?? false)
   const isStuck = isStudentStuck(recentResults)
 
@@ -95,12 +99,12 @@ export default async function PlayPage({
             />
             <span className="text-lg font-bold text-[#1a2e1c]">MathStep</span>
           </div>
-          <a
+          <Link
             href={`/dashboard?student=${student.id}`}
             className="rounded-lg border border-[#bae0bd] bg-white px-3.5 py-2 text-xs font-medium text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors"
           >
             Parent view
-          </a>
+          </Link>
         </div>
       </header>
 
@@ -115,7 +119,7 @@ export default async function PlayPage({
         {students.length > 1 && (
           <div className="flex flex-wrap items-center gap-2">
             {students.map(s => (
-              <a
+              <Link
                 key={s.id}
                 href={`/play?student=${s.id}`}
                 className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
@@ -125,7 +129,7 @@ export default async function PlayPage({
                 }`}
               >
                 {s.name}
-              </a>
+              </Link>
             ))}
           </div>
         )}
@@ -151,12 +155,12 @@ export default async function PlayPage({
         </div>
 
         {/* Start worksheet CTA */}
-        <a
+        <Link
           href={`/worksheet?student=${student.id}`}
           className="flex items-center justify-center gap-2 w-full rounded-xl bg-[#2d6a35] px-6 py-5 text-lg font-bold text-white hover:bg-[#1f4d26] transition-colors shadow-sm"
         >
           Start Today&apos;s Worksheet
-        </a>
+        </Link>
 
         {/* Support card when student is stuck */}
         {isStuck && (
@@ -257,6 +261,12 @@ export default async function PlayPage({
             </dl>
           </div>
         )}
+        {/* Footer */}
+        <div className="border-t border-[#bae0bd] pt-5 pb-2 text-center">
+          <Link href="/feedback" className="text-xs text-[#4a6b4e] hover:text-[#2d6a35] hover:underline">
+            Send feedback
+          </Link>
+        </div>
       </main>
     </div>
   )

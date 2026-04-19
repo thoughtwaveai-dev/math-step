@@ -7,6 +7,7 @@ import { SUPPORTED_LEVEL_KEYS } from '@/lib/levelKeys'
 import { generateWarmupProblems, getWarmupSourceLevel } from '@/lib/math/warmup'
 import { isStudentStuck } from '@/lib/stuckDetector'
 import Image from 'next/image'
+import Link from 'next/link'
 import WorksheetForm from './WorksheetForm'
 import LessonCard from './LessonCard'
 import WorksheetScratchpad from './WorksheetScratchpad'
@@ -69,12 +70,12 @@ export default async function WorksheetPage({
               <Image src="/math-step-logo.png" alt="MathStep" width={32} height={32} className="rounded-lg" />
               <span className="text-base font-bold text-[#1a2e1c]">MathStep</span>
             </div>
-            <a
+            <Link
               href={`/play?student=${student.id}`}
               className="rounded-lg border border-[#bae0bd] px-3.5 py-2 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
             >
               ← Play
-            </a>
+            </Link>
           </div>
         </header>
         <main className="mx-auto w-full max-w-3xl px-5 py-10">
@@ -84,12 +85,12 @@ export default async function WorksheetPage({
               Worksheets for Level {levelNumber}.{sublevelNumber} ({level.topic}) are not available yet.
               Check back soon!
             </p>
-            <a
+            <Link
               href={`/play?student=${student.id}`}
               className="mt-4 inline-block rounded-xl bg-[#2d6a35] px-4 py-3 text-sm font-semibold text-white hover:bg-[#1f4d26] transition-colors"
             >
               Back to Play
-            </a>
+            </Link>
           </div>
         </main>
       </div>
@@ -202,12 +203,12 @@ export default async function WorksheetPage({
               <Image src="/math-step-logo.png" alt="MathStep" width={32} height={32} className="rounded-lg" />
               <span className="text-base font-bold text-[#1a2e1c]">MathStep</span>
             </div>
-            <a
+            <Link
               href={`/play?student=${student.id}`}
               className="rounded-lg border border-[#bae0bd] px-3.5 py-2 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
             >
               ← Play
-            </a>
+            </Link>
           </div>
         </header>
         <main className="mx-auto w-full max-w-3xl px-5 py-10">
@@ -217,12 +218,12 @@ export default async function WorksheetPage({
               Worksheets for Level {levelNumber}.{sublevelNumber} ({level.topic}) are not available yet.
               Check back soon!
             </p>
-            <a
+            <Link
               href={`/play?student=${student.id}`}
               className="mt-4 inline-block rounded-xl bg-[#2d6a35] px-4 py-3 text-sm font-semibold text-white hover:bg-[#1f4d26] transition-colors"
             >
               Back to Play
-            </a>
+            </Link>
           </div>
         </main>
       </div>
