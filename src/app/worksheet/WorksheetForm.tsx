@@ -105,6 +105,13 @@ export default function WorksheetForm({ sessionId, problems, reviewProblemIds }:
         </span>
       </div>
 
+      {/* Review explanation */}
+      {reviewProblemIds.length > 0 && (
+        <p className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm text-amber-800">
+          Review questions help keep earlier skills fresh while you practise your current level.
+        </p>
+      )}
+
       {/* Problems */}
       {problems.map((problem, index) => (
         <div
