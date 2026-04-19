@@ -43,7 +43,7 @@ export default async function ResultsPage({
   searchParams,
 }: {
   params: Promise<{ sessionId: string }>
-  searchParams: Promise<{ advanced?: string; nl?: string; ns?: string; nt?: string }>
+  searchParams: Promise<{ advanced?: string; nl?: string; ns?: string; nt?: string; clc?: string; clt?: string }>
 }) {
   const { sessionId } = await params
   const sp = await searchParams
@@ -51,6 +51,8 @@ export default async function ResultsPage({
   const newLevel = sp.nl ? parseInt(sp.nl, 10) : null
   const newSublevel = sp.ns ? parseInt(sp.ns, 10) : null
   const newTopic = sp.nt ?? null
+  const paramClc = sp.clc !== undefined ? parseInt(sp.clc, 10) : null
+  const paramClt = sp.clt !== undefined ? parseInt(sp.clt, 10) : null
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -117,6 +119,13 @@ export default async function ResultsPage({
   const totalProblems = typedSession.total_problems ?? problems.length
   const accuracy = typedSession.accuracy ? Number(typedSession.accuracy) : 0
   const passed = typedSession.passed ?? false
+
+  // Mixed worksheet: review problems were included when current-level total < overall total
+  const clcCount = paramClc ?? correctCount
+  const cltCount = (paramClt !== null && paramClt > 0) ? paramClt : totalProblems
+  const hasMixedProblems = cltCount < totalProblems
+  const reviewCount = totalProblems - cltCount
+  const currentLevelAccuracyPct = Math.round((clcCount / cltCount) * 100)
 
   const showCelebration = accuracy === 100
 
@@ -205,6 +214,12 @@ export default async function ResultsPage({
                 {consecutivePasses} / {passesRequired} passes
               </span>
             </p>
+            {hasMixedProblems && (
+              <p className="mt-1.5 text-xs text-[#4a6b4e]">
+                This worksheet included {reviewCount} review problem{reviewCount === 1 ? '' : 's'} from earlier levels.
+                Score on new material: <span className="font-medium text-[#1a2e1c]">{clcCount}/{cltCount} ({currentLevelAccuracyPct}%)</span> — only this counts towards your pass.
+              </p>
+            )}
             {passed && (
               <p className="mt-1 text-xs text-[#4a6b4e]">
                 {consecutivePasses >= passesRequired
@@ -214,7 +229,7 @@ export default async function ResultsPage({
             )}
             {!passed && (
               <p className="mt-1 text-xs text-[#4a6b4e]">
-                Consecutive passes reset. Keep practicing!
+                Consecutive passes reset to 0/{passesRequired}. Keep going!
               </p>
             )}
           </div>

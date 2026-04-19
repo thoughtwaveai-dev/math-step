@@ -253,6 +253,8 @@ export async function submitWorksheet(
     params.set('ns', String(advancedToSublevel))
     if (advancedToTopic) params.set('nt', advancedToTopic)
   }
-  const resultUrl = `/worksheet/results/${sessionId}${params.size > 0 ? `?${params.toString()}` : ''}`
-  redirect(resultUrl)
+  // Pass current-level-only counts so the results page can show a review breakdown
+  params.set('clc', String(currentLevelCorrect))
+  params.set('clt', String(currentLevelTotal))
+  redirect(`/worksheet/results/${sessionId}?${params.toString()}`)
 }
