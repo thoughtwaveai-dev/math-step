@@ -265,7 +265,7 @@ All generators use **bounded algorithmic random generation** — no more fixed 1
 
 ### Lesson cards
 
-`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. Supported: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 11/2. Note: 9/2, 10/1, 10/2, 11/1 have generators but no lesson card (renders without card, which is acceptable).
+`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. All 22 currently supported levels have lesson cards: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 9/2, 10/1, 10/2, 11/1, 11/2.
 
 ---
 

@@ -6,8 +6,25 @@
 
 ## Current Status
 
-**Phase:** Milestone 42 — Simultaneous Equations (Level 11/2). ✓ Fully validated.
+**Phase:** Milestone 43 — Lesson content consistency pass. ✓ All 22 supported levels have Learn cards.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 43 — Lesson Content Consistency Pass (2026-04-19)
+
+**What was done:**
+Audited lesson content coverage for all 22 generator-supported levels. Discovered that entries for 9/2, 10/1, 10/2, and 11/1 already existed in `src/lib/lessons/index.ts` from a prior session but were not reflected in `PROJECT_CONTEXT.md`.
+
+**Result:** All 22 levels confirmed to have lesson cards. No new lesson content needed.
+
+**Files updated:**
+- `PROJECT_CONTEXT.md` — updated Lesson cards section to reflect full coverage
+
+**Validation:**
+- Read `src/lib/lessons/index.ts` — all 22 keys confirmed present
+- Browser: dev server running, worksheet renders Learn card correctly
+- No regressions observed
 
 ---
 
