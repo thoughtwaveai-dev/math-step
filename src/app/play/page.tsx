@@ -262,7 +262,10 @@ export default async function PlayPage({
           </div>
         )}
         {/* Footer */}
-        <div className="border-t border-[#bae0bd] pt-5 pb-2 text-center">
+        <div className="border-t border-[#bae0bd] pt-5 pb-2 flex justify-center gap-5">
+          <Link href="/help" className="text-xs text-[#4a6b4e] hover:text-[#2d6a35] hover:underline">
+            Help
+          </Link>
           <Link href="/feedback" className="text-xs text-[#4a6b4e] hover:text-[#2d6a35] hover:underline">
             Send feedback
           </Link>

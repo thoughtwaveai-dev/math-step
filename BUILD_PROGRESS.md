@@ -6,8 +6,35 @@
 
 ## Current Status
 
-**Phase:** Milestone 48 — Beta UX Polish (feedback, back-to-top, nav speed). ✓ Link replacement, query parallelization, feedback entry on play page, back-to-top on results. TypeScript clean, 0 console errors.
+**Phase:** Milestone 49 — Parent Help Page. ✓ /help page created, shared FAQ source, Help links in dashboard + play + landing footers. TypeScript clean, 0 console errors.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 49 — Parent Help Page (2026-04-19)
+
+**Goal:** Make core parent-facing help content accessible after login, not only from the public landing page.
+
+**Files changed:**
+- `src/lib/helpContent.ts` — new shared module; exports `FAQ_ITEMS` array (single source of truth for FAQ)
+- `src/app/help/page.tsx` — new public `/help` page: What is MathStep, How it works (4 steps), Parent vs Student view comparison, full FAQ, "Still have a question?" CTA linking to /feedback
+- `src/app/page.tsx` — imports `FAQ_ITEMS` from shared module (eliminates copy drift); added "Help" link to landing footer
+- `src/app/dashboard/page.tsx` — added "Help" link to footer (before Privacy)
+- `src/app/play/page.tsx` — added "Help" link to footer alongside "Send feedback"
+
+**Help is now accessible from:**
+- `/` (landing page footer)
+- `/dashboard` (footer)
+- `/play` (footer)
+- Direct URL: `/help` (public, no auth required — shareable)
+
+**Playwright validation:**
+- `/help` → 200, loads, 0 console errors, all sections render
+- `/help` mobile (390px) → clean stack layout, all sections readable
+- `/help` tablet (768px) → two-column parent/student card renders correctly
+- `/` → 200, FAQ renders from shared source, Help link in footer confirmed
+- `/dashboard` → 307 redirect to /login (correct auth guard)
+- Pre-existing warning: `themeColor` metadata on /dashboard — unrelated to this milestone
 
 ---
 
