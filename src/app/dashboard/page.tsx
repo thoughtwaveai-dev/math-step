@@ -239,7 +239,7 @@ export default async function DashboardPage({
 
               <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 <div className="rounded-lg bg-[#f7faf7] p-3">
-                  <dt className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Speed target</dt>
+                  <dt className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Time target</dt>
                   <dd className="mt-1 text-base font-semibold text-[#1a2e1c]">
                     {formatSpeed(level.speed_target_seconds)}
                   </dd>

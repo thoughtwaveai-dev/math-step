@@ -105,6 +105,10 @@ export default function WorksheetForm({ sessionId, problems, reviewProblemIds }:
         </span>
       </div>
 
+      <p className="text-xs text-center text-[#4a6b4e]">
+        Need space to work things out? There&apos;s a drawing area at the bottom of this page.
+      </p>
+
       {/* Review explanation */}
       {reviewProblemIds.length > 0 && (
         <p className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm text-amber-800">

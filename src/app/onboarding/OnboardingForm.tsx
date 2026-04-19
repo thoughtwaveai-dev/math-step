@@ -28,25 +28,35 @@ export default function OnboardingForm() {
         </div>
       )}
 
-      <button
-        type="submit"
-        name="start_mode"
-        value="default"
-        disabled={pending}
-        className="rounded-xl bg-[#2d6a35] px-4 py-3.5 text-sm font-semibold text-white hover:bg-[#1f4d26] disabled:opacity-50 transition-colors"
-      >
-        {pending ? 'Setting up…' : 'Start at Level 1'}
-      </button>
+      <div className="flex flex-col gap-1.5">
+        <button
+          type="submit"
+          name="start_mode"
+          value="default"
+          disabled={pending}
+          className="rounded-xl bg-[#2d6a35] px-4 py-3.5 text-sm font-semibold text-white hover:bg-[#1f4d26] disabled:opacity-50 transition-colors"
+        >
+          {pending ? 'Setting up…' : 'Start at Level 1'}
+        </button>
+        <p className="text-xs text-[#4a6b4e] text-center">
+          Starts from the beginning. Great for younger students or building a solid foundation.
+        </p>
+      </div>
 
-      <button
-        type="submit"
-        name="start_mode"
-        value="diagnostic"
-        disabled={pending}
-        className="rounded-xl border border-[#bae0bd] bg-white px-4 py-3.5 text-sm font-semibold text-[#2d6a35] hover:bg-[#f2faf3] disabled:opacity-50 transition-colors"
-      >
-        {pending ? 'Setting up…' : 'Take a short placement quiz →'}
-      </button>
+      <div className="flex flex-col gap-1.5">
+        <button
+          type="submit"
+          name="start_mode"
+          value="diagnostic"
+          disabled={pending}
+          className="rounded-xl border border-[#bae0bd] bg-white px-4 py-3.5 text-sm font-semibold text-[#2d6a35] hover:bg-[#f2faf3] disabled:opacity-50 transition-colors"
+        >
+          {pending ? 'Setting up…' : 'Take a short placement quiz →'}
+        </button>
+        <p className="text-xs text-[#4a6b4e] text-center">
+          Answer a few questions to find the right starting level. Takes about 2 minutes.
+        </p>
+      </div>
     </form>
   )
 }

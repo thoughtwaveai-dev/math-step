@@ -6,8 +6,44 @@
 
 ## Current Status
 
-**Phase:** Milestone 46 — Product Messaging / Positioning Pass. ✓ Copy updated across landing, onboarding, play, dashboard. Pages load cleanly, 0 console errors.
+**Phase:** Milestone 47 — UX/Copy Clarity Pass. ✓ FAQ added to landing, onboarding buttons clarified, scratchpad hint added to worksheet, "Speed target" → "Time target" on dashboard and play. Pages load cleanly, 0 console errors.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 47 — UX/Copy Clarity Pass (2026-04-19)
+
+**Goal:** Make the app easier for parents to understand, easier for children to follow, and more polished for beta testers.
+
+**Files updated:**
+- `src/app/page.tsx` — added FAQ section (9 Q&As) before footer
+- `src/app/onboarding/OnboardingForm.tsx` — added explanatory subtext under each button
+- `src/app/worksheet/WorksheetForm.tsx` — added scratchpad hint below timer
+- `src/app/dashboard/page.tsx` — "Speed target" → "Time target"
+- `src/app/play/page.tsx` — "Speed target" → "Time target"
+
+**Key changes:**
+
+FAQ section (landing page):
+- 9 Q&As covering: what is MathStep, who it's for, child email, setup, marking, stuck support, review meaning, parent vs student view, live tutor clarification
+- Rendered as simple card list before footer — no JS required
+
+Onboarding:
+- "Start at Level 1" button now has subtext: "Starts from the beginning. Great for younger students or building a solid foundation."
+- "Take a short placement quiz" button now has subtext: "Answer a few questions to find the right starting level. Takes about 2 minutes."
+
+Worksheet:
+- Small hint below timer: "Need space to work things out? There's a drawing area at the bottom of this page."
+
+Terminology:
+- "Speed target" → "Time target" on dashboard and play pages (less pressuring, more descriptive)
+- DB column `speed_target_seconds` unchanged
+
+**Playwright smoke checks:**
+- `/` — 200, loads, 0 console errors, FAQ renders correctly
+- `/onboarding` — 200, loads, 0 console errors, button subtext visible
+- `/login` — 200, loads, 0 console errors
+- `/signup` — 200, loads, 0 console errors
 
 ---
 
