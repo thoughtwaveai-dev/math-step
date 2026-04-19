@@ -20,6 +20,10 @@ export const FAQ_ITEMS = [
     a: "MathStep marks every answer automatically the moment it's submitted. No manual checking needed.",
   },
   {
+    q: 'How are the worksheets created?',
+    a: "MathStep generates worksheets automatically using built-in math rules for each topic and level. This keeps practice consistent and level-appropriate without any preparation from you. The app then marks answers instantly and tracks accuracy, time, and mastery over time.",
+  },
+  {
     q: 'How does the app help if my child gets stuck?',
     a: 'Each level has a worked example your child can refer to at any time. If they fail several sessions in a row, the app automatically offers easier warm-up problems from the previous topic to rebuild confidence before trying again.',
   },
@@ -32,7 +36,7 @@ export const FAQ_ITEMS = [
     a: 'The student view (Play page) is simple and focused — just the worksheet. The parent view (Dashboard) shows progress, recent sessions, accuracy trends, and settings like adjusting the starting level.',
   },
   {
-    q: 'Is MathStep a live tutor?',
-    a: "No — it's a structured independent practice system, not a live tutor or AI assistant. MathStep teaches through worked examples, marks answers instantly, and guides students through their mistakes. Parents can step in when a topic needs more explanation.",
+    q: 'Is MathStep a live tutor or just worksheets?',
+    a: "Neither — it's a guided practice system. MathStep teaches with worked examples, marks answers instantly, offers self-correction after each session, and provides warm-up support when a student is struggling. Parents can also see progress and step in when a topic needs more explanation.",
   },
 ]
