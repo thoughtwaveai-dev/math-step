@@ -71,6 +71,8 @@ function inputModeForType(type: AnyProblemType): React.HTMLAttributes<HTMLInputE
   if (type === 'neg_addition' || type === 'neg_subtraction' || type === 'neg_multiplication' || type === 'neg_division') return 'text'
   if (type === 'order_add_mul' || type === 'order_sub_mul' || type === 'order_div_add' || type === 'order_paren') return 'numeric'
   if (type === 'eq_add' || type === 'eq_sub' || type === 'eq_mul' || type === 'eq_div') return 'numeric'
+  // Factorization types with multi-token answers (e.g. "2 × 3 × 5", "1, 2, 3, 6", "1×12, 2×6")
+  if (type === 'prime_factorization' || type === 'list_factors' || type === 'factor_pairs' || type === 'common_factors') return 'text'
   // Algebraic expressions need text mode for letters (e.g. "5x", "3x + 7")
   if (type === 'expr_combine_like' || type === 'expr_multi_terms' || type === 'expr_with_constant') return 'text'
   // Simultaneous equation answers contain letters and commas (e.g. "x = 3, y = 7")
