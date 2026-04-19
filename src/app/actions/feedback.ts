@@ -23,15 +23,18 @@ export async function submitFeedback(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Not authenticated.' }
 
-  // If student_id provided, verify ownership
+  let studentName: string | null = null
+
+  // If student_id provided, verify ownership and get name
   if (studentId) {
     const { data: student } = await supabase
       .from('students')
-      .select('id')
+      .select('id, name')
       .eq('id', studentId)
       .eq('parent_id', user.id)
       .maybeSingle()
     if (!student) return { error: 'Student not found.' }
+    studentName = student.name
   }
 
   const { error: insertError } = await supabase
@@ -41,6 +44,9 @@ export async function submitFeedback(
       student_id: studentId || null,
       category,
       message,
+      parent_email: user.email ?? null,
+      parent_name: (user.user_metadata?.name as string) ?? null,
+      student_name: studentName,
     })
 
   if (insertError) return { error: insertError.message }

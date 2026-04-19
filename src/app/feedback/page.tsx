@@ -39,7 +39,7 @@ export default async function FeedbackPage({
 
   const { data: recentFeedback } = await supabase
     .from('feedback')
-    .select('id, category, message, created_at, student_id')
+    .select('id, category, message, created_at, student_id, student_name')
     .eq('parent_id', user.id)
     .order('created_at', { ascending: false })
     .limit(20)
@@ -100,8 +100,10 @@ export default async function FeedbackPage({
                     >
                       {CATEGORY_LABELS[item.category] ?? item.category}
                     </span>
-                    {item.student_id && studentMap.has(item.student_id) && (
-                      <span className="text-xs text-[#4a6b4e]">{studentMap.get(item.student_id)}</span>
+                    {(item.student_id || item.student_name) && (
+                      <span className="text-xs text-[#4a6b4e]">
+                        {studentMap.get(item.student_id) ?? item.student_name}
+                      </span>
                     )}
                     <span className="ml-auto text-xs text-[#4a6b4e]">{formatDate(item.created_at)}</span>
                   </div>
