@@ -6,8 +6,46 @@
 
 ## Current Status
 
-**Phase:** Milestone 45 — Stuck-Mode Support v1. ✓ Warm-up system built. TypeScript clean. Unit tests: 17/17 pass.
+**Phase:** Milestone 46 — Product Messaging / Positioning Pass. ✓ Copy updated across landing, onboarding, play, dashboard. Pages load cleanly, 0 console errors.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 46 — Product Messaging / Positioning Pass (2026-04-19)
+
+**Goal:** Clarify MathStep's positioning for parents and skeptical educators. Make the support story (worked examples, instant marking, self-correction, stuck-mode warm-up, parent visibility) obvious. Subtle "practice system, not a live tutor" framing.
+
+**Files updated:**
+- `src/app/page.tsx` — full landing page copy rewrite
+- `src/app/onboarding/page.tsx` — first-time bullet points
+- `src/app/play/page.tsx` — stuck card copy
+- `src/app/dashboard/page.tsx` — stuck notice for parent
+
+**Key messaging changes:**
+
+Landing page:
+- Hero body: added "instant marking, worked examples" to the core value prop
+- "How it works" step 2: now mentions instant marking, worked examples, mastery gating
+- "Why MathStep?" renamed to "What makes MathStep different" with 6 focused differentiator cards: Instant marking / Worked examples at every level / Self-correction after results / Mastery-based progression / Stuck-mode support / Parent visibility
+- Added "Short sessions that fit real life" note (10–15 min, tablet-first)
+- Added new section: "A practice system, not a live tutor" — honest positioning, not defensive
+
+Onboarding:
+- Replaced generic bullets with copy that explains how the app teaches: instant marking + worked examples, parent dashboard, device support
+
+Play page (stuck card):
+- Expanded from 2 lines to 3; names the worked example and warm-up explicitly; reassuring tone
+
+Dashboard (stuck notice):
+- Added level number to heading for specificity; expanded guidance for parent ("it may help to review the worked example together")
+
+**Playwright smoke checks:**
+- `/` — 200, loads, 0 console errors
+- `/onboarding` — 200, loads, 0 console errors
+- `/disclaimer` — 200, loads, 0 console errors
+- `/privacy` — 200, loads, 0 console errors
+- `/login` — 200, loads, 0 console errors
+- `/signup` — 200, loads, 0 console errors
 
 ---
 

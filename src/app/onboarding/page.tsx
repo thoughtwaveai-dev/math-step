@@ -38,9 +38,9 @@ export default async function OnboardingPage() {
         </p>
         {!hasStudents && (
           <ul className="mb-6 mx-auto max-w-xs space-y-1.5 text-xs text-[#4a6b4e] text-left list-none">
-            <li className="flex items-start gap-2"><span className="text-[#2d6a35] font-bold mt-0.5">✓</span>The app adjusts as your child masters each level</li>
-            <li className="flex items-start gap-2"><span className="text-[#2d6a35] font-bold mt-0.5">✓</span>You can add more than one child later</li>
-            <li className="flex items-start gap-2"><span className="text-[#2d6a35] font-bold mt-0.5">✓</span>Works well on tablet and mobile</li>
+            <li className="flex items-start gap-2"><span className="text-[#2d6a35] font-bold mt-0.5">✓</span>Answers marked instantly — with worked examples to help when stuck</li>
+            <li className="flex items-start gap-2"><span className="text-[#2d6a35] font-bold mt-0.5">✓</span>Track their sessions and progress from your parent dashboard</li>
+            <li className="flex items-start gap-2"><span className="text-[#2d6a35] font-bold mt-0.5">✓</span>Works great on tablet, phone, and desktop</li>
           </ul>
         )}
         {hasStudents && <div className="mb-6" />}

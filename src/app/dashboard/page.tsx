@@ -228,12 +228,11 @@ export default async function DashboardPage({
               {isStuck && (
                 <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
                   <p className="text-sm font-semibold text-amber-900">
-                    {student.name} is finding this level difficult
+                    {student.name} is finding Level {student.current_level}.{student.current_sublevel} difficult
                   </p>
                   <p className="mt-1 text-xs text-amber-800">
-                    They have failed most of their recent sessions at Level {student.current_level}.{student.current_sublevel}.
-                    The worksheet now shows a <span className="font-semibold">worked example</span> and an optional <span className="font-semibold">warm-up</span> to build confidence.
-                    You can also review the worked example together, or use Admin controls to adjust their starting level.
+                    Most of their recent sessions at this level haven&apos;t passed. The worksheet now surfaces a <span className="font-semibold">worked example</span> and an optional <span className="font-semibold">warm-up</span> with easier problems to rebuild confidence.
+                    If they&apos;re still struggling after a few more sessions, it may help to review the worked example together or use Admin controls below to adjust their level.
                   </p>
                 </div>
               )}
