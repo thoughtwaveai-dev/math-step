@@ -158,12 +158,14 @@ export default async function PlayPage({
           Start Today&apos;s Worksheet
         </a>
 
-        {/* Encouragement nudge when student is stuck */}
+        {/* Support card when student is stuck */}
         {isStuck && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
-            <p className="text-sm font-semibold text-amber-900">This topic is taking a bit more practice — keep going!</p>
-            <p className="mt-1 text-xs text-amber-800">
-              You&apos;re getting better with every session. It&apos;s okay if it feels hard — that means you&apos;re learning.
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 space-y-2">
+            <p className="text-sm font-semibold text-amber-900">Need a little help?</p>
+            <p className="text-xs text-amber-800">
+              This topic is taking a bit more practice — that&apos;s completely okay.
+              On the worksheet, you&apos;ll find the <span className="font-semibold">Learn</span> card with a worked example,
+              and an optional warm-up to build confidence before the main problems.
             </p>
           </div>
         )}

@@ -6,8 +6,68 @@
 
 ## Current Status
 
-**Phase:** Milestone 44 — Beta hardening pass. ✓ All major flows tested end-to-end. 2 UX fixes applied.
+**Phase:** Milestone 45 — Stuck-Mode Support v1. ✓ Warm-up system built. TypeScript clean. Unit tests: 17/17 pass.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 45 — Stuck-Mode Support v1 (2026-04-19)
+
+**What was added:**
+Stuck-mode support layer so students struggling on a level get guided help instead of just an encouragement nudge.
+
+**Files added:**
+- `src/lib/levelKeys.ts` — shared `SUPPORTED_LEVEL_KEYS` (extracted from worksheet/page.tsx)
+- `src/lib/math/warmup.ts` — `getWarmupSourceLevel()` + `generateWarmupProblems()` (X.2 → X.1 strategy)
+- `src/app/worksheet/WarmupSection.tsx` — client component: 5 warm-up problems, client-side grading, no DB persistence
+- `src/app/worksheet/StuckSupportCard.tsx` — client component: collapsed-by-default support card wrapping WarmupSection
+
+**Files modified:**
+- `src/app/worksheet/page.tsx` — imports from `levelKeys.ts`, detects stuck (last 5 sessions), generates warm-up server-side, renders `StuckSupportCard` between LessonCard and WorksheetForm
+- `src/app/play/page.tsx` — enhanced stuck card: explains lesson + warm-up available on worksheet
+- `src/app/dashboard/page.tsx` — parent notice updated to mention worked example + warm-up on worksheet
+
+**Warm-up strategy:**
+- X.2 levels (1/2, 2/2, 3/2, 4/2, 5/2, 6/2, 7/2, 8/2, 9/2, 10/2, 11/2): warm-up = matching X.1 generator (same topic, easier sublevel)
+- X.1 levels and 1/1: warm-up not available — falls back to lesson review only (StuckSupportCard still shows, but without warm-up button)
+- Warm-up: 5 problems, graded client-side using shared `gradeAnswer`, not persisted to DB, not counted toward mastery
+
+**Behavior:**
+- Non-stuck students: no StuckSupportCard shown (unchanged worksheet)
+- Stuck student on X.2 level: sees "Need a little help?" card with a "Try warm-up problems first" button
+- Stuck student on X.1 level: sees "Need a little help?" card pointing to the Learn card (no warm-up button)
+- Warm-up: collapsed by default, revealed on click, student checks answers, then "Continue to worksheet →"
+- LessonCard remains visible and open for all students as before
+
+**Unit tests (17/17 PASS):**
+| Test | Result |
+|------|--------|
+| isStudentStuck: [] | PASS |
+| isStudentStuck: 2 items | PASS |
+| isStudentStuck: pass/fail/fail | PASS |
+| isStudentStuck: 3 consecutive fails | PASS |
+| isStudentStuck: 4 of 5 fails | PASS |
+| isStudentStuck: 2 of 5 fails | PASS |
+| getWarmupSourceLevel: 1/1 → null | PASS |
+| getWarmupSourceLevel: 1/2 → [1,1] | PASS |
+| getWarmupSourceLevel: 5/2 → [5,1] | PASS |
+| getWarmupSourceLevel: 7/1 → null | PASS |
+| getWarmupSourceLevel: 11/2 → [11,1] | PASS |
+| generateWarmupProblems: 1/1 → [] | PASS |
+| generateWarmupProblems: 1/2 → 5 problems | PASS |
+| generateWarmupProblems: 1/2 type = addition | PASS |
+| generateWarmupProblems: 5/2 → 5 problems | PASS |
+| generateWarmupProblems: 11/2 → 5 problems | PASS |
+| generateWarmupProblems: 11/2 type = inequality | PASS |
+
+**TypeScript build:** Clean (no errors).
+
+**Limitations of v1:**
+- Browser testing blocked: no test credentials available in codebase. Flows verified via unit tests + code review.
+- Warm-up only available for X.2 levels (11 of 22). X.1 levels show lesson review only.
+- Warm-up uses the previous sublevel's generator; no custom "reduced difficulty" variants.
+- Stuck detection on worksheet runs a fresh DB query (5 rows) — acceptable for v1.
+- No warm-up for 1/1 (first level — nothing prior to fall back to).
 
 ---
 

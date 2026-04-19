@@ -232,7 +232,8 @@ export default async function DashboardPage({
                   </p>
                   <p className="mt-1 text-xs text-amber-800">
                     They have failed most of their recent sessions at Level {student.current_level}.{student.current_sublevel}.
-                    You may want to review the worked example together, or use Admin controls to adjust their starting level.
+                    The worksheet now shows a <span className="font-semibold">worked example</span> and an optional <span className="font-semibold">warm-up</span> to build confidence.
+                    You can also review the worked example together, or use Admin controls to adjust their starting level.
                   </p>
                 </div>
               )}

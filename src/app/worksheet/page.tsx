@@ -3,19 +3,14 @@ import { createClient } from '@/lib/supabase/server'
 import { generateProblems } from '@/lib/math/generators'
 import { shuffled } from '@/lib/math/generators/rand'
 import { getLesson } from '@/lib/lessons'
+import { SUPPORTED_LEVEL_KEYS } from '@/lib/levelKeys'
+import { generateWarmupProblems, getWarmupSourceLevel } from '@/lib/math/warmup'
+import { isStudentStuck } from '@/lib/stuckDetector'
 import Image from 'next/image'
 import WorksheetForm from './WorksheetForm'
 import LessonCard from './LessonCard'
 import WorksheetScratchpad from './WorksheetScratchpad'
-
-// Curriculum-ordered list of levels that have generator support.
-// Used to find eligible review levels relative to the student's current position.
-const SUPPORTED_LEVEL_KEYS: [number, number][] = [
-  [1, 1], [1, 2], [2, 1], [2, 2], [3, 1], [3, 2], [4, 1], [4, 2], [5, 1], [5, 2], [6, 1], [6, 2],
-  [7, 1], [7, 2],
-  [8, 1], [8, 2],
-  [9, 1], [9, 2], [10, 1], [10, 2], [11, 1], [11, 2],
-]
+import StuckSupportCard from './StuckSupportCard'
 
 // Number of review problems to include in a mixed worksheet.
 const REVIEW_PROBLEM_COUNT = 4
@@ -100,6 +95,26 @@ export default async function WorksheetPage({
       </div>
     )
   }
+
+  // --- Stuck detection ---
+  const { data: recentLevelSessions } = await supabase
+    .from('sessions')
+    .select('passed')
+    .eq('student_id', student.id)
+    .eq('level_id', level.id)
+    .not('completed_at', 'is', null)
+    .order('completed_at', { ascending: false })
+    .limit(5)
+
+  const recentResults = (recentLevelSessions ?? []).map(s => s.passed ?? false)
+  const isStuck = isStudentStuck(recentResults)
+
+  // --- Warm-up problem generation (server-side, not persisted) ---
+  const warmupSourceLevel = getWarmupSourceLevel(levelNumber, sublevelNumber)
+  const warmupProblems = isStuck && warmupSourceLevel
+    ? generateWarmupProblems(levelNumber, sublevelNumber, 5)
+    : []
+  const hasWarmup = warmupProblems.length > 0
 
   // --- Interleaving: find eligible review levels ---
   // Only include levels where the student has actually demonstrated mastery
@@ -264,6 +279,8 @@ export default async function WorksheetPage({
 
   const topic = level.topic ?? 'Math'
   const lesson = getLesson(levelNumber, sublevelNumber)
+  const warmupLesson = warmupSourceLevel ? getLesson(warmupSourceLevel[0], warmupSourceLevel[1]) : null
+  const warmupTopicLabel = warmupLesson?.title ?? `Level ${warmupSourceLevel?.[0]}.${warmupSourceLevel?.[1]}`
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f7faf7]">
@@ -291,6 +308,14 @@ export default async function WorksheetPage({
         </div>
 
         {lesson && <LessonCard lesson={lesson} />}
+
+        {isStuck && (
+          <StuckSupportCard
+            warmupProblems={warmupProblems}
+            warmupTopicLabel={warmupTopicLabel}
+            hasWarmup={hasWarmup}
+          />
+        )}
 
         <WorksheetForm
           sessionId={session.id}
