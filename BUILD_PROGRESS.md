@@ -6,8 +6,62 @@
 
 ## Current Status
 
-**Phase:** Milestone 43 — Lesson content consistency pass. ✓ All 22 supported levels have Learn cards.
+**Phase:** Milestone 44 — Beta hardening pass. ✓ All major flows tested end-to-end. 2 UX fixes applied.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 44 — Beta Hardening Pass (2026-04-19)
+
+**What was done:**
+Broad regression + UX review across all major flows in preparation for inviting 5–20 beta testers.
+
+**Flows tested:**
+- Signup → onboarding (Level 1 path and placement quiz path)
+- Placement diagnostic: 12-question v2, mid-path placement (7.1), all-pass placement (9.1), apply recommendation
+- Login / logout / unauthenticated redirect guards
+- Parent dashboard: student tabs, analytics, recent worksheets, Current Focus card, Admin controls
+- Play page: student switcher, stats, last session card, stuck detector wiring
+- Worksheet: Level 1.1 (Addition), Level 11.2 (Simultaneous Equations), all 20 problems, lesson card, timer
+- Worksheet submit: correct 20/20, wrong 17/20, mastery counter update
+- Results page: score card, mastery progress, problem review, self-correction (correct + wrong attempts)
+- Self-correction: "✓ Corrected" badge, counter update, wrong attempt error display
+- Multi-student: add second student, switcher on play page and dashboard, student-scoped data
+- Admin placement override: set unsupported level (12.1 → Coming Soon), set 11.2 → worksheet loads
+- Feedback: form submit, success banner, recent submissions list
+- Static pages: privacy, terms, disclaimer — all load
+- Wrong credentials error display
+
+**Issues found and fixed:**
+
+1. **CorrectionInput placeholder misleading for non-numeric levels**
+   - Was: `"Correct answer for: number"` for all non-inequality types
+   - Now: `"e.g. x = 3, y = 7"` for sim-eq, `"e.g. 5x + 2"` for algebra, `"your answer"` for integers
+   - Also: sim-eq input width widened from `w-36` to `w-48`
+   - File: `src/app/worksheet/results/[sessionId]/CorrectionInput.tsx`
+
+2. **Play page "Last session" card showed cross-level session after placement override**
+   - Was: fetched most-recent session across all levels — confusing after admin level change
+   - Now: filtered to current level only (same pattern as `levelProgress` and `recentLevelSessions`)
+   - File: `src/app/play/page.tsx`
+
+**No regressions found.**
+**TypeScript build: clean.**
+
+**Confirmed working:**
+- All 22 supported levels in `SUPPORTED_LEVEL_KEYS` present and routing correctly
+- Unsupported levels (12/1, 12/2) show "Coming Soon" safely
+- Placement quiz v2 (12 questions, 6 bands) routes to correct levels
+- Admin override → unsupported level → Coming Soon (safe fallback)
+- Grading paths verified: addition (1/1), simultaneous equations (11/2)
+- Multi-student support: creation, switching, scoped data
+- Feedback flow end-to-end
+- Auth guards on all protected pages
+
+**Remaining known risk before inviting testers:**
+- Deployed URL not yet tested — mobile PWA install and real network latency untested
+- Email confirmation flow not tested (depends on Supabase project settings)
+- Level progression (auto-advance after 3 consecutive passes) not E2E tested here (unit logic tested in prior milestones)
 
 ---
 

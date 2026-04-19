@@ -42,14 +42,17 @@ export default async function PlayPage({
     .eq('sublevel_number', student.current_sublevel)
     .maybeSingle()
 
-  const { data: lastSession } = await supabase
-    .from('sessions')
-    .select('correct_count, total_problems, accuracy, time_taken_seconds, passed, completed_at')
-    .eq('student_id', student.id)
-    .not('completed_at', 'is', null)
-    .order('completed_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
+  const { data: lastSession } = level
+    ? await supabase
+        .from('sessions')
+        .select('correct_count, total_problems, accuracy, time_taken_seconds, passed, completed_at')
+        .eq('student_id', student.id)
+        .eq('level_id', level.id)
+        .not('completed_at', 'is', null)
+        .order('completed_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+    : { data: null }
 
   const { data: levelProgress } = level
     ? await supabase

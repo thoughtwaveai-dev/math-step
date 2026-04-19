@@ -31,9 +31,19 @@ export default function CorrectionInput({ problemId, sessionId, correctAnswer }:
         <input
           type="text"
           name="correction_answer"
-          placeholder={`Correct answer for: ${correctAnswer.includes('<') || correctAnswer.includes('>') ? 'e.g. x > 3' : 'number'}`}
+          placeholder={
+            (correctAnswer.includes('<') || correctAnswer.includes('>'))
+              ? 'e.g. x > 3'
+              : (correctAnswer.includes('=') && correctAnswer.includes(','))
+                ? 'e.g. x = 3, y = 7'
+                : /[a-zA-Z]/.test(correctAnswer)
+                  ? 'e.g. 5x + 2'
+                  : 'your answer'
+          }
           autoComplete="off"
-          className="w-36 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-sm text-[#1a2e1c] placeholder:text-[#a0b8a3] focus:border-amber-500 focus:outline-none"
+          className={`${
+            correctAnswer.includes('=') && correctAnswer.includes(',') ? 'w-48' : 'w-36'
+          } rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-sm text-[#1a2e1c] placeholder:text-[#a0b8a3] focus:border-amber-500 focus:outline-none`}
         />
         <button
           type="submit"
