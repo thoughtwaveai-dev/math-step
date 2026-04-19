@@ -8,6 +8,10 @@ export const FAQ_ITEMS = [
     a: 'Children roughly ages 7–14 who benefit from consistent, structured practice. Parents create and manage the account — students just open the app and practise.',
   },
   {
+    q: 'How do parents and students use MathStep together?',
+    a: "Parents create the account, add their child, and check progress from Parent View (Dashboard). Students do their daily practice in Student View (Play page). The simplest routine: a parent logs in, opens Student View, and hands the device to their child for practice.",
+  },
+  {
     q: 'Does my child need their own email?',
     a: "No. You sign up with your own email as a parent and add your child by first name. Your child never needs to create an account.",
   },
@@ -34,6 +38,10 @@ export const FAQ_ITEMS = [
   {
     q: 'What is the difference between the parent view and student view?',
     a: 'The student view (Play page) is simple and focused — just the worksheet. The parent view (Dashboard) shows progress, recent sessions, accuracy trends, and settings like adjusting the starting level.',
+  },
+  {
+    q: 'Can my child access Parent View?',
+    a: "Parent View and Student View currently share the same family login, so a child could navigate to Parent View if they leave Student View. A future update may add a separate child-friendly access mode or parent PIN to keep the views separate.",
   },
   {
     q: 'Is MathStep a live tutor or just worksheets?',
