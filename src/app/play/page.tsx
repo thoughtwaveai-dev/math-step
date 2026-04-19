@@ -99,12 +99,20 @@ export default async function PlayPage({
             />
             <span className="text-lg font-bold text-[#1a2e1c]">MathStep</span>
           </div>
-          <Link
-            href={`/dashboard?student=${student.id}`}
-            className="rounded-lg border border-[#bae0bd] bg-white px-3.5 py-2 text-xs font-medium text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors"
-          >
-            Parent view
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link
+              href="/help"
+              className="rounded-lg border border-[#bae0bd] bg-white px-3.5 py-2 text-xs font-medium text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors"
+            >
+              Help
+            </Link>
+            <Link
+              href={`/dashboard?student=${student.id}`}
+              className="rounded-lg border border-[#bae0bd] bg-white px-3.5 py-2 text-xs font-medium text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors"
+            >
+              Parent view
+            </Link>
+          </div>
         </div>
       </header>
 

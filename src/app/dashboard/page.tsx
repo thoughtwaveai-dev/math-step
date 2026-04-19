@@ -137,14 +137,22 @@ export default async function DashboardPage({
             />
             <span className="text-lg font-bold text-[#1a2e1c]">MathStep</span>
           </div>
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="rounded-lg border border-[#bae0bd] bg-white px-3.5 py-2 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
+          <div className="flex items-center gap-2">
+            <Link
+              href="/help"
+              className="rounded-lg border border-[#bae0bd] bg-white px-3.5 py-2 text-sm font-medium text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors"
             >
-              Log out
-            </button>
-          </form>
+              Help
+            </Link>
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="rounded-lg border border-[#bae0bd] bg-white px-3.5 py-2 text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
+              >
+                Log out
+              </button>
+            </form>
+          </div>
         </div>
       </header>
 
