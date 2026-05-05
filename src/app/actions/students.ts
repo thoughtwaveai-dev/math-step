@@ -107,7 +107,7 @@ export async function createStudent(
 
   const isFirstStudent = (count ?? 0) === 0
   if (isFirstStudent) {
-    redirect(`/play?student=${student.id}`)
+    redirect(`/onboarding/pin?student=${student.id}`)
   } else {
     redirect(`/dashboard?student=${student.id}`)
   }

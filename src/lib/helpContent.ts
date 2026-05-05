@@ -9,7 +9,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'How do parents and students use MathStep together?',
-    a: "Parents create the account, add their child, and check progress from Parent View (Dashboard). Students do their daily practice in Student View (Play page). The simplest routine: a parent logs in, opens Student View, and hands the device to their child for practice.",
+    a: "Parents create the account, add their child, and check progress from Parent View (Dashboard). Students do their daily practice in Student View (Play page). The simplest routine: a parent logs in, taps \"Hand over to child\" on the dashboard, and gives the device to their child. Student View stays open, and the parent dashboard waits behind a 4-digit PIN until the parent taps it back in.",
   },
   {
     q: 'Does my child need their own email?',
@@ -17,7 +17,7 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'How do I set up a student?',
-    a: "Sign up as a parent, then enter your child's first name. That's it — the whole setup takes under 60 seconds.",
+    a: "Sign up as a parent, then enter your child's first name. That's it — the whole setup takes under 60 seconds. After that, MathStep offers an optional 4-digit parent PIN you can set up now or later.",
   },
   {
     q: 'Who marks the answers?',
@@ -41,7 +41,19 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'Can my child access Parent View?',
-    a: "Parent View and Student View currently share the same family login, so a child could navigate to Parent View if they leave Student View. A future update may add a separate child-friendly access mode or parent PIN to keep the views separate.",
+    a: "If you set up an optional 4-digit parent PIN, the parent dashboard, feedback page, and student-add screens all stay tucked away in Student View. If your child taps something parent-only, they see a friendly \"Ask a parent\" helper asking for the PIN — they can't get into the dashboard without it. Without a PIN set, both views share the same family login as before.",
+  },
+  {
+    q: 'How do I set up a parent PIN?',
+    a: "Open the dashboard, expand Admin controls, and tap \"Set up PIN\". Enter a 4-digit number, confirm it, and you're done. You'll also be offered the option during initial onboarding — you can skip it then and add it later. The PIN is stored securely (hashed) and only ever needs to be re-entered to leave Student View.",
+  },
+  {
+    q: 'How does Student Mode work?',
+    a: "Once you've set a PIN, the dashboard shows a \"Hand over to child\" button. Tapping it opens Student View and politely tucks the parent dashboard away. Your child can keep using Play and worksheets freely. If they tap something that's only for parents, MathStep gently asks for the PIN before showing it. Tapping the PIN in unlocks the parent area for the rest of the session.",
+  },
+  {
+    q: 'What if I forget my PIN?',
+    a: 'Parents can log out from the PIN screen, log back in with their email and password, and reset the PIN from Parent View.',
   },
   {
     q: 'Is MathStep a live tutor or just worksheets?',

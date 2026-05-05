@@ -1,9 +1,12 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/app/actions/auth'
+import { lockToStudentMode } from '@/app/actions/pin'
+import { enforceParentMode } from '@/lib/parentMode'
 import Image from 'next/image'
 import Link from 'next/link'
 import SetLevelForm from './SetLevelForm'
+import PinSettings from './PinSettings'
 import { formatSpeed } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
 
@@ -15,8 +18,10 @@ function formatDate(iso: string): string {
 export default async function DashboardPage({
   searchParams,
 }: {
-  searchParams: Promise<{ student?: string }>
+  searchParams: Promise<{ student?: string; pin?: string }>
 }) {
+  await enforceParentMode('/dashboard')
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -32,7 +37,15 @@ export default async function DashboardPage({
 
   const sp = await searchParams
   const selectedId = sp.student
+  const showPinHint = sp.pin === 'needed'
   const student = (selectedId ? students.find(s => s.id === selectedId) : null) ?? students[0]
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('parent_pin')
+    .eq('id', user.id)
+    .maybeSingle()
+  const hasPin = Boolean(profile?.parent_pin)
 
   // Parallel: these all depend only on student.id / student.current_level, not each other
   const [
@@ -163,6 +176,15 @@ export default async function DashboardPage({
           <p className="mt-0.5 text-sm text-[#4a6b4e]">{user.email}</p>
         </div>
 
+        {showPinHint && !hasPin && (
+          <div className="rounded-xl border border-[#bae0bd] bg-[#f2faf3] px-5 py-4">
+            <p className="text-sm font-semibold text-[#1a2e1c]">Set up a PIN first</p>
+            <p className="mt-1 text-sm text-[#4a6b4e]">
+              Add a 4-digit PIN below in Admin controls, then you can hand the device to your child in Student View.
+            </p>
+          </div>
+        )}
+
         {/* Student switcher — shown when more than one student */}
         {students.length > 1 && (
           <div className="flex flex-wrap items-center gap-2">
@@ -210,6 +232,16 @@ export default async function DashboardPage({
           >
             Open Student View
           </Link>
+          {hasPin && (
+            <form action={lockToStudentMode} className="sm:w-auto">
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#2d6a35] px-5 py-4 text-sm font-semibold text-white hover:bg-[#1f4d26] transition-colors shadow-sm"
+              >
+                Hand over to child
+              </button>
+            </form>
+          )}
           <Link
             href="/onboarding"
             className="flex items-center justify-center gap-2 rounded-xl border border-[#bae0bd] bg-white px-5 py-4 text-sm font-semibold text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors shadow-sm sm:w-auto"
@@ -383,7 +415,8 @@ export default async function DashboardPage({
             <span>Admin controls</span>
             <span className="text-xs text-[#4a6b4e]">▾</span>
           </summary>
-          <div className="px-5 pb-5 space-y-4">
+          <div className="px-5 pb-5 space-y-5">
+            <PinSettings hasPin={hasPin} />
             {allLevels && allLevels.length > 0 && (
               <SetLevelForm
                 studentId={student.id}

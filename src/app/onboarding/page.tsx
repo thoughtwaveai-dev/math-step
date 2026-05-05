@@ -1,9 +1,12 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { enforceParentMode } from '@/lib/parentMode'
 import Image from 'next/image'
 import OnboardingForm from './OnboardingForm'
 
 export default async function OnboardingPage() {
+  await enforceParentMode('/onboarding')
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -40,6 +43,7 @@ export default async function OnboardingPage() {
           <ul className="mb-6 mx-auto max-w-xs space-y-1.5 text-xs text-[#4a6b4e] text-left list-none">
             <li className="flex items-start gap-2"><span className="text-[#2d6a35] font-bold mt-0.5">✓</span>Answers marked instantly — with worked examples to help when stuck</li>
             <li className="flex items-start gap-2"><span className="text-[#2d6a35] font-bold mt-0.5">✓</span>Track their sessions and progress from your parent dashboard</li>
+            <li className="flex items-start gap-2"><span className="text-[#2d6a35] font-bold mt-0.5">✓</span>Optional 4-digit PIN keeps the parent view tucked away</li>
             <li className="flex items-start gap-2"><span className="text-[#2d6a35] font-bold mt-0.5">✓</span>Works great on tablet, phone, and desktop</li>
           </ul>
         )}

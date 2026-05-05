@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { enforceParentMode } from '@/lib/parentMode'
 import Image from 'next/image'
 import Link from 'next/link'
 import FeedbackForm from './FeedbackForm'
@@ -27,6 +28,8 @@ export default async function FeedbackPage({
 }: {
   searchParams: Promise<{ sent?: string }>
 }) {
+  await enforceParentMode('/feedback')
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')

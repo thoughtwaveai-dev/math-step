@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { enforceParentMode } from '@/lib/parentMode'
 import Image from 'next/image'
 import PlacementForm from './PlacementForm'
 
@@ -8,12 +9,14 @@ export default async function PlacementPage({
 }: {
   searchParams: Promise<{ student?: string }>
 }) {
+  const sp = await searchParams
+  const studentId = sp.student
+  await enforceParentMode(studentId ? `/placement?student=${studentId}` : '/placement')
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const sp = await searchParams
-  const studentId = sp.student
   if (!studentId) redirect('/dashboard')
 
   const { data: student } = await supabase

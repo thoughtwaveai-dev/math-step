@@ -104,6 +104,19 @@ RLS: users can only access rows where `parent_id = auth.uid()`.
 
 RLS: users can only access streak rows for their own students.
 
+### `profiles`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | PK, FK → auth.users(id) |
+| email | text | not null |
+| name | text | nullable |
+| created_at | timestamptz | default now() |
+| parent_pin | text | nullable; format `saltHex:scryptHashHex` (Milestone 50) |
+| pin_failed_attempts | int | default 0 (Milestone 50) |
+| pin_locked_until | timestamptz | nullable; cooldown end (Milestone 50) |
+
+RLS: insert/select/update own row (`auth.uid() = id`). No new policies were needed for the PIN columns.
+
 ### `feedback`
 | Column | Type | Notes |
 |--------|------|-------|
@@ -297,6 +310,19 @@ After a worksheet is submitted and graded, the results page shows a `CorrectionI
 **Scope:** Only `problems.self_corrected` is updated. Session metrics (`correct_count`, `accuracy`, `passed`), mastery, streaks, and points are never touched. The `revalidatePath` pattern is used for in-place page refresh.
 
 **Shared grading utility:** `src/lib/math/gradeAnswer.ts` — `gradeAnswer()` extracted here so it can be imported from both `worksheet.ts` and `selfCorrection.ts` without the `'use server'` export restriction.
+
+## Parent PIN / Student Mode (Milestone 50)
+
+Optional 4-digit PIN that gates the parent dashboard so kids can use Student View independently. Tone is deliberately soft — never "locked / denied / blocked".
+
+- **Storage:** `profiles.parent_pin` (nullable text), `pin_failed_attempts` (int), `pin_locked_until` (timestamptz). Hash is `saltHex:scryptHashHex` produced by `node:crypto.scryptSync` (16-byte salt, 64-byte key). No new dependency.
+- **Helpers:** `src/lib/pin.ts` (`hashPin` / `verifyPin` / `isValidPinFormat`), `src/lib/parentMode.ts` (`STUDENT_MODE_COOKIE`, `enforceParentMode`, `setStudentModeCookie`, `clearStudentModeCookie`, `sanitizeNext`).
+- **Server actions (`src/app/actions/pin.ts`):** `setPin`, `removePin`, `lockToStudentMode`, `verifyPinAction`. After 5 wrong attempts, sets `pin_locked_until = now + 30s` and zeros the counter; success path clears both.
+- **Cookie:** `mathstep_student_mode` (httpOnly, sameSite=lax, 30-day maxAge). Set on "Hand over to child", cleared on PIN-success / signIn / signUp / signOut / removePin.
+- **Route guards:** `enforceParentMode(returnTo)` called at the top of `/dashboard`, `/onboarding`, `/feedback`, `/placement`. Skips silently if no PIN is saved (so first-time signups are unaffected). `/play`, `/worksheet`, and `/worksheet/results/[sessionId]` are intentionally not gated.
+- **PIN entry page:** `/parent-pin` with `?next=...` (sanitised — must start with `/` and not `//`; otherwise falls back to `/dashboard`). Single 4-digit `inputMode="numeric"` input. Live cooldown countdown. "Back to Student View" link + "Sign out" escape.
+- **Onboarding integration:** after the *first* student is created, `createStudent` redirects to `/onboarding/pin?student=...` instead of `/play`. The page is fully skippable. Adding a 2nd+ student still lands on `/dashboard` as before.
+- **Recovery:** sign-out / re-login / remove PIN from Admin controls. No email reset.
 
 ## Next Planned Milestone
 

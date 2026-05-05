@@ -99,6 +99,10 @@ export default function Home() {
               <p className="font-semibold text-[#1a2e1c] mb-1">Parent visibility</p>
               <p className="text-sm text-[#4a6b4e]">The parent dashboard shows every recent session, accuracy trends, mastery progress, and an alert if your child is finding a level difficult — so you can step in when it matters.</p>
             </div>
+            <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
+              <p className="font-semibold text-[#1a2e1c] mb-1">Safe for kids to use independently</p>
+              <p className="text-sm text-[#4a6b4e]">Add an optional 4-digit parent PIN and hand the device to your child in Student View. The dashboard, settings, and feedback page stay tucked behind the PIN — your child can keep practising without stumbling into parent-only screens.</p>
+            </div>
           </div>
 
           <div className="mt-6 rounded-xl border border-[#bae0bd] bg-white p-5">

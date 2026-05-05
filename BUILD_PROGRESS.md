@@ -6,8 +6,74 @@
 
 ## Current Status
 
-**Phase:** Milestone 49 — Parent Help Page. ✓ /help page created, shared FAQ source, Help links in dashboard + play + landing footers. TypeScript clean, 0 console errors.
+**Phase:** Milestone 50 — Parent PIN / Student Mode. ✓ Optional 4-digit PIN, soft "Hand over to child" lock, parent-only routes gated behind a calm PIN helper, full Playwright validation.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 50 — Parent PIN / Student Mode (2026-05-05)
+
+**Goal:** Let parents lock the parent dashboard behind an optional 4-digit PIN so kids can use Student View independently — with a calm, family-friendly tone (never "locked / denied / blocked").
+
+**Schema change (applied via Supabase MCP `apply_migration`):**
+
+```sql
+alter table public.profiles
+  add column if not exists parent_pin text,                                   -- nullable; "saltHex:scryptHashHex"
+  add column if not exists pin_failed_attempts integer not null default 0,
+  add column if not exists pin_locked_until timestamptz;
+```
+
+Existing RLS on `profiles` (insert/select/update own row) covers the new columns — no policy change needed. Migration name: `add_parent_pin_to_profiles`.
+
+**Files added:**
+- `src/lib/pin.ts` — `hashPin` / `verifyPin` / `isValidPinFormat` using `node:crypto.scryptSync` (16-byte salt, 64-byte key, `timingSafeEqual` compare). No new dependency.
+- `src/lib/parentMode.ts` — `STUDENT_MODE_COOKIE`, `MAX_PIN_ATTEMPTS = 5`, `COOLDOWN_SECONDS = 30`, `setStudentModeCookie` / `clearStudentModeCookie` (both wrapped in try/catch so they're safe to call from server components), `sanitizeNext` (rejects absolute and `//`-prefixed redirects), `enforceParentMode(returnTo)` page-level guard.
+- `src/app/actions/pin.ts` — `setPin`, `removePin`, `lockToStudentMode`, `verifyPinAction` server actions. Cooldown is server-authoritative (DB), counter resets on success.
+- `src/app/parent-pin/page.tsx` + `PinEntryForm.tsx` — soft "This bit's for parents" page with single 4-digit input (`inputMode="numeric"`, `maxLength=4`), live cooldown countdown, "Back to Student View" + "Sign out" escapes.
+- `src/app/dashboard/PinSettings.tsx` — set/change/remove PIN inline forms with `router.refresh()` after success so the chip + "Hand over" button update immediately.
+- `src/app/onboarding/pin/page.tsx` + `OnboardingPinForm.tsx` — optional PIN step shown only after the *first* student is created (skippable; future students return to /dashboard as before).
+
+**Files modified:**
+- `src/app/actions/auth.ts` — clears the student-mode cookie on `signIn`, `signUp`, and `signOut` so a new login is never inherited by a stale lock.
+- `src/app/actions/students.ts` — first-student create now redirects to `/onboarding/pin?student=…` instead of `/play?student=…`. Subsequent adds unchanged.
+- `src/app/dashboard/page.tsx` — calls `enforceParentMode('/dashboard')`, fetches `parent_pin` to compute `hasPin`, surfaces a soft `?pin=needed` hint banner, conditional "Hand over to child" button, mounts `<PinSettings />` inside Admin controls.
+- `src/app/onboarding/page.tsx` — calls `enforceParentMode('/onboarding')`; new "Optional 4-digit PIN keeps the parent view tucked away" bullet on first-time copy.
+- `src/app/feedback/page.tsx` — calls `enforceParentMode('/feedback')`.
+- `src/app/placement/page.tsx` — calls `enforceParentMode('/placement?student=…')`.
+- `src/app/page.tsx` — new "Safe for kids to use independently" differentiator card.
+- `src/lib/helpContent.ts` — replaced the old "Can my child access Parent View?" preview answer; added FAQs for PIN setup, Student Mode, and forgotten PIN; updated parent-student workflow FAQ to mention "Hand over to child".
+
+**Key UX decisions (per the brief's tone guidance):**
+- Lock entry point reads "Hand over to child" — frames it as a thoughtful handoff, not a security toggle.
+- PIN helper page heads with "This bit's for parents" + "Pop in the parent PIN to take a peek at progress" — never "locked / denied / blocked / restricted".
+- After 5 wrong attempts: counter zeros, `pin_locked_until` set to `now + 30s`, button changes to "Take a short break — Ns" with live countdown. Soft phrasing throughout. Cooldown survives page reloads (DB-backed).
+- Forgot-PIN recovery: "Sign out" button on the PIN screen + explainer copy. Login resets PIN state via the cleared cookie.
+- Open-redirect-safe: `next` query param is sanitised at both the page render (hidden input) and on the action redirect; absolute URLs and `//host` paths fall back to `/dashboard`.
+- `enforceParentMode` short-circuits if the parent has no PIN saved — first-time signups never see the helper, and removing a PIN immediately makes the dashboard reachable again.
+
+**Playwright validation (fresh signup, fresh email, full flow):**
+- Signup → `/onboarding` → name "Riley" → `/onboarding/pin?student=…`. Skip → `/play`. ✓
+- `/dashboard` reachable normally before any PIN. ✓
+- "Set up PIN" inline form, save, chip flips to "PIN saved", DB shows hashed value (161 chars `salt:hash`). ✓
+- "Hand over to child" → cookie set → `/play`. ✓
+- Direct URL `/dashboard`, `/feedback`, `/onboarding`, `/placement?student=…` all 307 to `/parent-pin?next=…`. ✓
+- `/play` and `/worksheet` reachable while student-mode is on. ✓
+- 5 wrong PINs → attempts 1–3 "That doesn't match. Try again.", attempt 4 "One more try before a short break.", attempt 5 "Take a short break — try again in 30s." with live countdown + disabled input + DB `pin_locked_until` populated. ✓
+- Correct PIN after lock cleared → `/dashboard`. Cookie cleared, counter reset. ✓
+- Change PIN flow: requires current PIN, "PIN updated" success, refresh re-renders chip. ✓
+- Remove PIN flow: requires current PIN, DB `parent_pin = null`, chip flips back to "No PIN yet", student-mode cookie cleared. ✓
+- Open-redirect: `?next=https://evil.example/foo` and `?next=//evil.example` both rewritten to `/dashboard` in the hidden form input. ✓
+- Sign-out from `/parent-pin` → `/login` → re-login → `/play`. Cookie cleared by `signIn`, `/dashboard` reachable directly without PIN. ✓
+- Onboarding PIN happy path: name student → `/onboarding/pin` → set PIN → `/play`, DB row shows hashed PIN. ✓
+- Mobile (390 × 844): `/parent-pin` lays out cleanly, central PIN box, all soft copy visible. ✓
+- TypeScript: `npx tsc --noEmit` 0 errors. Console errors: 0 across all visited pages.
+
+**v1 limitations:**
+- `enforceParentMode` is page-level rather than middleware. Future pages added under parent-only paths must add the call manually. Worth a soft lint/check if more parent routes appear.
+- Cooldown is global per-account, not per-device. A parent on another device hitting the same account during a kid's cooldown will see the same lock window — fine for v1.
+- No email-based PIN reset (per brief). Recovery is "sign out + re-login + remove PIN under Admin controls".
+- `PinSettings` form uses a plain `text` input with `inputMode="numeric"` (not `type="password"`). Chose readability over masking — parents typing it are alone with the device. Easy to flip later if needed.
 
 ---
 
