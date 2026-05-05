@@ -29,19 +29,18 @@ export default function PinSettings({ hasPin }: Props) {
     }
   }, [removeState, router])
 
+  if (!hasPin) return null
+
   return (
     <div>
-      <h3 className="text-sm font-semibold text-[#1a2e1c]">Parent area helper</h3>
+      <h3 className="text-sm font-semibold text-[#1a2e1c]">Manage Parent PIN</h3>
       <p className="mt-1 text-xs text-[#4a6b4e]">
-        Add a quick 4-digit PIN so your child can stay in Student View on their own.
-        It just keeps the parent dashboard tucked away until you tap it in.
+        Change or remove the 4-digit PIN. The Parent PIN card above is the main entry point.
       </p>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
-        <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-          hasPin ? 'bg-[#e1f4e3] text-[#2d6a35]' : 'bg-[#f2faf3] text-[#4a6b4e] border border-[#bae0bd]'
-        }`}>
-          {hasPin ? 'PIN saved' : 'No PIN yet'}
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-[#e1f4e3] px-3 py-1 text-xs font-semibold text-[#2d6a35]">
+          PIN saved
         </span>
         {!showSetForm && !showRemoveForm && (
           <>
@@ -50,40 +49,36 @@ export default function PinSettings({ hasPin }: Props) {
               onClick={() => setShowSetForm(true)}
               className="rounded-lg border border-[#bae0bd] bg-white px-3 py-1.5 text-xs font-semibold text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
             >
-              {hasPin ? 'Change PIN' : 'Set up PIN'}
+              Change PIN
             </button>
-            {hasPin && (
-              <button
-                type="button"
-                onClick={() => setShowRemoveForm(true)}
-                className="rounded-lg border border-[#bae0bd] bg-white px-3 py-1.5 text-xs font-medium text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors"
-              >
-                Remove PIN
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => setShowRemoveForm(true)}
+              className="rounded-lg border border-[#bae0bd] bg-white px-3 py-1.5 text-xs font-medium text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors"
+            >
+              Remove PIN
+            </button>
           </>
         )}
       </div>
 
       {showSetForm && (
         <form action={setAction} className="mt-4 space-y-3 rounded-lg border border-[#e8f5e9] bg-[#f7faf7] p-4">
-          {hasPin && (
-            <label className="block">
-              <span className="text-xs font-medium text-[#1a2e1c]">Current PIN</span>
-              <input
-                name="current_pin"
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]{4}"
-                maxLength={4}
-                required
-                autoComplete="off"
-                className="mt-1 w-full rounded-lg border border-[#bae0bd] bg-white px-3 py-2 text-sm tracking-widest text-[#1a2e1c] focus:border-[#2d6a35] focus:outline-none focus:ring-1 focus:ring-[#2d6a35]"
-              />
-            </label>
-          )}
           <label className="block">
-            <span className="text-xs font-medium text-[#1a2e1c]">{hasPin ? 'New PIN' : 'New 4-digit PIN'}</span>
+            <span className="text-xs font-medium text-[#1a2e1c]">Current PIN</span>
+            <input
+              name="current_pin"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]{4}"
+              maxLength={4}
+              required
+              autoComplete="off"
+              className="mt-1 w-full rounded-lg border border-[#bae0bd] bg-white px-3 py-2 text-sm tracking-widest text-[#1a2e1c] focus:border-[#2d6a35] focus:outline-none focus:ring-1 focus:ring-[#2d6a35]"
+            />
+          </label>
+          <label className="block">
+            <span className="text-xs font-medium text-[#1a2e1c]">New PIN</span>
             <input
               name="new_pin"
               type="text"

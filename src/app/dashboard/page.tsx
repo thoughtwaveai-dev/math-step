@@ -1,12 +1,12 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/app/actions/auth'
-import { lockToStudentMode } from '@/app/actions/pin'
 import { enforceParentMode } from '@/lib/parentMode'
 import Image from 'next/image'
 import Link from 'next/link'
 import SetLevelForm from './SetLevelForm'
 import PinSettings from './PinSettings'
+import StudentModeCard from './StudentModeCard'
 import { formatSpeed } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
 
@@ -180,7 +180,7 @@ export default async function DashboardPage({
           <div className="rounded-xl border border-[#bae0bd] bg-[#f2faf3] px-5 py-4">
             <p className="text-sm font-semibold text-[#1a2e1c]">Set up a PIN first</p>
             <p className="mt-1 text-sm text-[#4a6b4e]">
-              Add a 4-digit PIN below in Admin controls, then you can hand the device to your child in Student View.
+              Add a 4-digit PIN in the Parent PIN card below, then you can hand the device to your child in Student View.
             </p>
           </div>
         )}
@@ -232,16 +232,6 @@ export default async function DashboardPage({
           >
             Open Student View
           </Link>
-          {hasPin && (
-            <form action={lockToStudentMode} className="sm:w-auto">
-              <button
-                type="submit"
-                className="w-full flex items-center justify-center gap-2 rounded-xl bg-[#2d6a35] px-5 py-4 text-sm font-semibold text-white hover:bg-[#1f4d26] transition-colors shadow-sm"
-              >
-                Hand over to child
-              </button>
-            </form>
-          )}
           <Link
             href="/onboarding"
             className="flex items-center justify-center gap-2 rounded-xl border border-[#bae0bd] bg-white px-5 py-4 text-sm font-semibold text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors shadow-sm sm:w-auto"
@@ -249,6 +239,9 @@ export default async function DashboardPage({
             + Add Student
           </Link>
         </div>
+
+        {/* Parent PIN / Student Mode card */}
+        <StudentModeCard hasPin={hasPin} />
 
         {/* Current Focus */}
         <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
