@@ -4,6 +4,7 @@ import { enforceParentMode } from '@/lib/parentMode'
 import Image from 'next/image'
 import Link from 'next/link'
 import FeedbackForm from './FeedbackForm'
+import { formatNzDate } from '@/lib/format'
 
 const CATEGORY_LABELS: Record<string, string> = {
   bug: 'Bug',
@@ -17,10 +18,6 @@ const CATEGORY_COLORS: Record<string, string> = {
   idea: 'bg-blue-50 text-blue-700',
   confusion: 'bg-amber-50 text-amber-700',
   praise: 'bg-[#e1f4e3] text-[#2d6a35]',
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 export default async function FeedbackPage({
@@ -108,7 +105,7 @@ export default async function FeedbackPage({
                         {studentMap.get(item.student_id) ?? item.student_name}
                       </span>
                     )}
-                    <span className="ml-auto text-xs text-[#4a6b4e]">{formatDate(item.created_at)}</span>
+                    <span className="ml-auto text-xs text-[#4a6b4e]">{formatNzDate(item.created_at)}</span>
                   </div>
                   <p className="text-sm text-[#1a2e1c] line-clamp-3">{item.message}</p>
                 </div>

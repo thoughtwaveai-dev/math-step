@@ -8,16 +8,9 @@ import SetLevelForm from './SetLevelForm'
 import PinSettings from './PinSettings'
 import StudentModeCard from './StudentModeCard'
 import AchievementsCard from '@/components/AchievementsCard'
-import { formatSpeed } from '@/lib/format'
+import { formatSpeed, formatNzDateTime } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
 import { deriveEarnedAchievements } from '@/lib/achievements'
-
-function formatDateTime(iso: string): string {
-  const d = new Date(iso)
-  const date = d.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' })
-  const time = d.toLocaleTimeString('en-NZ', { hour: 'numeric', minute: '2-digit' })
-  return `${date}, ${time}`
-}
 
 export default async function DashboardPage({
   searchParams,
@@ -356,7 +349,7 @@ export default async function DashboardPage({
                         {lvl ? `Level ${lvl.level_number}.${lvl.sublevel_number} — ${lvl.topic}` : `Level ID ${s.level_id}`}
                       </p>
                       <p className="text-xs text-[#4a6b4e] mt-0.5">
-                        {s.completed_at ? formatDateTime(s.completed_at) : '—'}
+                        {s.completed_at ? formatNzDateTime(s.completed_at) : '—'}
                         {' · '}
                         {s.correct_count}/{s.total_problems}
                         {' · '}
