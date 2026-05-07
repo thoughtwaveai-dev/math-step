@@ -324,6 +324,19 @@ Optional 4-digit PIN that gates the parent dashboard so kids can use Student Vie
 - **Onboarding integration:** after the *first* student is created, `createStudent` redirects to `/onboarding/pin?student=...` instead of `/play`. The page is fully skippable. Adding a 2nd+ student still lands on `/dashboard` as before.
 - **Recovery:** sign-out / re-login / remove PIN from Admin controls. No email reset.
 
+## Achievements / Milestones (Milestone 51)
+
+Eight derived achievements rendered without any new tables. Logic and copy live in `src/lib/achievements.ts`; the shared display is `src/app/achievements/AchievementsCard.tsx`.
+
+- **Persistent grid (dashboard + play):** 🎯 First Worksheet, 📘 5 Worksheets, 📚 10 Worksheets, 🔥 3-Day Streak, 🔥 5-Day Streak, 💯 Perfect Score, ⚡ Speedy Pass, 🚀 Level Mastered. The first five come straight from `streaks` columns; Perfect Score and the genuine-pass half of Level Mastered each use one cheap `select id … limit 1` existence query; Speedy Pass scans the last 10 sessions only (documented v1 limitation). Level Mastered also requires `students.current_level > 1 OR current_sublevel > 1`, which filters the most common "placement-jumped, no practice" case but does not catch the edge of "placement-jumped, then passed once at the new level" (acceptable for v1 since the brief groups "mastered / advanced" together).
+- **Results-page "Milestones unlocked" strip (`detectSessionMilestones`):** session-scoped — First/5/10 Worksheets when `streaks.total_sessions` lands on the threshold, Perfect Score on 100% accuracy, Beat the Time Target when passing inside the level's `speed_target_seconds`, and Fixed Every Mistake when every incorrect problem also has `self_corrected = true`. Streak milestones are deliberately not shown here (current_streak reflects "now", not when the session was completed) and Level Up is left to its existing dedicated banner.
+- **Dashboard variant** shows the full grid with locked tiles dimmed and an `X/8 earned` counter; **play variant** shows earned-only with a child-friendly empty-state message. No third-party UI library — plain Tailwind + emoji.
+- **Not persisted.** Achievements are derived at render time. Documented limitation: Speedy Pass on dashboard/play only checks recent 10 sessions, and "Fixed Every Mistake" only appears as a results-page banner (no persistent grid slot). Both are acceptable v1 trade-offs.
+
+## Recent Worksheets timestamp
+
+`src/app/dashboard/page.tsx` formats completed_at via `formatDateTime()` — `en-NZ` date + 12-hour time on a single subline (e.g. `7 May 2026, 6:20 pm · 20/20 · 100% · 29s`).
+
 ## Next Planned Milestone
 
 - Deploy to Vercel (or similar) to test real mobile install flow

@@ -6,6 +6,7 @@ import CelebrationEffect from './CelebrationEffect'
 import CorrectionInput from './CorrectionInput'
 import BackToTop from './BackToTop'
 import { isStudentStuck } from '@/lib/stuckDetector'
+import { detectSessionMilestones } from '@/lib/achievements'
 
 function formatTime(seconds: number | null): string {
   if (!seconds) return '—'
@@ -90,11 +91,18 @@ export default async function ResultsPage({
     .eq('level_id', typedSession.level_id)
     .maybeSingle()
 
-  // Fetch level metadata for passes required
+  // Fetch level metadata for passes required + speed target (for beat-time milestone)
   const { data: levelMeta } = await supabase
     .from('levels')
-    .select('consecutive_passes_required, topic, level_number, sublevel_number')
+    .select('consecutive_passes_required, topic, level_number, sublevel_number, speed_target_seconds')
     .eq('id', typedSession.level_id)
+    .maybeSingle()
+
+  // Streak row drives session-count and streak milestones — pulled with .maybeSingle()
+  const { data: streakRow } = await supabase
+    .from('streaks')
+    .select('current_streak, total_sessions')
+    .eq('student_id', studentId)
     .maybeSingle()
 
   const consecutivePasses = levelProgress?.consecutive_passes ?? 0
@@ -132,6 +140,19 @@ export default async function ResultsPage({
   const incorrectProblems = problems.filter(p => !p.is_correct)
   const correctedCount = incorrectProblems.filter(p => p.self_corrected).length
   const allCorrected = incorrectProblems.length > 0 && correctedCount === incorrectProblems.length
+
+  // Milestones unlocked by this session — additive, not duplicating Level Up banner.
+  // Streak milestones intentionally skipped here: current_streak reflects "right now",
+  // not the moment the session was completed, so showing them on a revisited old
+  // results page would be misleading. Streak achievements live on dashboard/play instead.
+  const sessionMilestones = detectSessionMilestones({
+    totalSessionsAfter: streakRow?.total_sessions ?? 0,
+    accuracy,
+    passed,
+    timeTakenSeconds: typedSession.time_taken_seconds ?? null,
+    speedTargetSeconds: levelMeta?.speed_target_seconds ?? null,
+    allMistakesCorrected: allCorrected,
+  })
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f7faf7]">
@@ -194,6 +215,24 @@ export default async function ResultsPage({
             </div>
           </dl>
         </div>
+
+        {/* Milestones unlocked by this session */}
+        {sessionMilestones.length > 0 && (
+          <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
+            <p className="text-sm font-semibold text-[#1a2e1c] mb-3">Milestones unlocked</p>
+            <ul className="flex flex-wrap gap-2">
+              {sessionMilestones.map((m) => (
+                <li
+                  key={m.title}
+                  className="inline-flex items-center gap-2 rounded-full border border-[#bae0bd] bg-[#f2faf3] px-3 py-1.5"
+                >
+                  <span aria-hidden="true">{m.emoji}</span>
+                  <span className="text-xs font-semibold text-[#1a2e1c]">{m.title}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Level advancement banner */}
         {didAdvance && newLevel !== null && newSublevel !== null && (

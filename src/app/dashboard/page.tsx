@@ -7,12 +7,16 @@ import Link from 'next/link'
 import SetLevelForm from './SetLevelForm'
 import PinSettings from './PinSettings'
 import StudentModeCard from './StudentModeCard'
+import AchievementsCard from '@/components/AchievementsCard'
 import { formatSpeed } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
+import { deriveEarnedAchievements } from '@/lib/achievements'
 
-function formatDate(iso: string): string {
+function formatDateTime(iso: string): string {
   const d = new Date(iso)
-  return d.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' })
+  const date = d.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' })
+  const time = d.toLocaleTimeString('en-NZ', { hour: 'numeric', minute: '2-digit' })
+  return `${date}, ${time}`
 }
 
 export default async function DashboardPage({
@@ -53,6 +57,8 @@ export default async function DashboardPage({
     { data: level },
     { data: allLevels },
     { data: recentSessions },
+    { data: perfectMarker },
+    { data: masteryMarker },
   ] = await Promise.all([
     supabase.from('streaks')
       .select('current_streak, longest_streak, total_sessions, total_points')
@@ -64,7 +70,7 @@ export default async function DashboardPage({
       .eq('sublevel_number', student.current_sublevel)
       .maybeSingle(),
     supabase.from('levels')
-      .select('id, level_number, sublevel_number, topic, description')
+      .select('id, level_number, sublevel_number, topic, description, speed_target_seconds')
       .order('level_number', { ascending: true })
       .order('sublevel_number', { ascending: true }),
     supabase.from('sessions')
@@ -73,6 +79,20 @@ export default async function DashboardPage({
       .not('completed_at', 'is', null)
       .order('completed_at', { ascending: false })
       .limit(10),
+    supabase.from('sessions')
+      .select('id')
+      .eq('student_id', student.id)
+      .eq('accuracy', 100)
+      .not('completed_at', 'is', null)
+      .limit(1)
+      .maybeSingle(),
+    supabase.from('sessions')
+      .select('id')
+      .eq('student_id', student.id)
+      .eq('passed', true)
+      .not('completed_at', 'is', null)
+      .limit(1)
+      .maybeSingle(),
   ])
 
   const streak = streakRow?.current_streak ?? 0
@@ -80,6 +100,24 @@ export default async function DashboardPage({
   const totalSessions = streakRow?.total_sessions ?? 0
   const totalPoints = streakRow?.total_points ?? 0
   const levelMap = new Map(allLevels?.map(l => [l.id, l]) ?? [])
+
+  const speedTargetMap = new Map<number, number | null>(
+    (allLevels ?? []).map(l => [l.id, l.speed_target_seconds ?? null])
+  )
+  const advancedPastStart = student.current_level > 1 || student.current_sublevel > 1
+  const hasGenuinePass = Boolean(masteryMarker)
+  const earnedAchievements = deriveEarnedAchievements({
+    totalSessions,
+    longestStreak,
+    hasPerfectSession: Boolean(perfectMarker),
+    hasMasteredLevel: advancedPastStart && hasGenuinePass,
+    recentSessions: (recentSessions ?? []).map(s => ({
+      passed: s.passed,
+      time_taken_seconds: s.time_taken_seconds ?? null,
+      level_id: s.level_id,
+    })),
+    levelSpeedTargets: speedTargetMap,
+  })
 
   // Parallel: stuck detection + level progress both need level.id
   const [
@@ -296,6 +334,9 @@ export default async function DashboardPage({
           )}
         </div>
 
+        {/* Milestones */}
+        <AchievementsCard earnedIds={earnedAchievements} variant="dashboard" studentName={student.name} />
+
         {/* Recent Worksheets */}
         <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
           <h2 className="text-base font-semibold text-[#1a2e1c] mb-4">Recent Worksheets</h2>
@@ -315,7 +356,7 @@ export default async function DashboardPage({
                         {lvl ? `Level ${lvl.level_number}.${lvl.sublevel_number} — ${lvl.topic}` : `Level ID ${s.level_id}`}
                       </p>
                       <p className="text-xs text-[#4a6b4e] mt-0.5">
-                        {s.completed_at ? formatDate(s.completed_at) : '—'}
+                        {s.completed_at ? formatDateTime(s.completed_at) : '—'}
                         {' · '}
                         {s.correct_count}/{s.total_problems}
                         {' · '}

@@ -4,6 +4,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { formatSpeed } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
+import { deriveEarnedAchievements } from '@/lib/achievements'
+import AchievementsCard from '@/components/AchievementsCard'
 
 export default async function PlayPage({
   searchParams,
@@ -27,13 +29,17 @@ export default async function PlayPage({
   const selectedId = sp.student
   const student = (selectedId ? students.find(s => s.id === selectedId) : null) ?? students[0]
 
-  // Parallel: streaks and level don't depend on each other
+  // Parallel: streaks, levels, and achievement-related markers don't depend on each other
   const [
     { data: streakRow },
     { data: level },
+    { data: levelSpeedTargets },
+    { data: recentSessions },
+    { data: perfectMarker },
+    { data: masteryMarker },
   ] = await Promise.all([
     supabase.from('streaks')
-      .select('current_streak, total_points')
+      .select('current_streak, longest_streak, total_sessions, total_points')
       .eq('student_id', student.id)
       .maybeSingle(),
     supabase.from('levels')
@@ -41,10 +47,52 @@ export default async function PlayPage({
       .eq('level_number', student.current_level)
       .eq('sublevel_number', student.current_sublevel)
       .maybeSingle(),
+    supabase.from('levels')
+      .select('id, speed_target_seconds'),
+    supabase.from('sessions')
+      .select('passed, time_taken_seconds, level_id')
+      .eq('student_id', student.id)
+      .not('completed_at', 'is', null)
+      .order('completed_at', { ascending: false })
+      .limit(10),
+    supabase.from('sessions')
+      .select('id')
+      .eq('student_id', student.id)
+      .eq('accuracy', 100)
+      .not('completed_at', 'is', null)
+      .limit(1)
+      .maybeSingle(),
+    supabase.from('sessions')
+      .select('id')
+      .eq('student_id', student.id)
+      .eq('passed', true)
+      .not('completed_at', 'is', null)
+      .limit(1)
+      .maybeSingle(),
   ])
 
   const streak = streakRow?.current_streak ?? 0
+  const longestStreak = streakRow?.longest_streak ?? 0
+  const totalSessions = streakRow?.total_sessions ?? 0
   const totalPoints = streakRow?.total_points ?? 0
+
+  const speedTargetMap = new Map<number, number | null>(
+    (levelSpeedTargets ?? []).map(l => [l.id, l.speed_target_seconds ?? null])
+  )
+  const advancedPastStart = student.current_level > 1 || student.current_sublevel > 1
+  const hasGenuinePass = Boolean(masteryMarker)
+  const earnedAchievements = deriveEarnedAchievements({
+    totalSessions,
+    longestStreak,
+    hasPerfectSession: Boolean(perfectMarker),
+    hasMasteredLevel: advancedPastStart && hasGenuinePass,
+    recentSessions: (recentSessions ?? []).map(s => ({
+      passed: s.passed,
+      time_taken_seconds: s.time_taken_seconds ?? null,
+      level_id: s.level_id,
+    })),
+    levelSpeedTargets: speedTargetMap,
+  })
 
   // Parallel: all three depend on level.id but not each other
   const [
@@ -231,6 +279,9 @@ export default async function PlayPage({
             </dl>
           </div>
         )}
+
+        {/* Your wins — earned achievements only */}
+        <AchievementsCard earnedIds={earnedAchievements} variant="play" />
 
         {/* Last session summary */}
         {lastSession && (

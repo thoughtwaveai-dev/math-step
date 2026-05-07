@@ -6,8 +6,61 @@
 
 ## Current Status
 
-**Phase:** Milestone 50 — Parent PIN / Student Mode. ✓ Optional 4-digit PIN, soft "Hand over to child" lock, parent-only routes gated behind a calm PIN helper, full Playwright validation.
+**Phase:** Milestone 51 — Achievements / Milestones v1. ✓ Eight derived achievements rendered on dashboard (full grid) and play (earned-only with empty state), session-specific milestones strip on results page, recent worksheets now show date + time. No new tables.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 51 — Achievements / Milestones v1 (2026-05-07)
+
+**Goal:** Add a simple, motivating achievement layer using existing data — no new schema, no LLM, no third-party libraries.
+
+**Achievement set (8 always-visible):**
+- 🎯 First Worksheet — `streaks.total_sessions >= 1`
+- 📘 5 Worksheets — `streaks.total_sessions >= 5`
+- 📚 10 Worksheets — `streaks.total_sessions >= 10`
+- 🔥 3-Day Streak — `streaks.longest_streak >= 3`
+- 🔥 5-Day Streak — `streaks.longest_streak >= 5`
+- 💯 Perfect Score — any session with `accuracy = 100` (cheap existence query)
+- ⚡ Speedy Pass — last 10 sessions: any `passed = true AND time_taken_seconds <= levels.speed_target_seconds` (v1 limitation: only checks recent 10 to avoid loading full session list)
+- 🚀 Level Mastered — `(students.current_level > 1 OR current_sublevel > 1) AND any session with passed = true`. The genuine-pass gate filters out students who were placement-jumped and never practised. Edge case: a placement-jump followed by a single pass at the new level still unlocks it — accepted for v1 since the brief groups "mastered / advanced" together.
+
+**Results-page "Milestones unlocked" strip (additive, session-scoped):**
+- 🎯 First Worksheet / 📘 5 Worksheets / 📚 10 Worksheets — fires when `streaks.total_sessions` after this session equals 1/5/10
+- 💯 Perfect Score — fires when this session's accuracy = 100 (always, not just first time)
+- ⚡ Beat the Time Target — passing session within target time
+- ✏️ Fixed Every Mistake — when every incorrect problem also has `self_corrected = true`
+
+Streak milestones intentionally skipped on results page (current_streak reflects "right now", not the moment the session was completed — would mislead on revisited old results pages). Level Up handled by the existing dedicated banner.
+
+**Files added:**
+- `src/lib/achievements.ts` — `ACHIEVEMENTS` definitions, `deriveEarnedAchievements()`, `detectSessionMilestones()`. Pure, no Supabase dependency.
+- `src/app/achievements/AchievementsCard.tsx` — server component. `variant="dashboard"` shows full grid (earned + dimmed locked + count); `variant="play"` shows earned-only with a child-friendly empty state.
+
+**Files modified:**
+- `src/app/dashboard/page.tsx` — adds two cheap existence queries (`sessions where accuracy=100 limit 1`, `sessions where passed=true limit 1`) into the existing `Promise.all`, computes `levelSpeedTargets` from `allLevels`, mounts `<AchievementsCard variant="dashboard" />` between Current Focus and Recent Worksheets. Recent Worksheets timestamp now uses `formatDateTime()` (e.g. `7 May 2026, 6:20 pm · 20/20 · 100% · 29s`) — single line, blends with existing layout.
+- `src/app/play/page.tsx` — adds parallel queries for recent 10 sessions, level speed targets, and the same two existence markers; mounts `<AchievementsCard variant="play" />` between the topic card and Last Session.
+- `src/app/worksheet/results/[sessionId]/page.tsx` — pulls `levels.speed_target_seconds` (added to existing levelMeta select) and `streaks.current_streak, total_sessions`; renders a "Milestones unlocked" card above the existing Level Up / Mastery progress banners only when `detectSessionMilestones()` returns at least one badge.
+
+**No schema changes.** All achievements are derived at render time. Documented limitation: Speedy Pass dashboard/play check is bounded to the last 10 sessions; if a student's only beat-the-time session is older than that, the badge will not appear (the results page strip still fires correctly per-session).
+
+**Playwright validation (fresh signup, fresh student "Riley"):**
+- Empty-state dashboard: "Milestones — 0/8 earned, Riley hasn't earned any milestones yet …", all 8 tiles dimmed. ✓
+- Empty-state play: "Your wins — Finish a worksheet to earn your first badge". ✓
+- Submitted a perfect 20/20 addition worksheet in 29s (under 8m target). Results page Milestones unlocked card showed: 🎯 First Worksheet, 💯 Perfect Score, ⚡ Beat the Time Target. ✓
+- Dashboard after submission: 3/8 earned tiles bright (First Worksheet, Perfect Score, Speedy Pass), Level Mastered correctly remained dimmed (student is still at 1.1 with 1/3 passes — placement-jump guard works). ✓
+- Recent Worksheets row: "Level 1.1 — Addition / 7 May 2026, 6:20 pm · 20/20 · 100% · 29s ✓". ✓
+- Play page after submission: "Your wins" card shows 3 earned badges, no locked tiles, child-friendly. ✓
+- Mobile (390 × 844): milestones grid drops to 2 columns, recent-worksheets line still fits. ✓
+- Tablet (≥640): milestones grid uses 4 columns. ✓
+- Console errors: 0 across signup → onboarding → play → worksheet → results → dashboard.
+- `npx tsc --noEmit`: 0 errors. `npx eslint`: 0 errors.
+
+**v1 limitations (documented for future revisit):**
+- Achievements are derived per render — not persisted as individual unlock events. No "earned date" UI for the four achievements where the date isn't recoverable from existing rows (streaks, level mastery).
+- Speedy Pass dashboard/play check only scans the last 10 sessions. A targeted Postgres function or a stored "achievements" row could lift this if richer history matters.
+- "Fixed Every Mistake" is results-page only (not in the persistent grid) — it would require a `problems` join across all sessions, deferred until v2.
+- No celebration animation for newly-earned milestones beyond what already exists (`CelebrationEffect` for 100%). Kept deliberately quiet per brief.
 
 ---
 
