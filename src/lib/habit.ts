@@ -51,6 +51,7 @@ export interface HabitDay {
   shortLabel: string   // "Mon"
   letterLabel: string  // "M"
   isToday: boolean
+  isFuture: boolean
   completed: boolean
 }
 
@@ -58,7 +59,7 @@ export interface HabitStatus {
   todayDone: boolean
   practisedYesterday: boolean
   daysPractisedThisWeek: number
-  last7: HabitDay[]
+  weekDays: HabitDay[]   // Monday → Sunday of the current NZ calendar week
   totalSessions: number
   currentStreak: number
   longestStreak: number
@@ -82,26 +83,37 @@ export function deriveHabitStatus(input: DeriveHabitInput): HabitStatus {
     completedDays.add(nzDateKey(iso))
   }
 
-  const last7: HabitDay[] = []
-  for (let offset = 6; offset >= 0; offset--) {
-    const key = shiftDateKey(todayKey, -offset)
-    last7.push({
+  // Monday-first NZ calendar week: shift back so we land on Monday.
+  // weekdayIndex returns 0=Sun ... 6=Sat; (i + 6) % 7 → days back to Monday.
+  const todayDow = new Date(Date.UTC(
+    Number(todayKey.slice(0, 4)),
+    Number(todayKey.slice(5, 7)) - 1,
+    Number(todayKey.slice(8, 10)),
+  )).getUTCDay()
+  const daysBackToMonday = (todayDow + 6) % 7
+  const mondayKey = shiftDateKey(todayKey, -daysBackToMonday)
+
+  const weekDays: HabitDay[] = []
+  for (let offset = 0; offset < 7; offset++) {
+    const key = shiftDateKey(mondayKey, offset)
+    weekDays.push({
       key,
       shortLabel: weekdayShortLabel(key),
       letterLabel: weekdayLetterLabel(key),
       isToday: key === todayKey,
+      isFuture: key > todayKey,
       completed: completedDays.has(key),
     })
   }
 
   const yesterdayKey = shiftDateKey(todayKey, -1)
-  const daysPractisedThisWeek = last7.filter(d => d.completed).length
+  const daysPractisedThisWeek = weekDays.filter(d => d.completed).length
 
   return {
     todayDone: completedDays.has(todayKey),
     practisedYesterday: completedDays.has(yesterdayKey),
     daysPractisedThisWeek,
-    last7,
+    weekDays,
     totalSessions: input.totalSessions,
     currentStreak: input.currentStreak,
     longestStreak: input.longestStreak,

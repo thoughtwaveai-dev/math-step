@@ -50,8 +50,8 @@ export default function AchievementsCard({ progress, variant, studentName }: Pro
         <h2 className="text-base font-semibold text-[#1a2e1c]">Milestones</h2>
         <span className="text-xs font-medium text-[#4a6b4e] tabular-nums">
           {inProgressCount > 0
-            ? `${inProgressCount} of ${progress.length} next tiers in progress`
-            : 'All tiers earned 🏆'}
+            ? `${inProgressCount} of ${progress.length} goals in progress`
+            : 'All goals reached 🏆'}
         </span>
       </div>
 
@@ -65,14 +65,15 @@ export default function AchievementsCard({ progress, variant, studentName }: Pro
         {progress.map(p => {
           const target = p.nextTier ?? p.earnedTier ?? p.family.tiers[0]
           const pct = p.isMaxed ? 100 : Math.min(100, Math.round((p.value / target) * 100))
+          const unit = p.family.unitSuffix ?? ''
           const rightLabel = p.isMaxed
-            ? 'All tiers earned 🏆'
+            ? 'All goals reached 🏆'
             : p.earnedTier !== null
-              ? `Tier ${p.earnedTier} ✓`
-              : 'not yet'
+              ? `Reached ${p.earnedTier}${unit} ✓`
+              : 'Not reached yet'
           const progressLabel = p.isMaxed
-            ? `${p.value.toLocaleString('en-NZ')}${p.family.unitSuffix ?? ''}`
-            : `${p.value.toLocaleString('en-NZ')} / ${target.toLocaleString('en-NZ')}${p.family.unitSuffix ?? ''}`
+            ? `${p.value.toLocaleString('en-NZ')}${unit}`
+            : `${p.value.toLocaleString('en-NZ')} / ${target.toLocaleString('en-NZ')}${unit}`
 
           return (
             <li key={p.family.id} className="rounded-lg bg-[#f7faf7] px-4 py-3">

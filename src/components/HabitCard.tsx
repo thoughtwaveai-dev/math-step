@@ -38,7 +38,7 @@ function PlayVariant({ status }: { status: HabitStatus }) {
         </p>
       )}
       <div className="mt-4">
-        <SevenDayRow last7={status.last7} />
+        <SevenDayRow weekDays={status.weekDays} />
       </div>
     </div>
   )
@@ -59,11 +59,11 @@ function DashboardVariant({
   if (status.totalSessions === 0) {
     bodyCopy = `${name} hasn't started practising yet — the first short session is the easiest way to begin.`
   } else if (status.daysPractisedThisWeek === 0) {
-    bodyCopy = `${name} hasn't practised in the last week — a short session helps them get back into rhythm.`
+    bodyCopy = `${name} hasn't practised yet this week — a short session helps them get back into rhythm.`
   } else if (status.daysPractisedThisWeek === 1) {
-    bodyCopy = `${name} has practised 1 of the last 7 days.`
+    bodyCopy = `${name} has practised 1 day this week.`
   } else {
-    bodyCopy = `${name} has practised ${status.daysPractisedThisWeek} of the last 7 days.`
+    bodyCopy = `${name} has practised ${status.daysPractisedThisWeek} of 7 days this week.`
   }
 
   const todaySubline = status.todayDone
@@ -74,12 +74,7 @@ function DashboardVariant({
 
   return (
     <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="text-base font-semibold text-[#1a2e1c]">Daily habit</h2>
-        <span className="text-xs font-medium text-[#4a6b4e] tabular-nums">
-          {status.daysPractisedThisWeek} / 7 days this week
-        </span>
-      </div>
+      <h2 className="text-base font-semibold text-[#1a2e1c]">Daily habit</h2>
 
       <p className="mt-2 text-sm text-[#4a6b4e]">{bodyCopy}</p>
       <p className="mt-1 text-xs text-[#4a6b4e]">{todaySubline}</p>
@@ -110,25 +105,35 @@ function DashboardVariant({
       </dl>
 
       <div className="mt-4">
-        <SevenDayRow last7={status.last7} />
+        <SevenDayRow weekDays={status.weekDays} />
       </div>
     </div>
   )
 }
 
-function SevenDayRow({ last7 }: { last7: HabitStatus['last7'] }) {
+function SevenDayRow({ weekDays }: { weekDays: HabitStatus['weekDays'] }) {
   return (
     <ul
       className="grid grid-cols-7 gap-1 sm:gap-2"
-      aria-label="Last 7 days practice"
+      aria-label="Practice this week"
     >
-      {last7.map(day => {
+      {weekDays.map(day => {
         const baseTile =
           'flex h-8 w-full items-center justify-center rounded-md text-xs font-bold sm:h-10'
-        const tone = day.completed
-          ? 'bg-[#4ade80] text-white'
-          : 'bg-[#f7faf7] border border-[#bae0bd] text-[#4a6b4e]'
+        let tone: string
+        if (day.completed) {
+          tone = 'bg-[#4ade80] text-white'
+        } else if (day.isFuture) {
+          tone = 'bg-white border border-dashed border-[#bae0bd] text-[#bae0bd]'
+        } else {
+          tone = 'bg-[#f7faf7] border border-[#bae0bd] text-[#4a6b4e]'
+        }
         const todayRing = day.isToday ? 'ring-2 ring-[#2d6a35]' : ''
+        const ariaLabel = day.completed
+          ? `${day.shortLabel} — practised`
+          : day.isFuture
+            ? `${day.shortLabel} — upcoming`
+            : `${day.shortLabel} — no practice`
         return (
           <li key={day.key} className="flex flex-col items-center gap-1">
             <span className="text-[10px] font-medium uppercase tracking-wide text-[#4a6b4e] sm:text-xs">
@@ -137,11 +142,7 @@ function SevenDayRow({ last7 }: { last7: HabitStatus['last7'] }) {
             </span>
             <span
               className={`${baseTile} ${tone} ${todayRing}`}
-              aria-label={
-                day.completed
-                  ? `${day.shortLabel} — practised`
-                  : `${day.shortLabel} — no practice`
-              }
+              aria-label={ariaLabel}
               title={day.key}
             >
               {day.completed ? '✓' : day.isToday ? '·' : ''}

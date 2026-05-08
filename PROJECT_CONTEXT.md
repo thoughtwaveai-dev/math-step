@@ -331,7 +331,7 @@ Tiered achievements (7 families) derived from existing rows — no new tables. D
 
 - **Families and tiers:** 📘 Worksheets completed (1, 5, 10, 25, 50, 100), 💯 Perfect scores (1, 5, 10, 25), 🔥 Best streak (3, 5, 7, 14, 30 days), 🚀 Levels mastered (1, 3, 5, 10), ⭐ Points earned (100, 500, 1000, 2500), ✏️ Self-correction wins (1, 5, 10), ⚡ Speedy passes (1, 5, 10).
 - **Data sources:** Worksheets / Best streak / Points come straight from `streaks` columns (`total_sessions`, `longest_streak`, `total_points`). Perfect / Speedy / Levels mastered are computed in JS over the bounded `sessions` history (`.limit(500)`, ordered by `completed_at desc`) loaded once per render — `passed AND time_taken_seconds <= levels.speed_target_seconds` for Speedy, `accuracy = 100` for Perfect, distinct `level_id` of passing sessions for Levels mastered. Self-correction count uses an embedded inner join: `from('problems').select('id, sessions!inner(student_id)', { count: 'exact', head: true }).eq('self_corrected', true).eq('sessions.student_id', student.id)`. (The memory-noted PostgREST embed caveat applies specifically to `streaks` — not used here.)
-- **Dashboard variant** renders 7 family rows: emoji + parent label, "Tier N ✓" / "not yet" / "All tiers earned 🏆" on the right, "value / next-tier" with a soft progress bar underneath. Header shows "X of 7 next tiers in progress".
+- **Dashboard variant** renders 7 family rows: emoji + parent label, *"Reached N{unit} ✓"* / *"Not reached yet"* / *"All goals reached 🏆"* on the right, *"value / next-tier"* with a soft progress bar underneath. Header shows *"X of 7 goals in progress"*. (Milestone 57 reworded these from the original *"Tier N ✓"* / *"not yet"* / *"All tiers earned 🏆"* / *"…next tiers in progress"* phrasing for parent clarity.)
 - **Play variant** renders earned highest-tier badges only as a pill strip ("Your wins" — e.g. `📘 10 Worksheets · 💯 5 Perfect Scores · 🚀 Level Mastered`). Empty state when nothing's earned.
 - **Results-page "Milestones unlocked" strip (`detectSessionMilestones`):** session-scoped, fires only in the moment — Worksheet thresholds 1/5/10/25/50/100 when `streaks.total_sessions` after this session equals the threshold, Perfect Score when accuracy = 100, Beat the Time Target when passing inside the level's `speed_target_seconds`, and Fixed Every Mistake when every incorrect problem also has `self_corrected = true`. Streak milestones intentionally skipped here, Level Up left to its dedicated banner.
 - **Not persisted.** All progress is derived at render time. v1 limitations: no per-tier earned date; sessions fetch is capped at 500 per render so a student with 500+ historical completions could under-count Speedy / Levels-mastered tiers from the very first ones (Worksheets/Streak/Points are unaffected).
@@ -366,6 +366,12 @@ In-app, gentle daily-practice surface — no email or push reminders.
   `Intl.DateTimeFormat({timeZone:'Pacific/Auckland'}).formatToParts()`. Day
   arithmetic uses `shiftDateKey()` (UTC date math on the parsed key) so DST
   transitions can't drift the result.
+- **Habit week is a Monday-start NZ calendar week** (Milestone 57). The
+  helper anchors the 7-day window on the NZ-local Monday of the current
+  week — `(weekdayIndex + 6) % 7` days back from `todayKey` — and walks
+  forward to Sunday. Future days within the current week render with a
+  dashed muted border. Sessions from a prior calendar week do not count
+  toward `daysPractisedThisWeek`.
 - **No schema changes, no extra Supabase queries.** Both `/play` and
   `/dashboard` already fetch `sessions` with `.not('completed_at','is',null)
   .order(... desc).limit(500)`; the new `deriveHabitStatus()` consumes
@@ -379,14 +385,15 @@ In-app, gentle daily-practice surface — no email or push reminders.
     *"Nice work — you practised today!"*; one optional line *"Nice — that's
     day {n}!"* only when `todayDone && currentStreak >= 2` (streak number
     is *not* re-emphasised here — the stat tile above already carries it);
-    a 7-tile rhythm row (oldest left → today right) with completed days
-    filled green and today ringed.
+    a Mon → Sun rhythm row with completed days filled green, today ringed,
+    and future days rendered with a dashed muted border.
   - Dashboard variant: between *Progress at a Glance* and *Milestones*.
-    Header *"Daily habit"* + meta *"X / 7 days this week"*. Body sentence
-    is parent-voice (e.g. *"{name} has practised 4 of the last 7 days."*),
-    plus *"Practice completed today."* / *"No practice yet today."* /
-    *"No sessions yet."*. 4 stat tiles: Today (Done ✓ / Not yet), Streak,
-    Best, This week (X / 7). Same 7-tile rhythm row as Play.
+    Header *"Daily habit"* (no meta — *This week* tile carries the count).
+    Body sentence is parent-voice (e.g. *"{name} has practised 4 of 7 days
+    this week."*), plus *"Practice completed today."* /
+    *"No practice yet today."* / *"No sessions yet."*. 4 stat tiles:
+    Today (Done ✓ / Not yet), Streak, Best, This week (X / 7). Same Mon →
+    Sun rhythm row as Play.
 - **Tone is gentle.** No words like *missed / behind / broken streak* —
   the empty / no-recent-practice copy is *"a short session helps them get
   back into rhythm"*.

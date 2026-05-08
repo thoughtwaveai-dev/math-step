@@ -6,8 +6,45 @@
 
 ## Current Status
 
-**Phase:** Milestone 56 — Daily Habit Loop v1. ✓ Pure helper `src/lib/habit.ts` with `nzDateKey` / `shiftDateKey` / `deriveHabitStatus` — Pacific/Auckland source-of-truth, DST-safe, dedupes same-day sessions. ✓ New `HabitCard` component with `play` / `dashboard` variants. ✓ Wired into `/play` between the stats row and the worksheet CTA, and into `/dashboard` between *Progress at a Glance* and *Milestones*. ✓ No schema changes, no extra Supabase queries — feeds off the existing `sessions.completed_at` data both pages already fetch. ✓ Tone is intentionally gentle (no "missed / behind / broken streak"). ✓ No email or push reminders in v1.
+**Phase:** Milestone 57 — Habit week + milestone label polish. ✓ Habit row is now a Mon → Sun NZ calendar week (was rolling last 7 days). ✓ Future days within the current week render with a dashed muted border. ✓ Dashboard copy updated to *"X of 7 days this week"* / *"X day this week"* (was *"the last 7 days"*). ✓ Milestones right-side labels rewritten *"Tier N ✓"* → *"Reached N{unit} ✓"* (e.g. *"Reached 1 ✓"*, *"Reached 5 days ✓"*); meta header *"… next tiers in progress"* → *"… goals in progress"*; *"All tiers earned 🏆"* → *"All goals reached 🏆"*; *"not yet"* → *"Not reached yet"*. ✓ Renamed `HabitStatus.last7` → `weekDays` and added `isFuture` flag.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 57 — Habit week + milestone label polish (2026-05-09)
+
+**Goal:** Two clean polish items on the v1 Daily Habit Loop and Milestones surfaces — make the habit row a Mon-first NZ calendar week (not a rolling 7-day window), and replace parent-unfriendly *"Tier N"* wording with plain-English *"Reached N"*.
+
+**Files modified:**
+- `src/lib/habit.ts` — `HabitDay` gains `isFuture: boolean`; `HabitStatus.last7` renamed to `weekDays` (semantic correction). `deriveHabitStatus` now anchors the 7-day window on the **NZ-local Monday of the current week**: shifts back `(weekdayIndex + 6) % 7` days from `todayKey` to find Monday, then walks forward 7 days to Sunday. `daysPractisedThisWeek` counts only the days inside this Mon–Sun window — sessions in the previous calendar week are no longer included.
+- `src/components/HabitCard.tsx` — uses `status.weekDays`; `SevenDayRow` adds a third tile state for future days (`bg-white border-dashed border-[#bae0bd] text-[#bae0bd]`) so they read as "upcoming" rather than "missed". Dashboard copy now says *"X of 7 days this week"* / *"1 day this week"* / *"hasn't practised yet this week"*. Removed the redundant *"X / 7 days this week"* meta in the header (the dedicated stat tile already carries that number).
+- `src/components/AchievementsCard.tsx` — dashboard variant only:
+  - `Tier ${tier} ✓` → `Reached ${tier}${unitSuffix} ✓` (e.g. `Reached 1 ✓`, `Reached 5 days ✓`).
+  - `All tiers earned 🏆` → `All goals reached 🏆` (in both the per-row label and the header meta).
+  - `not yet` → `Not reached yet`.
+  - Header meta `${n} of ${total} next tiers in progress` → `${n} of ${total} goals in progress`.
+  - Play variant (`Your wins`) is unchanged — its labels already used `formatTierBadge` (e.g. *"First Worksheet"*, *"5 Worksheets"*) which were never tier-jargon.
+
+**No schema changes, no logic changes outside the habit window and label wording.**
+
+**Validation (Playwright + helper smoke):**
+- Helper smoke (Sat 9 May, Mon 4 May, Sun 10 May, Wed 6 May with cross-week sessions) — all four scenarios produced correct Mon→Sun ordering, correct `isToday` / `isFuture` flags, correct `daysPractisedThisWeek` count (verified prior-week sessions are now ignored). ✓
+- `/play` Saturday 2026-05-09 NZT: 7-tile row reads `Mon Tue Wed Thu Fri Sat Sun` with **Sat ringed + filled green** and **Sun rendered with a dashed border** (future). Headline *"Today's practice done ✓ · Nice work — you practised today!"*. ✓
+- `/dashboard`: habit copy is now *"Riley has practised 1 day this week. Practice completed today."* — no more *"the last 7 days"*. Stat tile *This week 1 / 7* unchanged in shape. ✓
+- Milestones header reads *"7 of 7 goals in progress"*; per-row labels read *"Reached 1 ✓"*, *"Reached 5 days ✓"*, *"Not reached yet"*. **Zero `Tier ` strings remain in the Milestones DOM.** ✓
+- Mobile (390 × 844): no horizontal overflow (`scrollWidth === clientWidth === 375`), single-letter labels start with *"M"* — Mon-first ordering preserved. ✓
+- Tablet (768 × 1024): three-letter labels start with *"Mon"*, no overflow. ✓
+- `/play` Next Win card rendering unchanged (*"📘 5 Worksheets · 2 / 5 completed · Only 3 more to go!"*) — confirmed no tier jargon leaks through there either. ✓
+- `npx tsc --noEmit` clean. `npx eslint` clean on all changed files.
+- 0 console errors across signup → onboarding → play → worksheet → results → play → dashboard.
+
+**Behaviour after this change:**
+- Habit week boundary: NZ-local **Monday 00:00 → Sunday 23:59**, recomputed every render. Mon-Sun aligns with school-week scanning for parents.
+- Future days (later in the same Mon–Sun week) render with a dashed border — visually distinct from past-empty days, but no copy emphasises them (no *"upcoming"* badge, no countdown) to keep the tone gentle.
+- Counts strictly include only the current Mon–Sun. A session done last Sunday no longer shows as a green tile this Monday.
+
+**Limitations (still applies from Milestone 56):**
+- No reminders. Same-day dedup unchanged. No celebration animation when today flips to ✓.
 
 ---
 
