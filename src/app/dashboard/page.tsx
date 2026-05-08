@@ -401,7 +401,7 @@ export default async function DashboardPage({
 
               {/* Recent accuracy trend */}
               <div>
-                <div className="flex items-baseline justify-between mb-2 gap-3">
+                <div className="flex flex-col gap-0.5 mb-2 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
                   <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">
                     Recent accuracy trend
                   </p>
@@ -420,8 +420,8 @@ export default async function DashboardPage({
                         aria-hidden="true"
                       />
                       <span
-                        className="pointer-events-none absolute right-0 -translate-y-1/2 rounded bg-white/80 px-1 text-[10px] font-medium text-[#4a6b4e] tabular-nums"
-                        style={{ bottom: `${accuracyThreshold}%` }}
+                        className="pointer-events-none absolute right-0 rounded bg-white/80 px-1 text-[10px] font-medium text-[#4a6b4e] tabular-nums"
+                        style={{ top: `calc(${100 - accuracyThreshold}% + 2px)` }}
                       >
                         {accuracyThreshold}% target
                       </span>
