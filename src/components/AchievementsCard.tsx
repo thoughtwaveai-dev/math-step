@@ -50,8 +50,8 @@ export default function AchievementsCard({ progress, variant, studentName }: Pro
         <h2 className="text-base font-semibold text-[#1a2e1c]">Milestones</h2>
         <span className="text-xs font-medium text-[#4a6b4e] tabular-nums">
           {inProgressCount > 0
-            ? `${inProgressCount} of ${progress.length} goals in progress`
-            : 'All goals reached 🏆'}
+            ? `${inProgressCount} of ${progress.length} badges in progress`
+            : 'All badges earned 🏆'}
         </span>
       </div>
 
@@ -67,10 +67,10 @@ export default function AchievementsCard({ progress, variant, studentName }: Pro
           const pct = p.isMaxed ? 100 : Math.min(100, Math.round((p.value / target) * 100))
           const unit = p.family.unitSuffix ?? ''
           const rightLabel = p.isMaxed
-            ? 'All goals reached 🏆'
+            ? 'All badges earned 🏆'
             : p.earnedTier !== null
-              ? `Reached ${p.earnedTier}${unit} ✓`
-              : 'Not reached yet'
+              ? `Latest badge: ${p.earnedTier}${unit} ✓`
+              : 'No badges yet'
           const progressLabel = p.isMaxed
             ? `${p.value.toLocaleString('en-NZ')}${unit}`
             : `${p.value.toLocaleString('en-NZ')} / ${target.toLocaleString('en-NZ')}${unit}`
