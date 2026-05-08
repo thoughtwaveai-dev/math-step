@@ -8,13 +8,16 @@ import SetLevelForm from './SetLevelForm'
 import PinSettings from './PinSettings'
 import StudentModeCard from './StudentModeCard'
 import AchievementsCard from '@/components/AchievementsCard'
+import MistakeJournalCard from '@/components/MistakeJournalCard'
 import { formatSpeed, formatNzDateTime } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
 import { deriveAchievementProgress } from '@/lib/achievements'
+import { deriveWeakAreas } from '@/lib/mistakeJournal'
 
 const SESSION_FETCH_LIMIT = 500
 const RECENT_VISIBLE_LIMIT = 25
 const SCROLL_HINT_THRESHOLD = 7
+const MISTAKE_JOURNAL_SESSION_WINDOW = 20
 
 export default async function DashboardPage({
   searchParams,
@@ -147,6 +150,33 @@ export default async function DashboardPage({
   const consecutivePasses = levelProgress?.consecutive_passes ?? 0
   const recentResults = (recentLevelSessions ?? []).map(s => s.passed ?? false)
   const isStuck = isStudentStuck(recentResults)
+
+  // --- Mistake Journal: fetch problems from the recent N sessions ---
+  const recentSessionsForMistakes = sessions.slice(0, MISTAKE_JOURNAL_SESSION_WINDOW)
+  const recentSessionIds = recentSessionsForMistakes.map(s => s.id)
+  let weakAreas: ReturnType<typeof deriveWeakAreas> = []
+  if (recentSessionIds.length > 0) {
+    const { data: recentProblems } = await supabase
+      .from('problems')
+      .select('problem_text, correct_answer, is_correct, session_id, order_index')
+      .in('session_id', recentSessionIds)
+    if (recentProblems && recentProblems.length > 0) {
+      weakAreas = deriveWeakAreas({
+        problems: recentProblems,
+        sessions: recentSessionsForMistakes.map(s => ({
+          id: s.id,
+          level_id: s.level_id,
+          completed_at: s.completed_at,
+        })),
+        levels: (allLevels ?? []).map(l => ({
+          id: l.id,
+          level_number: l.level_number,
+          sublevel_number: l.sublevel_number,
+          topic: l.topic,
+        })),
+      })
+    }
+  }
 
   // Analytics — computed from the last 10 sessions (sessions10, desc order)
   const hasSessions = sessions10.length > 0
@@ -433,6 +463,13 @@ export default async function DashboardPage({
 
         {/* Milestones */}
         <AchievementsCard progress={achievementProgress} variant="dashboard" studentName={student.name} />
+
+        {/* Mistake Journal — needs practice */}
+        <MistakeJournalCard
+          weakAreas={weakAreas}
+          studentId={student.id}
+          studentName={student.name}
+        />
 
         {/* Recent Worksheets */}
         <div className="rounded-xl border border-[#bae0bd] bg-white p-5">

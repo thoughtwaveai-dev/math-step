@@ -6,8 +6,55 @@
 
 ## Current Status
 
-**Phase:** Milestone 52 — Tiered achievements + dashboard polish + scrollable Recent Worksheets. ✓ 7 family rows with progress to next tier on dashboard, earned highest-tier badges on play, polished metrics + trend (with level-specific accuracy threshold line), Recent Worksheets capped in a max-h scrollable panel. No schema changes.
+**Phase:** Milestone 53 — Mistake Journal / Targeted Practice v1. ✓ Parent dashboard "Needs Practice" card surfaces top 3 weak areas (level/topic grouping, last-20-sessions window). ✓ Soft `/play` CTA invites the student to optional practice. ✓ `/practice/weak-spots` runs 10 generated problems with client-side grading and zero side effects on streaks/points/sessions/mastery. No schema changes.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 53 — Mistake Journal / Targeted Practice v1 (2026-05-08)
+
+**Goal:** Identify what a student is struggling with from existing data and offer focused practice — without altering progression, mastery, streaks, or points.
+
+**Mistake analysis strategy (v1, no schema changes):**
+- Window: last 20 completed sessions for the selected student (reuses the dashboard's existing bounded `sessions` fetch — no extra session query).
+- Grouping signal: `sessions.level_id → levels.{level_number, sublevel_number, topic}`. Generators emit a per-problem `type` but it isn't persisted — Option A (level/topic grouping) chosen over Option B (add `problems.problem_type`) per the brief.
+- One new query: `problems.select('problem_text, correct_answer, is_correct, session_id, order_index').in('session_id', recentSessionIds)`. Empty arrays short-circuit before the `.in(...)` call.
+- Filtering: skip levels with `< 4` attempts in window, skip levels with `≥ 80%` accuracy. Sort by `incorrectCount desc, accuracy asc`. Take top 3.
+- Examples sorted in JS by `session.completed_at desc, then problem.order_index asc` — no UUID-as-chronology.
+- Signal banding: `accuracy ≤ 50% → high`, `≤ 70% → medium`, else `low` (drives parent-facing copy *Needs some practice / Could use a little practice / A bit of polish would help*).
+
+**Files added:**
+- `src/lib/mistakeJournal.ts` — pure `deriveWeakAreas()` derivation, no Supabase dependency.
+- `src/lib/math/inputMode.ts` — extracted `inputModeForType()` and `problemTypeLabel()` so worksheet + practice forms share the per-problem-type input handling. Prevents the historical stylus bug where `"x"` autocorrects to `"."` for algebra/factorization/inequality/sim-eq/fraction/negative answers.
+- `src/components/MistakeJournalCard.tsx` — dashboard "Needs Practice" card with empty state, top-3 weak areas, `Practise` link per area.
+- `src/components/TargetedPracticeCTA.tsx` — soft optional CTA on `/play`.
+- `src/app/practice/weak-spots/page.tsx` — server component: auth, parses `?student/level/sublevel`, validates against `SUPPORTED_LEVEL_KEYS`, generates 10 problems, hands them off to the client form. Friendly *Practice Coming Soon* fallback for unsupported levels.
+- `src/app/practice/weak-spots/PracticeForm.tsx` — client component: stateful answer entry, **client-side grading via shared `gradeAnswer`**, inline per-problem results, "Practise again" / "Back to play" CTAs. No persistence, no server action.
+
+**Files modified:**
+- `src/app/worksheet/WorksheetForm.tsx` — now imports `inputModeForType` / `problemTypeLabel` from the shared helper instead of defining them locally.
+- `src/app/dashboard/page.tsx` — extra `problems` query (bounded by recent 20 session IDs), `deriveWeakAreas` call, `MistakeJournalCard` mounted between Milestones and Recent Worksheets.
+- `src/app/play/page.tsx` — `levelSpeedTargets` query expanded to include `level_number, sublevel_number, topic`, `sessions` query expanded to include `completed_at`, derive single top weak area, render `TargetedPracticeCTA` only when one exists AND it isn't the same level the stuck-support card is already addressing.
+
+**No schema changes.**
+
+**Validation (Playwright + manual, fresh signup `mistake-journal@test.local` → student "Riley"):**
+- Empty state: dashboard *"No clear weak spots yet — keep practising. Riley hasn't made enough mistakes for us to spot a pattern."* ✓ `/play` shows no CTA. ✓
+- After one 12/20 worksheet (8 deliberate misses at Level 1.1): dashboard renders `Level 1.1 — Addition · Could use a little practice · missed 8 of 20 (60% accuracy) · Recent: 4 + 4 = ?, 8 + 5 = ?` with a `Practise` link to `/practice/weak-spots?student=…&level=1&sublevel=1`. ✓
+- `/play` shows the soft CTA pointing at the same level. ✓
+- `/practice/weak-spots?level=1&sublevel=1`: 10 generated problems, "Practice · won't change your level" pill + reassurance copy visible. Submit 7 correct + 3 wrong → inline results card *Practice complete · 7 / 10 (70%)* with per-problem ✓/✗ markers (8 ✓ tiles, 3 ✗ tiles — 7 problem ✓ + 1 summary ✓ chip = 8). ✓
+- **No-side-effects verification (before/after):** Level 1, Sublevel 1, Streak 1, Points 10 — identical pre/post-practice. Recent Worksheets count: 1 (unchanged, practice did not insert a session row). Dashboard "Sessions" stat: 1 (unchanged). The pre-existing weak area on dashboard still reads `missed 8 of 20 (60% accuracy)` — the practice run was not pulled into the journal. ✓
+- Unsupported level guard: `?level=99&sublevel=1` → friendly *Practice Coming Soon* card, no crash. ✓
+- Mobile (390 × 844): Mistake Journal card renders without horizontal overflow (`scrollWidth ≤ clientWidth`); practice form lays out cleanly. ✓
+- Console errors: 0 across signup → onboarding → play → worksheet → results → dashboard → practice flow.
+- `npx tsc --noEmit`: 0 errors. `npx eslint`: 0 errors.
+
+**v1 limitations (documented for future revisit):**
+- **Level/topic grouping, not problem-type grouping** — the journal can say *"struggling with Level 6.1 Decimals"* but not *"struggling with decimal subtraction specifically"*. Generators already emit a per-problem `type`; persisting it (`problems.problem_type text`) is the natural Option B upgrade.
+- **Last-20-sessions window** — older mistakes age out by design. A student returning after a long break will start with an empty journal even if they previously had weak spots.
+- **Client-side grading on `/practice/weak-spots`** — correct answers ship inside the page payload. Acceptable because practice doesn't affect progression and the audience is 6–12; a future v2 could move grading server-side via a stateless action with an encoded payload if needed.
+- **Examples are textual prompts only** — they show the prompt (`4 + 4 = ?`) but not the student's wrong answer or the correct answer. Adding the latter would be a small UI iteration.
+- **Practice runs are entirely ephemeral** — no record of "Riley practised X 5 times this week". If practice persistence is wanted later, it should land in a separate table or a flagged session row to keep the no-progression guarantee.
 
 ---
 

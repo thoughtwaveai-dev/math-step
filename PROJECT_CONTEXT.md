@@ -335,6 +335,21 @@ Tiered achievements (7 families) derived from existing rows — no new tables. D
 - **Results-page "Milestones unlocked" strip (`detectSessionMilestones`):** session-scoped, fires only in the moment — Worksheet thresholds 1/5/10/25/50/100 when `streaks.total_sessions` after this session equals the threshold, Perfect Score when accuracy = 100, Beat the Time Target when passing inside the level's `speed_target_seconds`, and Fixed Every Mistake when every incorrect problem also has `self_corrected = true`. Streak milestones intentionally skipped here, Level Up left to its dedicated banner.
 - **Not persisted.** All progress is derived at render time. v1 limitations: no per-tier earned date; sessions fetch is capped at 500 per render so a student with 500+ historical completions could under-count Speedy / Levels-mastered tiers from the very first ones (Worksheets/Streak/Points are unaffected).
 
+## Mistake Journal / Targeted Practice v1 (Milestone 53)
+
+Surfaces top weak areas for the selected student and offers an optional, side-effect-free practice flow.
+
+- **Derivation:** `src/lib/mistakeJournal.ts → deriveWeakAreas()`. Pure function — takes the recent-window problems, the matching session rows (for `level_id` and `completed_at`), and a level lookup. No Supabase dependency.
+- **Window:** last 20 completed sessions for the student. The dashboard reuses its bounded `sessions` fetch (no extra session query); a single new `problems.select(...).in('session_id', [...])` is added. `recentSessionIds` is checked before the `.in(...)` call to avoid `.in([])`.
+- **Grouping:** by `sessions.level_id → levels.{level_number, sublevel_number, topic}`. Generators emit a per-problem `type` but it is **not persisted** in `problems` — v1 stays at level/topic precision. Option B (add `problems.problem_type text`) is the natural upgrade.
+- **Filters:** skip groups with `< 4` attempts or `≥ 80%` accuracy. Sort by `incorrectCount desc, accuracy asc`. Top 3 returned.
+- **Recent examples:** sorted by `session.completed_at desc` then `problems.order_index asc` — never by UUID `problems.id`.
+- **Dashboard UI:** `MistakeJournalCard` between Milestones and Recent Worksheets. Empty state copy: *"No clear weak spots yet — keep practising."*
+- **Play UI:** `TargetedPracticeCTA` shown only when at least one weak area exists, and suppressed when the top weak area equals the current stuck level (avoids stacking with the existing stuck-support card).
+- **Practice route:** `/practice/weak-spots?student=…&level=…&sublevel=…`. Server component validates the level via `SUPPORTED_LEVEL_KEYS`, generates 10 problems with `generateProblems()`, hands them to a client component. Client-side grading via the shared `gradeAnswer` from `src/lib/math/gradeAnswer.ts`.
+- **No persistence, by design.** No `INSERT` to `sessions` / `problems`, no `UPDATE` to `streaks` / `student_level_progress` / `students`. Recent Worksheets count and achievement progress are untouched by a practice run.
+- **Shared input-mode helper:** `src/lib/math/inputMode.ts` — `inputModeForType()` + `problemTypeLabel()`. Used by both `WorksheetForm` and `PracticeForm` so the per-problem-type input mode (text for algebra/factorization/inequality/sim-eq/fractions/negatives, numeric/decimal for purely numeric types) cannot silently regress between the two surfaces. This is what protects against the historical stylus *"x → ."* bug.
+
 ## Recent Worksheets timestamp & scroll behaviour
 
 `src/app/dashboard/page.tsx` formats completed_at via `formatNzDateTime()` — `en-NZ` date + 12-hour NZT time on a single subline (e.g. `7 May 2026, 6:20 pm NZT · 20/20 · 100% · 29s`). Up to 25 entries are shown inside a `max-h-[26rem] overflow-y-auto` scroll container with a thin scrollbar (Chromium + Firefox styling). When the row count exceeds the visible threshold, a subtle "Showing latest N worksheets — scroll to see more." helper line appears below the panel.

@@ -6,8 +6,11 @@ import { formatSpeed } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
 import { deriveAchievementProgress } from '@/lib/achievements'
 import AchievementsCard from '@/components/AchievementsCard'
+import TargetedPracticeCTA from '@/components/TargetedPracticeCTA'
+import { deriveWeakAreas } from '@/lib/mistakeJournal'
 
 const SESSION_FETCH_LIMIT = 500
+const MISTAKE_JOURNAL_SESSION_WINDOW = 20
 
 export default async function PlayPage({
   searchParams,
@@ -49,9 +52,9 @@ export default async function PlayPage({
       .eq('sublevel_number', student.current_sublevel)
       .maybeSingle(),
     supabase.from('levels')
-      .select('id, speed_target_seconds'),
+      .select('id, level_number, sublevel_number, topic, speed_target_seconds'),
     supabase.from('sessions')
-      .select('id, passed, accuracy, time_taken_seconds, level_id')
+      .select('id, passed, accuracy, time_taken_seconds, level_id, completed_at')
       .eq('student_id', student.id)
       .not('completed_at', 'is', null)
       .order('completed_at', { ascending: false })
@@ -133,6 +136,40 @@ export default async function PlayPage({
   const consecutivePasses = levelProgress?.consecutive_passes ?? 0
   const recentResults = (recentLevelSessions ?? []).map(s => s.passed ?? false)
   const isStuck = isStudentStuck(recentResults)
+
+  // --- Targeted practice CTA: derive top weak area from recent sessions ---
+  const recentSessionsForMistakes = sessions.slice(0, MISTAKE_JOURNAL_SESSION_WINDOW)
+  const recentSessionIds = recentSessionsForMistakes.map(s => s.id)
+  let topWeakArea: ReturnType<typeof deriveWeakAreas>[number] | null = null
+  if (recentSessionIds.length > 0) {
+    const { data: recentProblems } = await supabase
+      .from('problems')
+      .select('problem_text, correct_answer, is_correct, session_id, order_index')
+      .in('session_id', recentSessionIds)
+    if (recentProblems && recentProblems.length > 0) {
+      const weakAreas = deriveWeakAreas({
+        problems: recentProblems,
+        sessions: recentSessionsForMistakes.map(s => ({
+          id: s.id,
+          level_id: s.level_id,
+          completed_at: s.completed_at,
+        })),
+        levels: (levelSpeedTargets ?? []).map(l => ({
+          id: l.id,
+          level_number: l.level_number,
+          sublevel_number: l.sublevel_number,
+          topic: l.topic,
+        })),
+        maxResults: 1,
+      })
+      topWeakArea = weakAreas[0] ?? null
+    }
+  }
+  // Suppress CTA when student is stuck on the same level the CTA would suggest —
+  // the existing "tough right now" support card already covers that emotional space.
+  const showPracticeCTA =
+    topWeakArea !== null &&
+    !(isStuck && level && topWeakArea.levelId === level.id)
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f7faf7]">
@@ -219,6 +256,12 @@ export default async function PlayPage({
         >
           Start Today&apos;s Worksheet
         </Link>
+
+        {/* Targeted practice CTA — shown only when there's a clear weak area
+            and it's not duplicating the stuck-support card */}
+        {showPracticeCTA && topWeakArea && (
+          <TargetedPracticeCTA weakArea={topWeakArea} studentId={student.id} />
+        )}
 
         {/* Support card when student is stuck */}
         {isStuck && (

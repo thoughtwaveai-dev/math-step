@@ -1,8 +1,9 @@
 'use client'
 
-import React, { useActionState, useEffect, useState } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import { submitWorksheet } from '@/app/actions/worksheet'
 import type { AnyProblemType } from '@/lib/math/generators'
+import { inputModeForType, problemTypeLabel } from '@/lib/math/inputMode'
 
 interface PersistedProblem {
   id: string
@@ -15,69 +16,6 @@ interface Props {
   sessionId: string
   problems: PersistedProblem[]
   reviewProblemIds: string[]
-}
-
-function problemTypeLabel(type: AnyProblemType): string {
-  switch (type) {
-    case 'addition': return 'Addition'
-    case 'subtraction': return 'Subtraction'
-    case 'multiplication': return 'Multiplication'
-    case 'division': return 'Division'
-    case 'prime_factorization': return 'Prime Factorization'
-    case 'list_factors': return 'List Factors'
-    case 'gcf': return 'Greatest Common Factor'
-    case 'lcm': return 'Least Common Multiple'
-    case 'factor_pairs': return 'Factor Pairs'
-    case 'common_factors': return 'Common Factors'
-    case 'fraction_addition': return 'Fraction Addition'
-    case 'fraction_subtraction': return 'Fraction Subtraction'
-    case 'fraction_multiplication': return 'Fraction Multiplication'
-    case 'fraction_division': return 'Fraction Division'
-    case 'decimal_addition': return 'Decimal Addition'
-    case 'decimal_subtraction': return 'Decimal Subtraction'
-    case 'decimal_multiplication': return 'Decimal Multiplication'
-    case 'percent_of_number': return 'Percentage'
-    case 'percent_to_decimal': return 'Percentage'
-    case 'decimal_to_percent': return 'Percentage'
-    case 'fraction_to_percent': return 'Percentage'
-    case 'neg_addition': return 'Negative Numbers'
-    case 'neg_subtraction': return 'Negative Numbers'
-    case 'neg_multiplication': return 'Negative Numbers'
-    case 'neg_division': return 'Negative Numbers'
-    case 'order_add_mul': return 'Order of Operations'
-    case 'order_sub_mul': return 'Order of Operations'
-    case 'order_div_add': return 'Order of Operations'
-    case 'order_paren': return 'Order of Operations'
-    case 'expr_combine_like': return 'Simplifying Expressions'
-    case 'expr_multi_terms': return 'Simplifying Expressions'
-    case 'expr_with_constant': return 'Simplifying Expressions'
-    case 'eq_add': return 'One-step Equation'
-    case 'eq_sub': return 'One-step Equation'
-    case 'eq_mul': return 'One-step Equation'
-    case 'eq_div': return 'One-step Equation'
-    case 'linear_equation': return 'Linear Equation'
-    case 'inequality': return 'Inequality'
-    case 'sim_eq': return 'Simultaneous Equations'
-  }
-}
-
-function inputModeForType(type: AnyProblemType): React.HTMLAttributes<HTMLInputElement>['inputMode'] {
-  if (type === 'inequality') return 'text'
-  if (type === 'fraction_addition' || type === 'fraction_subtraction') return 'text'
-  if (type === 'fraction_multiplication' || type === 'fraction_division') return 'text'
-  if (type === 'decimal_addition' || type === 'decimal_subtraction' || type === 'decimal_multiplication') return 'decimal'
-  if (type === 'percent_to_decimal') return 'decimal'
-  // Negative number types need text mode so the minus sign can be typed
-  if (type === 'neg_addition' || type === 'neg_subtraction' || type === 'neg_multiplication' || type === 'neg_division') return 'text'
-  if (type === 'order_add_mul' || type === 'order_sub_mul' || type === 'order_div_add' || type === 'order_paren') return 'numeric'
-  if (type === 'eq_add' || type === 'eq_sub' || type === 'eq_mul' || type === 'eq_div') return 'numeric'
-  // Factorization types with multi-token answers (e.g. "2 × 3 × 5", "1, 2, 3, 6", "1×12, 2×6")
-  if (type === 'prime_factorization' || type === 'list_factors' || type === 'factor_pairs' || type === 'common_factors') return 'text'
-  // Algebraic expressions need text mode for letters (e.g. "5x", "3x + 7")
-  if (type === 'expr_combine_like' || type === 'expr_multi_terms' || type === 'expr_with_constant') return 'text'
-  // Simultaneous equation answers contain letters and commas (e.g. "x = 3, y = 7")
-  if (type === 'sim_eq') return 'text'
-  return 'numeric'
 }
 
 export default function WorksheetForm({ sessionId, problems, reviewProblemIds }: Props) {
