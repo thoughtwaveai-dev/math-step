@@ -6,8 +6,42 @@
 
 ## Current Status
 
-**Phase:** Milestone 54 — Mistake Journal / Targeted Practice precision. ✓ `problems.problem_type` (nullable text) added; new worksheet inserts persist the generator's `type`. ✓ Mistake Journal groups by `(level_id, problem_type)` with parent-friendly labels (e.g. *Factor pairs*, *Fraction addition*); old NULL rows fall back to the legacy *Level X.Y — Topic* bucket. ✓ `/practice/weak-spots?type=…` over-generates 4× and filters to the requested type, topping up if short. Side-effect-free guarantee preserved.
+**Phase:** Milestone 55 — Next Win motivation card on Student Play. ✓ `pickNextWin()` helper picks the closest unearned tier across all 7 achievement families by progress ratio (tie-break = `ACHIEVEMENT_FAMILIES` declaration order). ✓ New `NextWinCard` server component renders above `AchievementsCard variant="play"`. ✓ Brand-new students see *"Finish your first worksheet to earn your first win!"*; maxed students see *"All wins earned for now"*. No DB schema changes, no extra queries.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 55 — Next Win Card on Student Play (2026-05-09)
+
+**Goal:** Once a child has earned several badges, give them a single, motivating, always-visible next target on `/play` (e.g. *"📘 25 Worksheets — 18/25 — Only 7 more to go!"*). Achievements remained tiered but the play page only showed earned wins, with no clear "what's next?".
+
+**Files modified:**
+- `src/lib/achievements.ts` — added `pickNextWin(progress)` + `NextWin` discriminated union (`{ kind: 'next', … }` / `{ kind: 'maxed' }`). Pure derivation off the existing `FamilyProgress[]`. Sort: progress ratio desc, stable tie-break preserves family declaration order. Friendly-message rules: brand-new worksheets first tier → *"Finish your first worksheet to earn your first win!"*; streak family uses *"… more days to go!"* / *"One more day to go!"*; points uses *"… more points to go!"* with `toLocaleString('en-NZ')`; everything else is *"Only N more to go!"* / *"Just one more to go!"*.
+- `src/app/play/page.tsx` — added `pickNextWin` import + `NextWinCard` import; computed `nextWin` directly after `achievementProgress`; mounted `<NextWinCard nextWin={nextWin} />` immediately above the existing `<AchievementsCard variant="play" />`. No new Supabase queries.
+
+**Files added:**
+- `src/components/NextWinCard.tsx` — server component, soft-green palette matching the rest of the play page. Eyebrow `Next win`, emoji + tier label headline, `current / target completed` (or `… days` for streak), progress bar (`bg-[#e1f4e3]` track, `bg-[#4ade80]` fill — same as `AchievementsCard` dashboard variant), friendly message. Maxed branch shows 🏆 + *"All wins earned for now"* + *"Amazing — keep practising for the next set!"*. `role="progressbar"` with `aria-valuenow` for accessibility.
+
+**No schema changes. No extra queries.** All progress is still derived from the existing `deriveAchievementProgress()` output the page already computes.
+
+**Validation (Playwright + manual + helper smoke tests, fresh signup `m55-nextwin@test.local` → student "Riley"):**
+- Brand-new student: `/play` shows `Next win · 📘 First Worksheet · 0 / 1 completed · Finish your first worksheet to earn your first win!`. "Your wins" empty-state still renders below. ✓
+- After one perfect 20/20 worksheet: 4 Tier-1 badges earned (`📘 First Worksheet · 💯 Perfect Score · 🚀 Level Mastered · ⚡ Speedy Pass`). Next Win correctly picks `🔥 3-Day Streak · 1 / 3 days · 2 more days to go!` (streak 33% and levels 33% tied; stable sort picks streak first per family declaration order). ✓
+- Helper smoke tests (`pickNextWin` against synthetic `FamilyProgress[]`):
+  - brand-new → `📘 First Worksheet · "Finish your first worksheet to earn your first win!"` ✓
+  - streak 2/3 → `🔥 3-Day Streak · "One more day to go!"` ✓
+  - worksheets 24/25 → `📘 25 Worksheets · "Just one more to go!"` ✓
+  - all families maxed → `{ kind: 'maxed' }` (renders the 🏆 *"All wins earned for now"* card) ✓
+- Mobile (390 × 844): no horizontal overflow (`scrollWidth ≤ clientWidth`). ✓
+- Desktop (1280 × 900): dashboard regression check — Milestones / Mistake Journal / Recent Worksheets unchanged, no "Next Win" leakage onto the dashboard. ✓
+- Console errors: 0 across signup → onboarding → play → worksheet → results → play.
+- `npx tsc --noEmit`: 0 errors. `npx eslint`: 0 errors on changed files.
+
+**v1 limitations (documented for future revisit):**
+- Tie-break for equal progress ratios is family declaration order in `ACHIEVEMENT_FAMILIES`, not a more nuanced "easiest next" heuristic. In practice this lands sensibly: a brand-new student goes to Worksheets first, a tied-at-33% student goes to Streak before Levels — both feel right.
+- No celebration/animation when a freshly-crossed tier flips the card to a new target. The results-page Milestones strip still fires per-session for 1/5/10/25/50/100 / Perfect / Beat-the-Time-Target / Fixed-Every-Mistake — that remains the "in the moment" celebration surface.
+- Maxed-state copy is a single message; if all 7 families are ever maxed in a session, the same card renders with the 🏆 variant. No further "what next" hint, by design — the Recent Worksheets feed and the level progression already provide forward motion.
+- `pickNextWin` consumes the same bounded `sessions` data as `AchievementsCard`, so the existing 500-session cap caveat (Speedy / Levels-mastered for >500 historical sessions) carries over.
 
 ---
 

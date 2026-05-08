@@ -132,6 +132,71 @@ export function earnedTierBadges(progress: FamilyProgress[]): EarnedTierBadge[] 
     .map(p => ({ family: p.family, tier: p.earnedTier as number }))
 }
 
+// Closest unearned tier across all families, used by the play "Next win" card.
+// Tie-break for equal progress ratios = ACHIEVEMENT_FAMILIES declaration order
+// (stable sort), so a brand-new student lands on Worksheets / First Worksheet.
+export type NextWin =
+  | { kind: 'maxed' }
+  | {
+      kind: 'next'
+      familyId: AchievementFamilyId
+      emoji: string
+      label: string
+      current: number
+      target: number
+      progressPct: number
+      friendlyTitle: string
+      friendlyMessage: string
+    }
+
+function buildFriendlyMessage(
+  familyId: AchievementFamilyId,
+  current: number,
+  target: number,
+): string {
+  const remaining = Math.max(0, target - current)
+  if (familyId === 'worksheets' && current === 0 && target === 1) {
+    return 'Finish your first worksheet to earn your first win!'
+  }
+  if (familyId === 'streak') {
+    return remaining === 1 ? 'One more day to go!' : `${remaining} more days to go!`
+  }
+  if (familyId === 'points') {
+    return `${remaining.toLocaleString('en-NZ')} more points to go!`
+  }
+  return remaining === 1 ? 'Just one more to go!' : `Only ${remaining} more to go!`
+}
+
+export function pickNextWin(progress: FamilyProgress[]): NextWin {
+  const candidates = progress.filter(p => !p.isMaxed && p.nextTier !== null)
+  if (candidates.length === 0) return { kind: 'maxed' }
+
+  const ranked = candidates
+    .map((p, idx) => ({
+      p,
+      idx,
+      ratio: Math.min(1, (p.value / (p.nextTier as number)) || 0),
+    }))
+    .sort((a, b) => (b.ratio - a.ratio) || (a.idx - b.idx))
+
+  const top = ranked[0].p
+  const target = top.nextTier as number
+  const current = top.value
+  const progressPct = Math.min(100, Math.round((current / target) * 100))
+
+  return {
+    kind: 'next',
+    familyId: top.family.id,
+    emoji: top.family.emoji,
+    label: top.family.formatTierBadge(target),
+    current,
+    target,
+    progressPct,
+    friendlyTitle: 'Next win',
+    friendlyMessage: buildFriendlyMessage(top.family.id, current, target),
+  }
+}
+
 // Session milestones strip on the results page. Equality-based, fires only in
 // the moment — see Milestone 51 notes for why streak milestones are skipped.
 export interface SessionMilestoneInputs {

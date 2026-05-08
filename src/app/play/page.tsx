@@ -4,8 +4,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { formatSpeed } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
-import { deriveAchievementProgress } from '@/lib/achievements'
+import { deriveAchievementProgress, pickNextWin } from '@/lib/achievements'
 import AchievementsCard from '@/components/AchievementsCard'
+import NextWinCard from '@/components/NextWinCard'
 import TargetedPracticeCTA from '@/components/TargetedPracticeCTA'
 import { deriveWeakAreas } from '@/lib/mistakeJournal'
 
@@ -98,6 +99,7 @@ export default async function PlayPage({
     selfCorrectCount: selfCorrectCount ?? 0,
     levelsMasteredCount,
   })
+  const nextWin = pickNextWin(achievementProgress)
 
   // Parallel: all three depend on level.id but not each other
   const [
@@ -324,6 +326,9 @@ export default async function PlayPage({
             </dl>
           </div>
         )}
+
+        {/* Next win — closest unearned tier across all families */}
+        <NextWinCard nextWin={nextWin} />
 
         {/* Your wins — earned achievements only */}
         <AchievementsCard progress={achievementProgress} variant="play" />
