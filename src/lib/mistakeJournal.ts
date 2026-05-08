@@ -88,6 +88,11 @@ const PARENT_LABELS: Record<string, string> = {
   lcm: 'Least common multiple',
   factor_pairs: 'Factor pairs',
   common_factors: 'Common factors',
+  function_evaluate_linear: 'Function evaluation',
+  function_evaluate_quadratic: 'Quadratic function evaluation',
+  function_evaluate_negative: 'Functions with negatives',
+  function_compose_simple: 'Function composition',
+  function_inverse_solve: 'Solve for function input',
 }
 
 export function parentLabelForType(type: string): string {

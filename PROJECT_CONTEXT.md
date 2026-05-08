@@ -255,6 +255,7 @@ Generators live in `src/lib/math/generators/`. The router is `generateProblems(l
 | 10/2 | linear equations (variables on both sides) | single integer | exact integer match |
 | 11/1 | one-variable inequalities (4 types) | `x > 4`, `x < 7`, `x <= 5`, `x >= 12` | inequality normalization |
 | 11/2 | simultaneous equations (3 shapes: x+y/x-y, 2x+y/x-y, x+2y/x+y) | `x = 3, y = 7` | sim-eq pair path (regex by name, normalizes spaces/case) |
+| 12/1 | functions (5 types: evaluate linear/quadratic/negative, compose simple, inverse-solve) | signed integer string: `"11"`, `"-8"`, `"3"` | signed integer path (`/^-?\d+$/`) |
 | others | not implemented | — | returns [] → "Coming Soon" |
 
 ### Generator architecture (Milestone 26)
@@ -279,7 +280,7 @@ All generators use **bounded algorithmic random generation** — no more fixed 1
 
 ### Lesson cards
 
-`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. All 22 currently supported levels have lesson cards: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 9/2, 10/1, 10/2, 11/1, 11/2.
+`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. All 23 currently supported levels have lesson cards: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 9/2, 10/1, 10/2, 11/1, 11/2, 12/1.
 
 ---
 
@@ -288,7 +289,7 @@ All generators use **bounded algorithmic random generation** — no more fixed 1
 Worksheets can include a small set of review problems from previously mastered levels to improve long-term retention.
 
 **Logic lives in `src/app/worksheet/page.tsx`:**
-- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support: `[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2],[6,1],[6,2],[7,1],[7,2],[8,1],[8,2],[9,1],[9,2],[10,1],[10,2],[11,1],[11,2]`
+- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support: `[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2],[6,1],[6,2],[7,1],[7,2],[8,1],[8,2],[9,1],[9,2],[10,1],[10,2],[11,1],[11,2],[12,1]`
 - `REVIEW_PROBLEM_COUNT = 4` — number of review problems in a mixed worksheet
 - For a 20-problem worksheet: 16 current-level + 4 review, shuffled to interleave
 - Review eligibility: `student_level_progress` row must exist with `consecutive_passes > 0 OR last_result_passed = true`. This filters out placement-jumped levels.

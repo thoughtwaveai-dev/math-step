@@ -15,6 +15,13 @@ export function inputModeForType(type: AnyProblemType): InputMode {
   if (type === 'prime_factorization' || type === 'list_factors' || type === 'factor_pairs' || type === 'common_factors') return 'text'
   if (type === 'expr_combine_like' || type === 'expr_multi_terms' || type === 'expr_with_constant') return 'text'
   if (type === 'sim_eq') return 'text'
+  if (type === 'function_evaluate_negative') return 'text'
+  if (
+    type === 'function_evaluate_linear' ||
+    type === 'function_evaluate_quadratic' ||
+    type === 'function_compose_simple' ||
+    type === 'function_inverse_solve'
+  ) return 'numeric'
   return 'numeric'
 }
 
@@ -59,5 +66,10 @@ export function problemTypeLabel(type: AnyProblemType): string {
     case 'linear_equation': return 'Linear Equation'
     case 'inequality': return 'Inequality'
     case 'sim_eq': return 'Simultaneous Equations'
+    case 'function_evaluate_linear': return 'Function evaluation'
+    case 'function_evaluate_quadratic': return 'Quadratic function evaluation'
+    case 'function_evaluate_negative': return 'Functions with negatives'
+    case 'function_compose_simple': return 'Function composition'
+    case 'function_inverse_solve': return 'Solve for function input'
   }
 }

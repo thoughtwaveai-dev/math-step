@@ -327,6 +327,21 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Give your answer with x first, then y — like this: x = 6, y = 4. To check, put both numbers back into both original equations. If both equations balance, your answer is correct!',
   },
+  '12/1': {
+    title: 'Functions',
+    explanation: 'A function is a rule that takes a number in and gives a number out. We write the rule as f(x) — read "f of x". The letter inside the brackets is the input, and the rule on the right tells you what to do with it. To evaluate a function, replace x with the value you are given and work out the answer. Function composition like f(g(x)) means: do g first, then put the result into f. To find the input that gives a certain output, set the rule equal to that output and solve for x.',
+    example: {
+      problem: 'f(x) = 2x + 3. Find f(4).',
+      steps: [
+        'Substitute x = 4 into the rule',
+        'f(4) = 2 × 4 + 3',
+        '= 8 + 3',
+        '= 11',
+      ],
+      answer: '11',
+    },
+    tip: 'Always replace every x with the input number — even when the input is negative, like f(-2). For composition f(g(c)), do the inside first: work out g(c), then put that result into f.',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

@@ -6,8 +6,58 @@
 
 ## Current Status
 
-**Phase:** Milestone 58 — Practice History v1. ✓ New `practice_sessions` table (separate from `sessions`/`problems`) records every targeted-practice run from `/practice/weak-spots`. ✓ Server action `recordPracticeSession` persists `student_id, level_id, problem_type, total_problems, correct_count, accuracy, completed_at` after client-side grading; failure is fire-and-forget. ✓ Dashboard adds a "Practice history" card directly below "Needs Practice" — empty-state copy, "this week" count using the same Mon-start NZ math as `HabitCard`, list of latest 5 entries with skill label, NZ date/time, and `N/M (X%)` score. ✓ Hard scope upheld: zero new rows in `sessions`/`problems`/`streaks`/`student_level_progress`, streaks/points/achievements/Daily Habit/Recent Worksheets all unchanged after a practice run.
+**Phase:** Milestone 59 — Level 12/1 Functions. ✓ New algorithmic generator `src/lib/math/generators/functions.ts` covers 5 sub-skills: function evaluation (linear, quadratic, with negatives), simple composition, and inverse-solve. ✓ Routing, supported-level keys, lesson card, mistake-journal labels, and worksheet input-mode helper all wired. ✓ All answers are plain signed integers — no `gradeAnswer.ts` change required. ✓ `function_evaluate_negative` uses `inputMode="text"` (matches `neg_*` precedent and the stylus-bug rule); the four always-positive types use `numeric`. ✓ Levels row for 12/1 was already seeded — no schema change.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 59 — Level 12/1 Functions (2026-05-09)
+
+**Goal:** Add curriculum coverage for Level 12/1 — Functions. Pure algorithmic generation, integrated with the existing worksheet, grading, lesson, mistake-journal, and targeted-practice flows. No regression to any prior level.
+
+**Problem types (5):**
+- `function_evaluate_linear` — *e.g.* `f(x) = 2x + 3. Find f(4).` → `11`
+- `function_evaluate_quadratic` — *e.g.* `f(x) = x² + 1. Find f(3).` → `10`
+- `function_evaluate_negative` — *e.g.* `f(x) = -3x + 5. Find f(-2).` → `11`
+- `function_compose_simple` — *e.g.* `f(x) = x + 2 and g(x) = 3x. Find f(g(2)).` → `8`
+- `function_inverse_solve` — *e.g.* `f(x) = 2x + 1. What value of x gives f(x) = 7?` → `3`
+
+Distribution for `count = 20` is fixed at 5/4/4/4/3 (linear/quadratic/negative/compose/inverse) via a deterministic plan; rounding is corrected so the plan length matches `count` exactly.
+
+**Files added:**
+- `src/lib/math/generators/functions.ts` — `generateFunctionsProblems(count, rand?)`, 5 internal `makeXxx(rand)` makers, prompt dedup with 50× per-slot retry. Helpers `formatCoeffTerm` / `formatConst` keep the prompt strings clean for both positive and negative coefficients (e.g. `2x + 3`, `-3x + 5`, `2x - 7`).
+
+**Files modified:**
+- `src/lib/math/generators/index.ts` — import, type re-export, `AnyProblemType` union, and `12/1` routing branch.
+- `src/lib/levelKeys.ts` — appended `[12, 1]` to `SUPPORTED_LEVEL_KEYS`.
+- `src/lib/math/inputMode.ts` — `function_evaluate_negative` → `'text'`, the other four → `'numeric'`; `problemTypeLabel` cases for all five with parent-friendly labels.
+- `src/lib/mistakeJournal.ts` — `PARENT_LABELS` mapping for all five problem types.
+- `src/lib/lessons/index.ts` — `'12/1'` lesson card: title `"Functions"`, explanation covering `f(x)` notation + evaluation + composition + inverse, worked example `f(x) = 2x + 3, find f(4)`, substitution tip.
+
+**Files NOT modified (verified scope):**
+- `src/lib/math/gradeAnswer.ts` — all answers are signed integers; existing `^-?\d+$` path handles them.
+- `src/app/worksheet/page.tsx`, `src/app/worksheet/WorksheetForm.tsx`, `src/app/practice/weak-spots/page.tsx` — drive off the helpers above.
+- `src/lib/math/warmup.ts` — X.1 levels correctly have no warm-up.
+- `src/lib/math/placement.ts` — placement ceiling stays at 9/1; 12/1 is reachable only via progression.
+- `supabase/schema.sql` — no change. Live `levels` row for 12/1 was already present.
+
+**Levels row (already in DB, no DDL run):** `id=23, level_number=12, sublevel_number=1, topic='Functions', description='Function notation basics', speed_target_seconds=660, accuracy_threshold=90, problems_per_session=20, consecutive_passes_required=3`.
+
+### Suite 59 — Level 12/1 Functions (2026-05-09)
+| Test | Result |
+|------|--------|
+| TypeScript: `tsc --noEmit` clean | PASS |
+| ESLint: clean on touched files (pre-existing errors elsewhere unchanged) | PASS |
+| Generator unit (seeded): 20 problems, distribution 5/4/4/4/3, zero duplicates | PASS |
+| Generator correctness: every produced answer matches the prompt's algebra (manual + script verification) | PASS |
+| Browser: 12/1 worksheet renders 20 problems with heading "Functions Worksheet" | PASS |
+| Browser: lesson card renders with worked example | PASS |
+| Browser: parent labels above each problem ("Function evaluation", "Quadratic function evaluation", "Functions with negatives", "Function composition", "Solve for function input") | PASS |
+| Browser: `function_evaluate_negative` rows have `inputMode="text"`; other four have `inputMode="numeric"` | PASS |
+| Browser: 20/20 correct (incl. 4 negative answers `-8, -13, -5, -19`) → 100%, ✓ Passed, 36s, mastery 1/3 | PASS |
+| Browser: "Beat the Time Target" + "Perfect Score" + "First Worksheet" milestones unlock | PASS |
+| Browser: regression — 11/2 worksheet still renders 20 simultaneous-equation problems with no errors | PASS |
+| Browser: SetLevelForm dropdown already includes "Level 12.1 — Functions: Function notation basics" (24 options) | PASS |
 
 ---
 
