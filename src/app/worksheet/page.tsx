@@ -253,6 +253,7 @@ export default async function WorksheetPage({
     problem_text: p.prompt,
     correct_answer: p.answer,
     order_index: i,
+    problem_type: p.type,
   }))
 
   const { data: insertedProblems, error: problemsError } = await supabase

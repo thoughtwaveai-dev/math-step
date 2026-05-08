@@ -5,6 +5,8 @@ export interface WeakArea {
   levelNumber: number
   sublevelNumber: number
   topic: string
+  problemType: string | null
+  label: string
   totalAttempted: number
   incorrectCount: number
   accuracy: number
@@ -18,6 +20,7 @@ export interface MistakeJournalProblem {
   correct_answer: string
   session_id: string
   order_index: number | null
+  problem_type: string | null
 }
 
 export interface MistakeJournalSession {
@@ -43,6 +46,59 @@ export interface DeriveWeakAreasInput {
   minAccuracyExclusion?: number
 }
 
+const LEGACY_TYPE_KEY = '__legacy__'
+
+const PARENT_LABELS: Record<string, string> = {
+  addition: 'Addition',
+  subtraction: 'Subtraction',
+  multiplication: 'Multiplication',
+  division: 'Division',
+  fraction_addition: 'Fraction addition',
+  fraction_subtraction: 'Fraction subtraction',
+  fraction_multiplication: 'Fraction multiplication',
+  fraction_division: 'Fraction division',
+  decimal_addition: 'Decimal addition',
+  decimal_subtraction: 'Decimal subtraction',
+  decimal_multiplication: 'Decimal multiplication',
+  percent_of_number: 'Percentages',
+  percent_to_decimal: 'Percentages',
+  decimal_to_percent: 'Percentages',
+  fraction_to_percent: 'Percentages',
+  neg_addition: 'Negative numbers',
+  neg_subtraction: 'Negative numbers',
+  neg_multiplication: 'Negative numbers',
+  neg_division: 'Negative numbers',
+  order_add_mul: 'Order of operations',
+  order_sub_mul: 'Order of operations',
+  order_div_add: 'Order of operations',
+  order_paren: 'Order of operations',
+  expr_combine_like: 'Simplifying expressions',
+  expr_multi_terms: 'Simplifying expressions',
+  expr_with_constant: 'Simplifying expressions',
+  eq_add: 'One-step equations',
+  eq_sub: 'One-step equations',
+  eq_mul: 'One-step equations',
+  eq_div: 'One-step equations',
+  linear_equation: 'Linear equations',
+  inequality: 'Inequalities',
+  sim_eq: 'Simultaneous equations',
+  prime_factorization: 'Prime factorization',
+  list_factors: 'Listing factors',
+  gcf: 'Greatest common factor',
+  lcm: 'Least common multiple',
+  factor_pairs: 'Factor pairs',
+  common_factors: 'Common factors',
+}
+
+export function parentLabelForType(type: string): string {
+  if (PARENT_LABELS[type]) return PARENT_LABELS[type]
+  // Fallback: title-case the first word of a snake_case string so we never
+  // expose raw identifiers if a future type is added without a label mapping.
+  const spaced = type.replace(/_/g, ' ').trim()
+  if (!spaced) return type
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1)
+}
+
 export function deriveWeakAreas(input: DeriveWeakAreasInput): WeakArea[] {
   const minAttempts = input.minAttempts ?? 4
   const maxResults = input.maxResults ?? 3
@@ -55,20 +111,24 @@ export function deriveWeakAreas(input: DeriveWeakAreasInput): WeakArea[] {
   const levelMap = new Map<number, MistakeJournalLevel>()
   for (const l of input.levels) levelMap.set(l.id, l)
 
-  // Bucket attempts by level_id
+  // Bucket attempts by (level_id, problem_type). Old rows with null
+  // problem_type fall into the legacy bucket per level.
   type Bucket = {
     levelId: number
+    typeKey: string
     total: number
     incorrect: number
     misses: { prompt: string; correctAnswer: string; completedAt: string | null; orderIndex: number }[]
   }
-  const buckets = new Map<number, Bucket>()
+  const buckets = new Map<string, Bucket>()
 
   for (const p of input.problems) {
     const session = sessionMap.get(p.session_id)
     if (!session) continue
     const levelId = session.level_id
-    const bucket = buckets.get(levelId) ?? { levelId, total: 0, incorrect: 0, misses: [] }
+    const typeKey = p.problem_type ?? LEGACY_TYPE_KEY
+    const key = `${levelId}::${typeKey}`
+    const bucket = buckets.get(key) ?? { levelId, typeKey, total: 0, incorrect: 0, misses: [] }
     bucket.total += 1
     if (p.is_correct === false) {
       bucket.incorrect += 1
@@ -79,7 +139,7 @@ export function deriveWeakAreas(input: DeriveWeakAreasInput): WeakArea[] {
         orderIndex: p.order_index ?? 0,
       })
     }
-    buckets.set(levelId, bucket)
+    buckets.set(key, bucket)
   }
 
   const candidates: WeakArea[] = []
@@ -102,11 +162,18 @@ export function deriveWeakAreas(input: DeriveWeakAreasInput): WeakArea[] {
 
     const signal: WeakAreaSignal = accuracy <= 50 ? 'high' : accuracy <= 70 ? 'medium' : 'low'
 
+    const problemType = bucket.typeKey === LEGACY_TYPE_KEY ? null : bucket.typeKey
+    const label = problemType
+      ? parentLabelForType(problemType)
+      : `Level ${level.level_number}.${level.sublevel_number} — ${level.topic}`
+
     candidates.push({
       levelId: bucket.levelId,
       levelNumber: level.level_number,
       sublevelNumber: level.sublevel_number,
       topic: level.topic,
+      problemType,
+      label,
       totalAttempted: bucket.total,
       incorrectCount: bucket.incorrect,
       accuracy,

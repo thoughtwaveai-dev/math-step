@@ -18,6 +18,11 @@ create table if not exists streaks (
   created_at timestamptz default now() not null
 );
 
+-- Problems table is created elsewhere (manual via SQL editor). Recent column:
+-- alter table problems add column if not exists problem_type text;
+--   nullable; stores generator type (e.g. factor_pairs, fraction_addition).
+--   Old rows remain NULL and feed the level/topic fallback in Mistake Journal.
+
 -- RLS
 alter table students enable row level security;
 alter table streaks enable row level security;

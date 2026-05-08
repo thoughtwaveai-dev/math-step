@@ -16,7 +16,7 @@ function parseLevelParam(value: string | undefined, fallback: number): number {
 export default async function WeakSpotsPracticePage({
   searchParams,
 }: {
-  searchParams: Promise<{ student?: string; level?: string; sublevel?: string }>
+  searchParams: Promise<{ student?: string; level?: string; sublevel?: string; type?: string }>
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -85,7 +85,29 @@ export default async function WeakSpotsPracticePage({
     )
   }
 
-  const generated = generateProblems(levelNumber, sublevelNumber, PRACTICE_PROBLEM_COUNT)
+  const requestedType = sp.type?.trim() || null
+
+  // When a specific problem_type is requested, over-generate and filter so we
+  // can deliver mostly/exactly that type without modifying generators. If the
+  // filtered batch is short, top up with the unfiltered remainder so practice
+  // never fails because exact-type generation came up short.
+  const baseBatchSize = requestedType
+    ? PRACTICE_PROBLEM_COUNT * 4
+    : PRACTICE_PROBLEM_COUNT
+  const batch = generateProblems(levelNumber, sublevelNumber, baseBatchSize)
+
+  // generateProblems returns a union of typed arrays (one variant per level),
+  // so spreading via filter loses that narrowing. Cast back through the
+  // top-up spread — runtime values are always the same shape.
+  type GeneratedProblems = typeof batch
+  let generated: GeneratedProblems
+  if (requestedType) {
+    const matching = batch.filter(p => p.type === requestedType)
+    const remainder = batch.filter(p => p.type !== requestedType)
+    generated = ([...matching, ...remainder] as GeneratedProblems).slice(0, PRACTICE_PROBLEM_COUNT) as GeneratedProblems
+  } else {
+    generated = batch.slice(0, PRACTICE_PROBLEM_COUNT) as GeneratedProblems
+  }
 
   if (generated.length === 0) {
     return (

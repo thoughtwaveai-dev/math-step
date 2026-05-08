@@ -144,7 +144,7 @@ export default async function PlayPage({
   if (recentSessionIds.length > 0) {
     const { data: recentProblems } = await supabase
       .from('problems')
-      .select('problem_text, correct_answer, is_correct, session_id, order_index')
+      .select('problem_text, correct_answer, is_correct, session_id, order_index, problem_type')
       .in('session_id', recentSessionIds)
     if (recentProblems && recentProblems.length > 0) {
       const weakAreas = deriveWeakAreas({

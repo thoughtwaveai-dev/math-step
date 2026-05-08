@@ -7,16 +7,27 @@ interface Props {
 }
 
 export default function TargetedPracticeCTA({ weakArea, studentId }: Props) {
+  const params = new URLSearchParams({
+    student: studentId,
+    level: String(weakArea.levelNumber),
+    sublevel: String(weakArea.sublevelNumber),
+  })
+  if (weakArea.problemType) params.set('type', weakArea.problemType)
+  const href = `/practice/weak-spots?${params.toString()}`
+
+  const headline = weakArea.problemType
+    ? `${weakArea.label} could use a little practice`
+    : 'Want to practise tricky questions?'
+  const body = weakArea.problemType
+    ? `Try 10 quick problems — it's totally optional and won't change your level.`
+    : `Try 10 quick problems from ${weakArea.topic} — it's totally optional and won't change your level.`
+
   return (
     <div className="rounded-xl border border-[#bae0bd] bg-[#f2faf3] px-5 py-4 space-y-2">
-      <p className="text-sm font-semibold text-[#1a2e1c]">Want to practise tricky questions?</p>
-      <p className="text-xs text-[#4a6b4e]">
-        Try 10 quick problems from{' '}
-        <span className="font-medium text-[#1a2e1c]">{weakArea.topic}</span>{' '}
-        — it&apos;s totally optional and won&apos;t change your level.
-      </p>
+      <p className="text-sm font-semibold text-[#1a2e1c]">{headline}</p>
+      <p className="text-xs text-[#4a6b4e]">{body}</p>
       <Link
-        href={`/practice/weak-spots?student=${studentId}&level=${weakArea.levelNumber}&sublevel=${weakArea.sublevelNumber}`}
+        href={href}
         className="inline-block rounded-lg border border-[#bae0bd] bg-white px-4 py-2 text-sm font-semibold text-[#2d6a35] hover:bg-[#e1f4e3] transition-colors"
       >
         Try practice questions →

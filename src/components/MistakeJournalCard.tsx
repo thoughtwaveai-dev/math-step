@@ -13,6 +13,16 @@ function signalLabel(area: WeakArea): string {
   return 'A bit of polish would help'
 }
 
+function practiceHref(area: WeakArea, studentId: string): string {
+  const params = new URLSearchParams({
+    student: studentId,
+    level: String(area.levelNumber),
+    sublevel: String(area.sublevelNumber),
+  })
+  if (area.problemType) params.set('type', area.problemType)
+  return `/practice/weak-spots?${params.toString()}`
+}
+
 export default function MistakeJournalCard({ weakAreas, studentId, studentName }: Props) {
   return (
     <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
@@ -29,13 +39,13 @@ export default function MistakeJournalCard({ weakAreas, studentId, studentName }
         <ul className="space-y-3">
           {weakAreas.map((area) => (
             <li
-              key={area.levelId}
+              key={`${area.levelId}-${area.problemType ?? 'legacy'}`}
               className="rounded-lg border border-[#e8f5e9] bg-[#f7faf7] p-4"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-[#1a2e1c]">
-                    Level {area.levelNumber}.{area.sublevelNumber} — {area.topic}
+                    {area.label}
                   </p>
                   <p className="mt-0.5 text-xs text-[#4a6b4e] tabular-nums">
                     {signalLabel(area)} · missed {area.incorrectCount} of {area.totalAttempted} ({area.accuracy}% accuracy)
@@ -53,7 +63,7 @@ export default function MistakeJournalCard({ weakAreas, studentId, studentName }
                   )}
                 </div>
                 <Link
-                  href={`/practice/weak-spots?student=${studentId}&level=${area.levelNumber}&sublevel=${area.sublevelNumber}`}
+                  href={practiceHref(area, studentId)}
                   className="shrink-0 rounded-lg border border-[#bae0bd] bg-white px-3 py-1.5 text-xs font-semibold text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
                 >
                   Practise

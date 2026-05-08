@@ -140,6 +140,7 @@ RLS: parents can only insert/select rows where `parent_id = auth.uid()`.
 | is_correct | bool | nullable, set on submission |
 | self_corrected | bool | nullable, set when student corrects a wrong answer post-results |
 | order_index | int | display order within session |
+| problem_type | text | nullable; generator type (e.g. `factor_pairs`, `fraction_addition`). Old rows pre-Milestone 54 are NULL and fall back to level/topic grouping. |
 
 ### `levels`
 | Column | Type | Notes |
@@ -341,12 +342,12 @@ Surfaces top weak areas for the selected student and offers an optional, side-ef
 
 - **Derivation:** `src/lib/mistakeJournal.ts → deriveWeakAreas()`. Pure function — takes the recent-window problems, the matching session rows (for `level_id` and `completed_at`), and a level lookup. No Supabase dependency.
 - **Window:** last 20 completed sessions for the student. The dashboard reuses its bounded `sessions` fetch (no extra session query); a single new `problems.select(...).in('session_id', [...])` is added. `recentSessionIds` is checked before the `.in(...)` call to avoid `.in([])`.
-- **Grouping:** by `sessions.level_id → levels.{level_number, sublevel_number, topic}`. Generators emit a per-problem `type` but it is **not persisted** in `problems` — v1 stays at level/topic precision. Option B (add `problems.problem_type text`) is the natural upgrade.
+- **Grouping:** by `(sessions.level_id, problems.problem_type)`. New rows store the generator's `type`; old rows (pre-Milestone 54) have `problem_type IS NULL` and fall back to a per-level legacy bucket grouped only by `levels.{level_number, sublevel_number, topic}`. Parent-friendly labels (e.g. `factor_pairs` → `Factor pairs`) live in `parentLabelForType()` inside `mistakeJournal.ts`; legacy buckets render as `Level X.Y — Topic`.
 - **Filters:** skip groups with `< 4` attempts or `≥ 80%` accuracy. Sort by `incorrectCount desc, accuracy asc`. Top 3 returned.
 - **Recent examples:** sorted by `session.completed_at desc` then `problems.order_index asc` — never by UUID `problems.id`.
 - **Dashboard UI:** `MistakeJournalCard` between Milestones and Recent Worksheets. Empty state copy: *"No clear weak spots yet — keep practising."*
 - **Play UI:** `TargetedPracticeCTA` shown only when at least one weak area exists, and suppressed when the top weak area equals the current stuck level (avoids stacking with the existing stuck-support card).
-- **Practice route:** `/practice/weak-spots?student=…&level=…&sublevel=…`. Server component validates the level via `SUPPORTED_LEVEL_KEYS`, generates 10 problems with `generateProblems()`, hands them to a client component. Client-side grading via the shared `gradeAnswer` from `src/lib/math/gradeAnswer.ts`.
+- **Practice route:** `/practice/weak-spots?student=…&level=…&sublevel=…[&type=…]`. Server component validates the level via `SUPPORTED_LEVEL_KEYS`. When `type` is present it over-generates 4× via `generateProblems()`, filters by matching `type`, then takes the first 10; if fewer than 10 match, it tops up with the unfiltered remainder so practice never fails because exact-type generation came up short. Without `type`, generates 10 directly. Client-side grading via the shared `gradeAnswer` from `src/lib/math/gradeAnswer.ts`.
 - **No persistence, by design.** No `INSERT` to `sessions` / `problems`, no `UPDATE` to `streaks` / `student_level_progress` / `students`. Recent Worksheets count and achievement progress are untouched by a practice run.
 - **Shared input-mode helper:** `src/lib/math/inputMode.ts` — `inputModeForType()` + `problemTypeLabel()`. Used by both `WorksheetForm` and `PracticeForm` so the per-problem-type input mode (text for algebra/factorization/inequality/sim-eq/fractions/negatives, numeric/decimal for purely numeric types) cannot silently regress between the two surfaces. This is what protects against the historical stylus *"x → ."* bug.
 

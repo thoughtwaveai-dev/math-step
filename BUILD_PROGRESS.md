@@ -6,8 +6,50 @@
 
 ## Current Status
 
-**Phase:** Milestone 53 — Mistake Journal / Targeted Practice v1. ✓ Parent dashboard "Needs Practice" card surfaces top 3 weak areas (level/topic grouping, last-20-sessions window). ✓ Soft `/play` CTA invites the student to optional practice. ✓ `/practice/weak-spots` runs 10 generated problems with client-side grading and zero side effects on streaks/points/sessions/mastery. No schema changes.
+**Phase:** Milestone 54 — Mistake Journal / Targeted Practice precision. ✓ `problems.problem_type` (nullable text) added; new worksheet inserts persist the generator's `type`. ✓ Mistake Journal groups by `(level_id, problem_type)` with parent-friendly labels (e.g. *Factor pairs*, *Fraction addition*); old NULL rows fall back to the legacy *Level X.Y — Topic* bucket. ✓ `/practice/weak-spots?type=…` over-generates 4× and filters to the requested type, topping up if short. Side-effect-free guarantee preserved.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 54 — Mistake Journal / Targeted Practice Precision (2026-05-09)
+
+**Goal:** Upgrade Milestone 53 from level/topic precision to per-problem-type precision so the dashboard can say *"Factor pairs could use a little practice"* instead of only *"Level 9.2 — Factorization"*. Old data must keep working via a fallback path.
+
+**Schema change (manual, Supabase SQL editor):**
+```sql
+alter table problems add column if not exists problem_type text;
+```
+Nullable, no default, no index, no backfill. Old rows stay `NULL` and feed the legacy bucket; new rows store the generator's `type`.
+
+**Files modified:**
+- `src/app/worksheet/page.tsx` — `problemRows` insert now includes `problem_type: p.type`. No grading or interleaving change.
+- `src/lib/mistakeJournal.ts` — `MistakeJournalProblem.problem_type: string | null`; bucket key is `${levelId}::${problem_type ?? '__legacy__'}`; `WeakArea` gains `problemType: string | null` and `label: string`; new `parentLabelForType()` helper with calm, parent-friendly mappings (factor_pairs → "Factor pairs", fraction_addition → "Fraction addition", sim_eq → "Simultaneous equations", etc.). Unknown future types fall back to a title-cased snake-split so we never expose raw identifiers.
+- `src/app/dashboard/page.tsx`, `src/app/play/page.tsx` — `problems.select(...)` extended with `problem_type`; passed straight through to `deriveWeakAreas`.
+- `src/components/MistakeJournalCard.tsx` — renders `area.label` (precise type label or legacy *Level X.Y — Topic*); practice link includes `&type=` when present.
+- `src/components/TargetedPracticeCTA.tsx` — when a precise type is known, headline becomes *"{Label} could use a little practice"* and the link includes `&type=`. When `problemType` is null (legacy bucket) the original wording is preserved.
+- `src/app/practice/weak-spots/page.tsx` — accepts optional `?type=`. With a type, calls `generateProblems(level, sublevel, 40)`, filters by matching `type`, takes the first 10; backfills from the unfiltered remainder if the filtered batch is short, so practice never fails because exact-type generation came up empty. Without `type`, behaviour is unchanged.
+- `supabase/schema.sql` — comment annotating the new column.
+
+**Files unchanged (intentionally):**
+- All generators — they already emitted `type`; no shape change.
+- `src/app/actions/worksheet.ts` — no grading change.
+- `src/lib/math/inputMode.ts` — `inputModeForType()` is keyed off `type`, which is what we now persist; the historical stylus *"x → ."* bug protection carries over to the practice page automatically.
+- `src/app/practice/weak-spots/PracticeForm.tsx` — server narrowing handled upstream.
+
+**Grouping strategy:**
+- New rows: bucket per `(level_id, problem_type)`. Avoids conflating e.g. 1/1 `addition` with 1/2 `addition` (single-digit vs double-digit).
+- Old rows (`problem_type IS NULL`): bucket per `level_id` only (legacy path), labelled *Level X.Y — Topic*.
+- Same thresholds as Milestone 53: skip < 4 attempts, skip ≥ 80% accuracy, sort by `incorrectCount desc, accuracy asc`, top 3.
+
+**Targeted-practice matching:**
+- `requestedType` present → over-generate 4× then filter then top up. Cheap thanks to the bounded random generators (`count × 50` retry budget per Milestone 26). For type-uniform levels (1/1, 2/1, 3/1, 4/1, 4/2) the filter is a no-op. For multi-type levels (5/x, 6/x, 7/x, 8/x, 9/x, 11/1) we get mostly/exactly the requested type.
+- Side-effect-free guarantee preserved: no `INSERT` to `sessions`/`problems`, no `UPDATE` to `streaks`/`student_level_progress`/`students`.
+
+**v1 limitations (documented for future revisit):**
+- Old rows pre-Milestone-54 stay at level/topic precision (no backfill).
+- Buckets are split by `(level_id, problem_type)` — the same `type` across two levels (e.g. 1/1 `addition` and 1/2 `addition`) does not aggregate into one weak area. This is deliberate to preserve difficulty separation.
+- No DB index on `problem_type`. Mistake Journal queries are bounded (≤ 20 sessions × ~20 problems) and group in JS. Add an index later if the dataset grows.
+- Examples on the dashboard still show only the prompt, not the wrong/correct answers.
 
 ---
 
