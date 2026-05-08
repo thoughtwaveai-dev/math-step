@@ -6,8 +6,58 @@
 
 ## Current Status
 
-**Phase:** Milestone 51 — Achievements / Milestones v1. ✓ Eight derived achievements rendered on dashboard (full grid) and play (earned-only with empty state), session-specific milestones strip on results page, recent worksheets now show date + time. No new tables.
+**Phase:** Milestone 52 — Tiered achievements + dashboard polish + scrollable Recent Worksheets. ✓ 7 family rows with progress to next tier on dashboard, earned highest-tier badges on play, polished metrics + trend (with level-specific accuracy threshold line), Recent Worksheets capped in a max-h scrollable panel. No schema changes.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 52 — Tiered Achievements, Dashboard Polish, Scrollable Recent Worksheets (2026-05-08)
+
+**Goal:** Replace the fixed 8-milestone v1 with tiered families that always show "what's next?", polish the parent dashboard metrics + trend, and stop Recent Worksheets pushing the page down indefinitely.
+
+**Tier structure (7 families, derived from existing rows — no schema changes):**
+
+| Family | Source | Tiers |
+|---|---|---|
+| 📘 Worksheets completed | `streaks.total_sessions` | 1, 5, 10, 25, 50, 100 |
+| 💯 Perfect scores | count of `sessions.accuracy = 100` | 1, 5, 10, 25 |
+| 🔥 Best streak | `streaks.longest_streak` | 3, 5, 7, 14, 30 |
+| 🚀 Levels mastered | distinct passed `level_id` from `sessions` | 1, 3, 5, 10 |
+| ⭐ Points earned | `streaks.total_points` | 100, 500, 1000, 2500 |
+| ✏️ Self-correction wins | `problems.self_corrected = true` (joined to student via `sessions!inner(student_id)`) | 1, 5, 10 |
+| ⚡ Speedy passes | `passed AND time_taken_seconds <= levels.speed_target_seconds` | 1, 5, 10 |
+
+Each row shows highest tier earned + a progress bar to the next tier; "All tiers earned 🏆" once maxed. Play page shows earned highest-tier badges only as a strip ("Your wins").
+
+**Files added:** none.
+
+**Files modified:**
+- `src/lib/achievements.ts` — replaced v1 `ACHIEVEMENTS` / `deriveEarnedAchievements` with `ACHIEVEMENT_FAMILIES`, `deriveAchievementProgress()`, `earnedTierBadges()`. Extended `detectSessionMilestones` thresholds to fire on 1/5/10/25/50/100 worksheet hits.
+- `src/components/AchievementsCard.tsx` — rewritten. Dashboard variant renders 7 family rows with tier-earned badge + progress bar. Play variant renders earned highest-tier badges as a soft pill strip; same empty-state copy.
+- `src/app/dashboard/page.tsx` — consolidated data path (one bounded full-history `sessions` fetch with `.limit(500)` + one self-correction count via `sessions!inner` join). Dropped `perfectMarker` / `masteryMarker`. Reordered sections to **Progress at a Glance → Milestones → Recent Worksheets** (Milestones grew, Recent now scrolls). Polished metrics labels (`Accuracy / Pass rate / Time / Sessions`, `tabular-nums`). Trend chart bumped 40px → 64px with a dashed level-`accuracy_threshold` line + "Last session N% · average N%" header. Recent Worksheets wrapped in `max-h-[26rem] overflow-y-auto` container with thin scrollbar styling, plus a subtle "Showing latest N worksheets — scroll to see more." helper line when the row count exceeds the visible threshold.
+- `src/app/play/page.tsx` — same data-path consolidation; mounts `AchievementsCard variant="play"` with the new `progress` prop.
+
+**Validation (Playwright + manual, against fresh signup `m52-fresh@test.local` → student "Riley"):**
+- Empty-state dashboard: 7 family rows all "not yet" with correct first tiers (`0 / 1`, `0 / 3 days`, `0 / 100`, etc.). Header shows "7 of 7 next tiers in progress". Empty-state copy renders. ✓
+- Empty-state play: "Finish a worksheet to earn your first badge — they show up right here." ✓
+- After 1 perfect 20/20 worksheet: dashboard shows Worksheets / Perfect / Levels mastered / Speedy passes at Tier 1 ✓ with `1 / next` progress; Best streak `1 / 3 days`; Points `15 / 100`; Self-correction `0 / 1` (no mistakes made). ✓
+- After 8 worksheets across levels 1.1 → 2.2: Worksheets `Tier 10 ✓ 10 / 25`, Perfect `Tier 10 ✓ 10 / 25`, Levels mastered `Tier 3 ✓ 4 / 5`, Points `Tier 100 ✓ 150 / 500`, Speedy passes `All tiers earned 🏆 10`. ✓
+- Recent Worksheets scrollable: `clientHeight=416px`, `scrollHeight=712px`, `scrollable=true`, helper line "Showing latest 10 worksheets — scroll to see more." renders. Rest of dashboard stays fixed while Recent scrolls. ✓
+- Play "Your wins": shows earned highest-tier badges (`📘 10 Worksheets · 💯 10 Perfect Scores · 🚀 3 Levels Mastered · ⭐ 100 Points · ⚡ 10 Speedy Passes`). ✓
+- Results page Milestones strip continues to fire: `📘 First Worksheet · 💯 Perfect Score · ⚡ Beat the Time Target` on the first 20/20 session. ✓
+- Level advancement (1.1 → 1.2 → 2.1 → 2.2) and Mastery progress banners untouched. ✓
+- Recent Worksheets timestamp: `8 May 2026, 5:50 pm NZT` — `formatNzDateTime` unchanged. ✓
+- Mobile (390 × 844): family rows + scrollable Recent panel render cleanly; trend bars + 90% target line legible. ✓
+- Tablet (768 × 1024): same. ✓
+- Console errors: 0 across signup → onboarding → play → worksheet → results → dashboard. Pre-existing `themeColor` viewport warning unchanged.
+- `npx tsc --noEmit`: 0 errors. `npx eslint`: 0 errors.
+
+**v1 limitations (documented for future revisit):**
+- Achievement counts derived per render — not persisted as individual unlock events; no per-tier earned date.
+- "Levels mastered" counts distinct `level_id`s with at least one passing session. A placement-jumped student who passes once at the new level still gets +1 (consistent with Milestone 51).
+- `sessions` fetch capped at the most recent 500 per dashboard render. A student with 500+ historical sessions would under-count Speedy / Levels-mastered tiers from the very first ones; Worksheets/Streak/Points come from `streaks` and are unaffected.
+- Recent Worksheets shows up to 25 entries, no pagination beyond that.
+- No celebration animation when a freshly-crossed tier hits on the dashboard. Results-page strip already fires for 1/5/10/25/50/100 worksheet hits and Perfect Score hits — that's the celebration surface.
 
 ---
 

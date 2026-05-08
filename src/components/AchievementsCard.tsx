@@ -1,67 +1,109 @@
-import { ACHIEVEMENTS, type AchievementId } from '@/lib/achievements'
+import { earnedTierBadges, type FamilyProgress } from '@/lib/achievements'
 
 interface Props {
-  earnedIds: Set<AchievementId>
+  progress: FamilyProgress[]
   variant: 'dashboard' | 'play'
   studentName?: string
 }
 
-export default function AchievementsCard({ earnedIds, variant, studentName }: Props) {
-  const earnedCount = earnedIds.size
-  const items = variant === 'play'
-    ? ACHIEVEMENTS.filter(a => earnedIds.has(a.id))
-    : ACHIEVEMENTS
-
-  if (variant === 'play' && earnedCount === 0) {
+export default function AchievementsCard({ progress, variant, studentName }: Props) {
+  if (variant === 'play') {
+    const badges = earnedTierBadges(progress)
+    if (badges.length === 0) {
+      return (
+        <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
+          <h2 className="text-base font-semibold text-[#1a2e1c] mb-2">Your wins</h2>
+          <p className="text-sm text-[#4a6b4e]">
+            Finish a worksheet to earn your first badge — they show up right here.
+          </p>
+        </div>
+      )
+    }
     return (
       <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
-        <h2 className="text-base font-semibold text-[#1a2e1c] mb-2">Your wins</h2>
-        <p className="text-sm text-[#4a6b4e]">
-          Finish a worksheet to earn your first badge — they show up right here.
-        </p>
+        <h2 className="text-base font-semibold text-[#1a2e1c] mb-3">Your wins</h2>
+        <ul className="flex flex-wrap gap-2">
+          {badges.map(b => (
+            <li
+              key={b.family.id}
+              className="inline-flex items-center gap-2 rounded-full border border-[#bae0bd] bg-[#f2faf3] px-3 py-1.5"
+            >
+              <span aria-hidden="true">{b.family.emoji}</span>
+              <span className="text-xs font-semibold text-[#1a2e1c]">
+                {b.family.formatTierBadge(b.tier)}
+              </span>
+            </li>
+          ))}
+        </ul>
       </div>
     )
   }
 
+  // Dashboard variant
+  const inProgressCount = progress.filter(p => !p.isMaxed).length
+  const earnedCount = progress.filter(p => p.earnedTier !== null).length
+  const allEmpty = earnedCount === 0
+
   return (
     <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
-      <div className="flex items-baseline justify-between mb-4">
-        <h2 className="text-base font-semibold text-[#1a2e1c]">
-          {variant === 'play' ? 'Your wins' : 'Milestones'}
-        </h2>
-        <span className="text-xs font-medium text-[#4a6b4e]">
-          {earnedCount}/{ACHIEVEMENTS.length} earned
+      <div className="flex items-baseline justify-between mb-4 gap-3">
+        <h2 className="text-base font-semibold text-[#1a2e1c]">Milestones</h2>
+        <span className="text-xs font-medium text-[#4a6b4e] tabular-nums">
+          {inProgressCount > 0
+            ? `${inProgressCount} of ${progress.length} next tiers in progress`
+            : 'All tiers earned 🏆'}
         </span>
       </div>
 
-      {variant === 'dashboard' && earnedCount === 0 && (
+      {allEmpty && (
         <p className="text-sm text-[#4a6b4e] mb-4">
-          {studentName ?? 'Your student'}{' '}hasn&apos;t earned any milestones yet — the first finished worksheet unlocks the first badge.
+          {studentName ?? 'Your student'} hasn&apos;t earned any milestones yet — the first finished worksheet unlocks the first badge.
         </p>
       )}
 
-      <ul className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
-        {items.map(a => {
-          const earned = earnedIds.has(a.id)
+      <ul className="space-y-3">
+        {progress.map(p => {
+          const target = p.nextTier ?? p.earnedTier ?? p.family.tiers[0]
+          const pct = p.isMaxed ? 100 : Math.min(100, Math.round((p.value / target) * 100))
+          const rightLabel = p.isMaxed
+            ? 'All tiers earned 🏆'
+            : p.earnedTier !== null
+              ? `Tier ${p.earnedTier} ✓`
+              : 'not yet'
+          const progressLabel = p.isMaxed
+            ? `${p.value.toLocaleString('en-NZ')}${p.family.unitSuffix ?? ''}`
+            : `${p.value.toLocaleString('en-NZ')} / ${target.toLocaleString('en-NZ')}${p.family.unitSuffix ?? ''}`
+
           return (
-            <li
-              key={a.id}
-              className={`flex flex-col items-center gap-1 rounded-lg border px-3 py-3 text-center ${
-                earned
-                  ? 'border-[#bae0bd] bg-[#f2faf3]'
-                  : 'border-[#e8f5e9] bg-[#f7faf7] opacity-55'
-              }`}
-              title={a.description}
-            >
-              <span className={`text-2xl leading-none ${earned ? '' : 'grayscale'}`} aria-hidden="true">
-                {a.emoji}
-              </span>
-              <span className={`text-xs font-semibold ${earned ? 'text-[#1a2e1c]' : 'text-[#4a6b4e]'}`}>
-                {a.title}
-              </span>
-              <span className="text-[10px] leading-tight text-[#4a6b4e]">
-                {a.description}
-              </span>
+            <li key={p.family.id} className="rounded-lg bg-[#f7faf7] px-4 py-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span aria-hidden="true" className="text-lg leading-none">{p.family.emoji}</span>
+                  <span className="text-sm font-semibold text-[#1a2e1c] truncate">
+                    {p.family.parentLabel}
+                  </span>
+                </div>
+                <span
+                  className={`shrink-0 text-xs font-semibold tabular-nums ${
+                    p.earnedTier !== null ? 'text-[#2d6a35]' : 'text-[#4a6b4e]'
+                  }`}
+                >
+                  {rightLabel}
+                </span>
+              </div>
+              <div className="mt-2 flex items-center gap-3">
+                <span className="text-xs font-medium text-[#4a6b4e] tabular-nums shrink-0 w-[5.5rem] sm:w-[6.5rem]">
+                  {progressLabel}
+                </span>
+                <div className="h-2 flex-1 rounded-full bg-[#e1f4e3] overflow-hidden">
+                  <div
+                    className={`h-full rounded-full ${
+                      p.isMaxed ? 'bg-[#2d6a35]' : p.earnedTier !== null ? 'bg-[#2d6a35]' : 'bg-[#4ade80]'
+                    }`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+              </div>
             </li>
           )
         })}

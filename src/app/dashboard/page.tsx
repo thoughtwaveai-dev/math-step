@@ -10,7 +10,11 @@ import StudentModeCard from './StudentModeCard'
 import AchievementsCard from '@/components/AchievementsCard'
 import { formatSpeed, formatNzDateTime } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
-import { deriveEarnedAchievements } from '@/lib/achievements'
+import { deriveAchievementProgress } from '@/lib/achievements'
+
+const SESSION_FETCH_LIMIT = 500
+const RECENT_VISIBLE_LIMIT = 25
+const SCROLL_HINT_THRESHOLD = 7
 
 export default async function DashboardPage({
   searchParams,
@@ -44,14 +48,13 @@ export default async function DashboardPage({
     .maybeSingle()
   const hasPin = Boolean(profile?.parent_pin)
 
-  // Parallel: these all depend only on student.id / student.current_level, not each other
+  // Parallel: streaks/levels lookups + bounded full-history sessions + self-correction count
   const [
     { data: streakRow },
     { data: level },
     { data: allLevels },
-    { data: recentSessions },
-    { data: perfectMarker },
-    { data: masteryMarker },
+    { data: allSessions },
+    { count: selfCorrectCount },
   ] = await Promise.all([
     supabase.from('streaks')
       .select('current_streak, longest_streak, total_sessions, total_points')
@@ -71,21 +74,11 @@ export default async function DashboardPage({
       .eq('student_id', student.id)
       .not('completed_at', 'is', null)
       .order('completed_at', { ascending: false })
-      .limit(10),
-    supabase.from('sessions')
-      .select('id')
-      .eq('student_id', student.id)
-      .eq('accuracy', 100)
-      .not('completed_at', 'is', null)
-      .limit(1)
-      .maybeSingle(),
-    supabase.from('sessions')
-      .select('id')
-      .eq('student_id', student.id)
-      .eq('passed', true)
-      .not('completed_at', 'is', null)
-      .limit(1)
-      .maybeSingle(),
+      .limit(SESSION_FETCH_LIMIT),
+    supabase.from('problems')
+      .select('id, sessions!inner(student_id)', { count: 'exact', head: true })
+      .eq('self_corrected', true)
+      .eq('sessions.student_id', student.id),
   ])
 
   const streak = streakRow?.current_streak ?? 0
@@ -93,24 +86,40 @@ export default async function DashboardPage({
   const totalSessions = streakRow?.total_sessions ?? 0
   const totalPoints = streakRow?.total_points ?? 0
   const levelMap = new Map(allLevels?.map(l => [l.id, l]) ?? [])
-
   const speedTargetMap = new Map<number, number | null>(
     (allLevels ?? []).map(l => [l.id, l.speed_target_seconds ?? null])
   )
-  const advancedPastStart = student.current_level > 1 || student.current_sublevel > 1
-  const hasGenuinePass = Boolean(masteryMarker)
-  const earnedAchievements = deriveEarnedAchievements({
+
+  const sessions = allSessions ?? []
+
+  // Derive achievement counts from sessions + counts.
+  const perfectCount = sessions.filter(s => Number(s.accuracy) === 100).length
+  const passedLevelIds = new Set<number>()
+  let speedyPassCount = 0
+  for (const s of sessions) {
+    if (s.passed) {
+      passedLevelIds.add(s.level_id)
+      const target = speedTargetMap.get(s.level_id)
+      if (target && s.time_taken_seconds !== null && s.time_taken_seconds <= target) {
+        speedyPassCount++
+      }
+    }
+  }
+  const levelsMasteredCount = passedLevelIds.size
+
+  const achievementProgress = deriveAchievementProgress({
     totalSessions,
     longestStreak,
-    hasPerfectSession: Boolean(perfectMarker),
-    hasMasteredLevel: advancedPastStart && hasGenuinePass,
-    recentSessions: (recentSessions ?? []).map(s => ({
-      passed: s.passed,
-      time_taken_seconds: s.time_taken_seconds ?? null,
-      level_id: s.level_id,
-    })),
-    levelSpeedTargets: speedTargetMap,
+    totalPoints,
+    perfectCount,
+    speedyPassCount,
+    selfCorrectCount: selfCorrectCount ?? 0,
+    levelsMasteredCount,
   })
+
+  // Recent Worksheets: first N, then trend uses first 10 of those.
+  const recentSessions = sessions.slice(0, RECENT_VISIBLE_LIMIT)
+  const sessions10 = sessions.slice(0, 10)
 
   // Parallel: stuck detection + level progress both need level.id
   const [
@@ -139,8 +148,7 @@ export default async function DashboardPage({
   const recentResults = (recentLevelSessions ?? []).map(s => s.passed ?? false)
   const isStuck = isStudentStuck(recentResults)
 
-  // Analytics — computed from the last 10 sessions (recentSessions, desc order)
-  const sessions10 = recentSessions ?? []
+  // Analytics — computed from the last 10 sessions (sessions10, desc order)
   const hasSessions = sessions10.length > 0
   const avgAccuracy = hasSessions
     ? Math.round(sessions10.reduce((sum, s) => sum + Number(s.accuracy), 0) / sessions10.length)
@@ -150,6 +158,8 @@ export default async function DashboardPage({
   const avgTimeSec = hasSessions
     ? Math.round(sessions10.reduce((sum, s) => sum + (s.time_taken_seconds ?? 0), 0) / sessions10.length)
     : null
+  const lastAccuracy = hasSessions ? Math.round(Number(sessions10[0].accuracy)) : null
+  const accuracyThreshold = level?.accuracy_threshold ?? null
 
   // Plain-English insight: compare newer half vs older half of accuracy
   let insight: string | null = null
@@ -165,6 +175,8 @@ export default async function DashboardPage({
     else if (passRate !== null && passRate <= 30) insight = `${student.name} is finding sessions challenging recently.`
     else insight = 'Accuracy has been steady recently.'
   }
+
+  const showScrollHint = recentSessions.length > SCROLL_HINT_THRESHOLD
 
   return (
     <div className="flex min-h-screen flex-col bg-[#f7faf7]">
@@ -239,19 +251,19 @@ export default async function DashboardPage({
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-xl border border-[#bae0bd] bg-white p-4 text-center">
             <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Level</p>
-            <p className="mt-1 text-3xl font-bold text-[#1a2e1c]">{student.current_level}</p>
+            <p className="mt-1 text-3xl font-bold text-[#1a2e1c] tabular-nums">{student.current_level}</p>
           </div>
           <div className="rounded-xl border border-[#bae0bd] bg-white p-4 text-center">
             <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Sublevel</p>
-            <p className="mt-1 text-3xl font-bold text-[#1a2e1c]">{student.current_sublevel}</p>
+            <p className="mt-1 text-3xl font-bold text-[#1a2e1c] tabular-nums">{student.current_sublevel}</p>
           </div>
           <div className="rounded-xl border border-[#bae0bd] bg-white p-4 text-center">
             <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Streak</p>
-            <p className="mt-1 text-3xl font-bold text-[#2d6a35]">{streak}</p>
+            <p className="mt-1 text-3xl font-bold text-[#2d6a35] tabular-nums">{streak}</p>
           </div>
           <div className="rounded-xl border border-[#bae0bd] bg-white p-4 text-center">
             <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Points</p>
-            <p className="mt-1 text-3xl font-bold text-[#2d6a35]">{totalPoints}</p>
+            <p className="mt-1 text-3xl font-bold text-[#2d6a35] tabular-nums">{totalPoints}</p>
           </div>
         </div>
 
@@ -327,53 +339,6 @@ export default async function DashboardPage({
           )}
         </div>
 
-        {/* Milestones */}
-        <AchievementsCard earnedIds={earnedAchievements} variant="dashboard" studentName={student.name} />
-
-        {/* Recent Worksheets */}
-        <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
-          <h2 className="text-base font-semibold text-[#1a2e1c] mb-4">Recent Worksheets</h2>
-
-          {recentSessions && recentSessions.length > 0 ? (
-            <div className="space-y-2">
-              {recentSessions.map((s) => {
-                const lvl = levelMap.get(s.level_id)
-                return (
-                  <Link
-                    key={s.id}
-                    href={`/worksheet/results/${s.id}`}
-                    className="flex items-center justify-between gap-3 rounded-lg border border-[#e8f5e9] bg-[#f7faf7] px-4 py-3 hover:bg-[#f2faf3] transition-colors"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-[#1a2e1c] truncate">
-                        {lvl ? `Level ${lvl.level_number}.${lvl.sublevel_number} — ${lvl.topic}` : `Level ID ${s.level_id}`}
-                      </p>
-                      <p className="text-xs text-[#4a6b4e] mt-0.5">
-                        {s.completed_at ? formatNzDateTime(s.completed_at) : '—'}
-                        {' · '}
-                        {s.correct_count}/{s.total_problems}
-                        {' · '}
-                        {Number(s.accuracy)}%
-                        {' · '}
-                        {formatSpeed(s.time_taken_seconds ?? 0)}
-                      </p>
-                    </div>
-                    <span
-                      className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                        s.passed ? 'bg-[#e1f4e3] text-[#2d6a35]' : 'bg-red-50 text-red-700'
-                      }`}
-                    >
-                      {s.passed ? '✓' : '✗'}
-                    </span>
-                  </Link>
-                )
-              })}
-            </div>
-          ) : (
-            <p className="text-sm text-[#4a6b4e]">No completed worksheets yet.</p>
-          )}
-        </div>
-
         {/* Progress at a Glance */}
         <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
           <h2 className="text-base font-semibold text-[#1a2e1c] mb-4">Progress at a Glance</h2>
@@ -383,42 +348,72 @@ export default async function DashboardPage({
               {/* Stat cards */}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div className="rounded-lg bg-[#f7faf7] p-3 text-center">
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Avg Accuracy</p>
-                  <p className="mt-1 text-2xl font-bold text-[#1a2e1c]">{avgAccuracy}%</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Accuracy</p>
+                  <p className="mt-1 text-2xl font-bold text-[#1a2e1c] tabular-nums">{avgAccuracy}%</p>
                   <p className="text-xs text-[#4a6b4e]">last {sessions10.length} sessions</p>
                 </div>
                 <div className="rounded-lg bg-[#f7faf7] p-3 text-center">
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Pass Rate</p>
-                  <p className="mt-1 text-2xl font-bold text-[#1a2e1c]">{passRate}%</p>
-                  <p className="text-xs text-[#4a6b4e]">{passCount}/{sessions10.length} passed</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Pass rate</p>
+                  <p className="mt-1 text-2xl font-bold text-[#1a2e1c] tabular-nums">{passRate}%</p>
+                  <p className="text-xs text-[#4a6b4e] tabular-nums">{passCount}/{sessions10.length} passed</p>
                 </div>
                 <div className="rounded-lg bg-[#f7faf7] p-3 text-center">
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Avg Time</p>
-                  <p className="mt-1 text-2xl font-bold text-[#1a2e1c]">{formatSpeed(avgTimeSec ?? 0)}</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Time</p>
+                  <p className="mt-1 text-2xl font-bold text-[#1a2e1c] tabular-nums">{formatSpeed(avgTimeSec ?? 0)}</p>
                   <p className="text-xs text-[#4a6b4e]">per session</p>
                 </div>
                 <div className="rounded-lg bg-[#f7faf7] p-3 text-center">
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Total Sessions</p>
-                  <p className="mt-1 text-2xl font-bold text-[#1a2e1c]">{totalSessions}</p>
-                  <p className="text-xs text-[#4a6b4e]">best streak: {longestStreak}</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Sessions</p>
+                  <p className="mt-1 text-2xl font-bold text-[#1a2e1c] tabular-nums">{totalSessions}</p>
+                  <p className="text-xs text-[#4a6b4e] tabular-nums">best streak: {longestStreak}</p>
                 </div>
               </div>
 
-              {/* Micro bar chart — oldest left, newest right */}
+              {/* Recent accuracy trend */}
               <div>
-                <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e] mb-2">Recent accuracy trend</p>
-                <div className="flex items-end gap-1" style={{ height: '40px' }}>
-                  {[...sessions10].reverse().map((s) => {
-                    const acc = Math.max(Number(s.accuracy), 8)
-                    return (
+                <div className="flex items-baseline justify-between mb-2 gap-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">
+                    Recent accuracy trend
+                  </p>
+                  {lastAccuracy !== null && avgAccuracy !== null && (
+                    <p className="text-xs text-[#4a6b4e] tabular-nums">
+                      Last session {lastAccuracy}% · average {avgAccuracy}%
+                    </p>
+                  )}
+                </div>
+                <div className="relative" style={{ height: '64px' }}>
+                  {accuracyThreshold !== null && accuracyThreshold > 0 && accuracyThreshold <= 100 && (
+                    <>
                       <div
-                        key={s.id}
-                        style={{ height: `${acc}%` }}
-                        className={`flex-1 rounded-sm ${s.passed ? 'bg-[#4ade80]' : 'bg-red-300'}`}
-                        title={`${Number(s.accuracy)}% · ${s.passed ? 'Pass' : 'Fail'}`}
+                        className="pointer-events-none absolute inset-x-0 border-t border-dashed border-[#bae0bd]"
+                        style={{ bottom: `${accuracyThreshold}%` }}
+                        aria-hidden="true"
                       />
-                    )
-                  })}
+                      <span
+                        className="pointer-events-none absolute right-0 -translate-y-1/2 rounded bg-white/80 px-1 text-[10px] font-medium text-[#4a6b4e] tabular-nums"
+                        style={{ bottom: `${accuracyThreshold}%` }}
+                      >
+                        {accuracyThreshold}% target
+                      </span>
+                    </>
+                  )}
+                  <div className="flex h-full items-end gap-1 sm:gap-1.5">
+                    {[...sessions10].reverse().map((s) => {
+                      const accNum = Number(s.accuracy)
+                      const acc = Math.max(accNum, 6)
+                      return (
+                        <div
+                          key={s.id}
+                          style={{ height: `${acc}%` }}
+                          className={`flex-1 rounded-t-sm ${s.passed ? 'bg-[#4ade80]' : 'bg-red-300'}`}
+                          title={
+                            (s.completed_at ? `${formatNzDateTime(s.completed_at)} · ` : '') +
+                            `${accNum}% · ${s.passed ? 'Pass' : 'Fail'}`
+                          }
+                        />
+                      )
+                    })}
+                  </div>
                 </div>
                 <div className="flex justify-between mt-1 text-xs text-[#4a6b4e]">
                   <span>Oldest</span>
@@ -433,6 +428,63 @@ export default async function DashboardPage({
             </div>
           ) : (
             <p className="text-sm text-[#4a6b4e]">No sessions yet — analytics will appear after the first worksheet is completed.</p>
+          )}
+        </div>
+
+        {/* Milestones */}
+        <AchievementsCard progress={achievementProgress} variant="dashboard" studentName={student.name} />
+
+        {/* Recent Worksheets */}
+        <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
+          <h2 className="text-base font-semibold text-[#1a2e1c] mb-4">Recent Worksheets</h2>
+
+          {recentSessions.length > 0 ? (
+            <>
+              <div
+                className="space-y-2 max-h-[26rem] overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#bae0bd]"
+                style={{ scrollbarWidth: 'thin', scrollbarColor: '#bae0bd transparent' }}
+              >
+                {recentSessions.map((s) => {
+                  const lvl = levelMap.get(s.level_id)
+                  return (
+                    <Link
+                      key={s.id}
+                      href={`/worksheet/results/${s.id}`}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-[#e8f5e9] bg-[#f7faf7] px-4 py-3 hover:bg-[#f2faf3] transition-colors"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-[#1a2e1c] truncate">
+                          {lvl ? `Level ${lvl.level_number}.${lvl.sublevel_number} — ${lvl.topic}` : `Level ID ${s.level_id}`}
+                        </p>
+                        <p className="text-xs text-[#4a6b4e] mt-0.5 tabular-nums">
+                          {s.completed_at ? formatNzDateTime(s.completed_at) : '—'}
+                          {' · '}
+                          {s.correct_count}/{s.total_problems}
+                          {' · '}
+                          {Number(s.accuracy)}%
+                          {' · '}
+                          {formatSpeed(s.time_taken_seconds ?? 0)}
+                        </p>
+                      </div>
+                      <span
+                        className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ${
+                          s.passed ? 'bg-[#e1f4e3] text-[#2d6a35]' : 'bg-red-50 text-red-700'
+                        }`}
+                      >
+                        {s.passed ? '✓' : '✗'}
+                      </span>
+                    </Link>
+                  )
+                })}
+              </div>
+              {showScrollHint && (
+                <p className="mt-3 text-xs text-[#4a6b4e] italic">
+                  Showing latest {recentSessions.length} worksheets — scroll to see more.
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="text-sm text-[#4a6b4e]">No completed worksheets yet.</p>
           )}
         </div>
 
