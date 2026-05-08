@@ -43,7 +43,7 @@ export default async function WeakSpotsPracticePage({
 
   const { data: level } = await supabase
     .from('levels')
-    .select('topic, description')
+    .select('id, topic, description')
     .eq('level_number', levelNumber)
     .eq('sublevel_number', sublevelNumber)
     .maybeSingle()
@@ -155,7 +155,12 @@ export default async function WeakSpotsPracticePage({
           </p>
         </div>
 
-        <PracticeForm problems={problems} studentId={student.id} />
+        <PracticeForm
+          problems={problems}
+          studentId={student.id}
+          levelId={level?.id ?? null}
+          problemType={requestedType}
+        />
       </main>
     </div>
   )

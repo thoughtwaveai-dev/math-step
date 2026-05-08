@@ -9,17 +9,20 @@ import PinSettings from './PinSettings'
 import StudentModeCard from './StudentModeCard'
 import AchievementsCard from '@/components/AchievementsCard'
 import MistakeJournalCard from '@/components/MistakeJournalCard'
+import PracticeHistoryCard, { type PracticeHistoryEntry } from '@/components/PracticeHistoryCard'
 import HabitCard from '@/components/HabitCard'
 import { formatSpeed, formatNzDateTime } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
 import { deriveAchievementProgress } from '@/lib/achievements'
 import { deriveHabitStatus } from '@/lib/habit'
+import { nzDateKey, shiftDateKey } from '@/lib/habit'
 import { deriveWeakAreas } from '@/lib/mistakeJournal'
 
 const SESSION_FETCH_LIMIT = 500
 const RECENT_VISIBLE_LIMIT = 25
 const SCROLL_HINT_THRESHOLD = 7
 const MISTAKE_JOURNAL_SESSION_WINDOW = 20
+const PRACTICE_HISTORY_FETCH_LIMIT = 25
 
 export default async function DashboardPage({
   searchParams,
@@ -53,13 +56,14 @@ export default async function DashboardPage({
     .maybeSingle()
   const hasPin = Boolean(profile?.parent_pin)
 
-  // Parallel: streaks/levels lookups + bounded full-history sessions + self-correction count
+  // Parallel: streaks/levels lookups + bounded full-history sessions + self-correction count + practice history
   const [
     { data: streakRow },
     { data: level },
     { data: allLevels },
     { data: allSessions },
     { count: selfCorrectCount },
+    { data: practiceRows },
   ] = await Promise.all([
     supabase.from('streaks')
       .select('current_streak, longest_streak, total_sessions, total_points')
@@ -84,6 +88,11 @@ export default async function DashboardPage({
       .select('id, sessions!inner(student_id)', { count: 'exact', head: true })
       .eq('self_corrected', true)
       .eq('sessions.student_id', student.id),
+    supabase.from('practice_sessions')
+      .select('id, level_id, problem_type, total_problems, correct_count, accuracy, completed_at')
+      .eq('student_id', student.id)
+      .order('completed_at', { ascending: false })
+      .limit(PRACTICE_HISTORY_FETCH_LIMIT),
   ])
 
   const streak = streakRow?.current_streak ?? 0
@@ -185,6 +194,38 @@ export default async function DashboardPage({
         })),
       })
     }
+  }
+
+  // --- Practice History: map rows + count this NZ-week (Mon-start, matches HabitCard) ---
+  const todayKey = nzDateKey(new Date())
+  const todayDow = new Date(Date.UTC(
+    Number(todayKey.slice(0, 4)),
+    Number(todayKey.slice(5, 7)) - 1,
+    Number(todayKey.slice(8, 10)),
+  )).getUTCDay()
+  const daysBackToMonday = (todayDow + 6) % 7
+  const mondayKey = shiftDateKey(todayKey, -daysBackToMonday)
+  const sundayKey = shiftDateKey(mondayKey, 6)
+
+  const practiceEntries: PracticeHistoryEntry[] = []
+  let practiceThisWeekCount = 0
+  for (const row of practiceRows ?? []) {
+    if (!row.completed_at) continue
+    const lvl = levelMap.get(row.level_id)
+    if (!lvl) continue
+    const dayKey = nzDateKey(row.completed_at)
+    if (dayKey >= mondayKey && dayKey <= sundayKey) practiceThisWeekCount++
+    practiceEntries.push({
+      id: row.id,
+      completedAt: row.completed_at,
+      levelNumber: lvl.level_number,
+      sublevelNumber: lvl.sublevel_number,
+      topic: lvl.topic,
+      problemType: row.problem_type,
+      correctCount: row.correct_count,
+      totalProblems: row.total_problems,
+      accuracy: row.accuracy,
+    })
   }
 
   // Analytics — computed from the last 10 sessions (sessions10, desc order)
@@ -480,6 +521,13 @@ export default async function DashboardPage({
         <MistakeJournalCard
           weakAreas={weakAreas}
           studentId={student.id}
+          studentName={student.name}
+        />
+
+        {/* Practice History — visibility into targeted practice (no progression effect) */}
+        <PracticeHistoryCard
+          entries={practiceEntries}
+          thisWeekCount={practiceThisWeekCount}
           studentName={student.name}
         />
 

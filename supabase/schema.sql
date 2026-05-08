@@ -23,9 +23,26 @@ create table if not exists streaks (
 --   nullable; stores generator type (e.g. factor_pairs, fraction_addition).
 --   Old rows remain NULL and feed the level/topic fallback in Mistake Journal.
 
+-- Practice History v1 — targeted practice runs (parent visibility only).
+-- Fully separate from sessions/problems. Does NOT feed mastery/streaks/points.
+create table if not exists practice_sessions (
+  id              uuid primary key default gen_random_uuid(),
+  student_id      uuid not null references students(id) on delete cascade,
+  level_id        int  not null references levels(id),
+  problem_type    text,
+  total_problems  int  not null check (total_problems > 0),
+  correct_count   int  not null check (correct_count >= 0 and correct_count <= total_problems),
+  accuracy        int  not null check (accuracy between 0 and 100),
+  completed_at    timestamptz not null default now()
+);
+
+create index if not exists idx_practice_sessions_student_completed
+  on practice_sessions (student_id, completed_at desc);
+
 -- RLS
 alter table students enable row level security;
 alter table streaks enable row level security;
+alter table practice_sessions enable row level security;
 
 create policy "Users can manage their own students" on students
   for all using (auth.uid() = parent_id) with check (auth.uid() = parent_id);
@@ -42,6 +59,22 @@ create policy "Users can manage streaks for their students" on streaks
     exists (
       select 1 from students
       where students.id = streaks.student_id
+        and students.parent_id = auth.uid()
+    )
+  );
+
+create policy "Users can manage practice for their students" on practice_sessions
+  for all using (
+    exists (
+      select 1 from students
+      where students.id = practice_sessions.student_id
+        and students.parent_id = auth.uid()
+    )
+  )
+  with check (
+    exists (
+      select 1 from students
+      where students.id = practice_sessions.student_id
         and students.parent_id = auth.uid()
     )
   );

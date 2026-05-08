@@ -6,8 +6,58 @@
 
 ## Current Status
 
-**Phase:** Milestone 57 — Habit week + milestone label polish. ✓ Habit row is now a Mon → Sun NZ calendar week (was rolling last 7 days). ✓ Future days within the current week render with a dashed muted border. ✓ Dashboard copy updated to *"X of 7 days this week"* / *"X day this week"* (was *"the last 7 days"*). ✓ Milestones right-side labels rewritten *"Tier N ✓"* → *"Reached N{unit} ✓"* (e.g. *"Reached 1 ✓"*, *"Reached 5 days ✓"*); meta header *"… next tiers in progress"* → *"… goals in progress"*; *"All tiers earned 🏆"* → *"All goals reached 🏆"*; *"not yet"* → *"Not reached yet"*. ✓ Renamed `HabitStatus.last7` → `weekDays` and added `isFuture` flag.
+**Phase:** Milestone 58 — Practice History v1. ✓ New `practice_sessions` table (separate from `sessions`/`problems`) records every targeted-practice run from `/practice/weak-spots`. ✓ Server action `recordPracticeSession` persists `student_id, level_id, problem_type, total_problems, correct_count, accuracy, completed_at` after client-side grading; failure is fire-and-forget. ✓ Dashboard adds a "Practice history" card directly below "Needs Practice" — empty-state copy, "this week" count using the same Mon-start NZ math as `HabitCard`, list of latest 5 entries with skill label, NZ date/time, and `N/M (X%)` score. ✓ Hard scope upheld: zero new rows in `sessions`/`problems`/`streaks`/`student_level_progress`, streaks/points/achievements/Daily Habit/Recent Worksheets all unchanged after a practice run.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 58 — Practice History v1 (2026-05-09)
+
+**Goal:** Make targeted practice effort visible to parents. Until now, `/practice/weak-spots` was fully ephemeral — generated, graded, and discarded — so parents had no signal that the Mistake-Journal → Practise loop was actually being used. v1 records each run in a dedicated table and surfaces a small dashboard card. **No effect on mastery, level advancement, streaks, points, achievements, sessions, problems, or Recent Worksheets** — by design.
+
+**Files added:**
+- `src/app/actions/practiceSessions.ts` — `recordPracticeSession({ studentId, levelId, problemType, totalProblems, correctCount, accuracy })` server action. Auth check + bounds checks, single insert. Returns `{ error } | null`.
+- `src/components/PracticeHistoryCard.tsx` — server-rendered presentational card. Empty state *"No practice sessions yet. Targeted practice from Needs Practice will appear here."* Otherwise: *"{name} practised weak spots N times this week."* + list of up to 5 most-recent entries (label via `parentLabelForType` with level/topic fallback, `formatNzDateTime`, `N/M (X%)` chip).
+
+**Files modified:**
+- `supabase/schema.sql` — `practice_sessions` table, `idx_practice_sessions_student_completed` index, RLS policy that mirrors the `streaks` join through `students.parent_id = auth.uid()`.
+- `src/app/practice/weak-spots/page.tsx` — added `id` to the levels select so we can pass `levelId` into the form.
+- `src/app/practice/weak-spots/PracticeForm.tsx` — accepts `levelId: number | null`, `problemType: string | null`. After local grading, fires `recordPracticeSession(...).catch(() => {})` — failure is silent and never blocks the results screen.
+- `src/app/dashboard/page.tsx` — added a sibling `practice_sessions.select(...)` to the existing `Promise.all`, computed `practiceThisWeekCount` using `nzDateKey` + Mon-start week math (same as `HabitCard`), mapped rows against the existing `levelMap`, mounted `<PracticeHistoryCard …/>` directly below `<MistakeJournalCard …/>`.
+
+**Schema (applied via Supabase SQL Editor):**
+```
+create table practice_sessions (
+  id              uuid primary key default gen_random_uuid(),
+  student_id      uuid not null references students(id) on delete cascade,
+  level_id        int  not null references levels(id),
+  problem_type    text,
+  total_problems  int  not null check (total_problems > 0),
+  correct_count   int  not null check (correct_count >= 0 and correct_count <= total_problems),
+  accuracy        int  not null check (accuracy between 0 and 100),
+  completed_at    timestamptz not null default now()
+);
+create index idx_practice_sessions_student_completed on practice_sessions (student_id, completed_at desc);
+alter table practice_sessions enable row level security;
+-- "Users can manage practice for their students" — exists() join through students.parent_id
+```
+
+**Validation (Playwright on `habit-v1@test.local` / Riley):**
+- **Baseline (before practice run):** Streak 1, Points 30, Sessions 2, Level 1.1 progress 2/3, Recent Worksheets 2 rows.
+- **Practice run:** `/practice/weak-spots?student=…&level=1&sublevel=1&type=addition` generated 10 addition problems. Submitted 8 correct / 2 wrong → results card showed *"8 / 10 (80%)"*. ✓
+- **Dashboard (after run):** Streak **1**, Points **30**, Sessions **2**, Level 1.1 progress **2/3**, Recent Worksheets **2 rows** — *all unchanged*. ✓
+- **Practice History card:** *"Riley practised weak spots 1 time this week."* + entry *"Addition · 9 May 2026, 8:48 am NZT · 8 / 10 (80%)"*. ✓
+- **Multi-student isolation:** Switched to "Mira" → Practice History card shows the empty-state copy with 0 entries (no leakage from Riley). ✓
+- **Empty state:** Mira (no practice runs) renders *"No practice sessions yet. Targeted practice from Needs Practice will appear here."* ✓
+- **Console errors:** 0 across the full flow (dashboard → practice → submit → dashboard → student switch).
+- `npx tsc --noEmit` clean. ESLint: only the 7 pre-existing errors in untouched files (PinSettings / StudentModeCard / PinEntryForm / parent-pin/page / CelebrationEffect) — zero new errors.
+
+**v1 limitations (documented for future revisit):**
+- **No persistence beyond totals.** Per-problem records are not stored — practice is graded client-side and only the run summary is written. If future analytics need per-problem detail, a `practice_problems` companion table would be the next step.
+- **No `time_taken_seconds` / no `passed` flag.** Practice is "won't change your level" by design; pass/fail isn't meaningful here.
+- **Parent dashboard only.** No Play/Student-View surface for v1 — parent visibility is the explicit goal.
+- **No per-skill aggregate** beyond "this week count." The Mistake Journal still reflects mistakes from `sessions`/`problems` only — practice does not feed it. (Inline *"Practised N times this week"* enrichment on Mistake Journal entries was scoped out of v1; revisitable.)
+- **Top 5 list cap.** Older runs aren't shown; the count line still tells parents the absolute scope.
 
 ---
 

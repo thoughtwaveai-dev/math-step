@@ -5,6 +5,7 @@ import Link from 'next/link'
 import type { AnyProblemType } from '@/lib/math/generators'
 import { gradeAnswer } from '@/lib/math/gradeAnswer'
 import { inputModeForType, problemTypeLabel } from '@/lib/math/inputMode'
+import { recordPracticeSession } from '@/app/actions/practiceSessions'
 
 interface PracticeProblem {
   id: string
@@ -16,6 +17,8 @@ interface PracticeProblem {
 interface Props {
   problems: PracticeProblem[]
   studentId: string
+  levelId: number | null
+  problemType: string | null
 }
 
 interface GradedProblem {
@@ -24,7 +27,7 @@ interface GradedProblem {
   isCorrect: boolean
 }
 
-export default function PracticeForm({ problems, studentId }: Props) {
+export default function PracticeForm({ problems, studentId, levelId, problemType }: Props) {
   const [answers, setAnswers] = useState<Record<string, string>>({})
   const [graded, setGraded] = useState<GradedProblem[] | null>(null)
 
@@ -47,6 +50,22 @@ export default function PracticeForm({ problems, studentId }: Props) {
       }
     })
     setGraded(results)
+
+    // Fire-and-forget persistence. Failure must never block the results screen.
+    if (levelId !== null) {
+      const total = results.length
+      const correct = results.filter(r => r.isCorrect).length
+      const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0
+      recordPracticeSession({
+        studentId,
+        levelId,
+        problemType,
+        totalProblems: total,
+        correctCount: correct,
+        accuracy,
+      }).catch(() => {})
+    }
+
     if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 

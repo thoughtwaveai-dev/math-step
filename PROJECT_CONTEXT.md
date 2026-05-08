@@ -352,6 +352,27 @@ Surfaces top weak areas for the selected student and offers an optional, side-ef
 - **No persistence, by design.** No `INSERT` to `sessions` / `problems`, no `UPDATE` to `streaks` / `student_level_progress` / `students`. Recent Worksheets count and achievement progress are untouched by a practice run.
 - **Shared input-mode helper:** `src/lib/math/inputMode.ts` — `inputModeForType()` + `problemTypeLabel()`. Used by both `WorksheetForm` and `PracticeForm` so the per-problem-type input mode (text for algebra/factorization/inequality/sim-eq/fractions/negatives, numeric/decimal for purely numeric types) cannot silently regress between the two surfaces. This is what protects against the historical stylus *"x → ."* bug.
 
+## Practice History v1 (Milestone 58)
+
+Lightweight, parent-facing record of every targeted-practice run. Fully separate from `sessions`/`problems`/mastery/progression.
+
+- **Schema — new table `practice_sessions`:**
+  | Column | Type | Notes |
+  |--------|------|-------|
+  | id | uuid | PK, gen_random_uuid() |
+  | student_id | uuid | FK → students(id), cascade delete |
+  | level_id | int | FK → levels(id) |
+  | problem_type | text | nullable; matches `problems.problem_type` convention |
+  | total_problems | int | check > 0 |
+  | correct_count | int | check between 0 and total_problems |
+  | accuracy | int | check between 0 and 100 |
+  | completed_at | timestamptz | default now() |
+  Index: `idx_practice_sessions_student_completed` on `(student_id, completed_at desc)`. RLS mirrors the `streaks` policy via an `exists` join through `students.parent_id = auth.uid()`.
+- **Persistence path:** `/practice/weak-spots/page.tsx` selects `levels.id` and passes `levelId` + `problemType` (the URL `type` param) into `PracticeForm`. After client-side grading, the form fires `recordPracticeSession(...)` (`src/app/actions/practiceSessions.ts`) with totals/correct/accuracy. Failure is `.catch(() => {})` — never blocks the results screen.
+- **Dashboard surface:** `PracticeHistoryCard` (`src/components/PracticeHistoryCard.tsx`) is mounted directly below `MistakeJournalCard`. It receives mapped entries (label resolved via `parentLabelForType` with level/topic fallback) and a `thisWeekCount`. The "this week" math reuses `nzDateKey` + Mon-start week math from `src/lib/habit.ts`, exactly matching the `HabitCard` boundary so a Sunday-night practice in the same NZ-local week is counted, but a session from the prior week isn't.
+- **Hard scope rules (enforced):** No effect on `streaks` (current/longest/total_sessions/total_points), `student_level_progress.consecutive_passes`, `students.current_level/sublevel`, achievements, Daily Habit, or Recent Worksheets. No new rows in `sessions` or `problems`. Practice runs do not appear in any "completed worksheet" surface.
+- **v1 limitations:** No per-problem records (only the run summary), no `time_taken_seconds`, no `passed` flag, no Play/Student-View surface, no Mistake-Journal inline enrichment. Top 5 visible on the dashboard with a `Showing latest 5 of N` hint when there are more.
+
 ## Recent Worksheets timestamp & scroll behaviour
 
 `src/app/dashboard/page.tsx` formats completed_at via `formatNzDateTime()` — `en-NZ` date + 12-hour NZT time on a single subline (e.g. `7 May 2026, 6:20 pm NZT · 20/20 · 100% · 29s`). Up to 25 entries are shown inside a `max-h-[26rem] overflow-y-auto` scroll container with a thin scrollbar (Chromium + Firefox styling). When the row count exceeds the visible threshold, a subtle "Showing latest N worksheets — scroll to see more." helper line appears below the panel.
