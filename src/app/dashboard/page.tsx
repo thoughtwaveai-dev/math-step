@@ -9,9 +9,11 @@ import PinSettings from './PinSettings'
 import StudentModeCard from './StudentModeCard'
 import AchievementsCard from '@/components/AchievementsCard'
 import MistakeJournalCard from '@/components/MistakeJournalCard'
+import HabitCard from '@/components/HabitCard'
 import { formatSpeed, formatNzDateTime } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
 import { deriveAchievementProgress } from '@/lib/achievements'
+import { deriveHabitStatus } from '@/lib/habit'
 import { deriveWeakAreas } from '@/lib/mistakeJournal'
 
 const SESSION_FETCH_LIMIT = 500
@@ -118,6 +120,13 @@ export default async function DashboardPage({
     speedyPassCount,
     selfCorrectCount: selfCorrectCount ?? 0,
     levelsMasteredCount,
+  })
+
+  const habitStatus = deriveHabitStatus({
+    sessionCompletedAts: sessions.map(s => s.completed_at),
+    totalSessions,
+    currentStreak: streak,
+    longestStreak,
   })
 
   // Recent Worksheets: first N, then trend uses first 10 of those.
@@ -460,6 +469,9 @@ export default async function DashboardPage({
             <p className="text-sm text-[#4a6b4e]">No sessions yet — analytics will appear after the first worksheet is completed.</p>
           )}
         </div>
+
+        {/* Daily habit — today's practice + 7-day rhythm */}
+        <HabitCard status={habitStatus} variant="dashboard" studentName={student.name} />
 
         {/* Milestones */}
         <AchievementsCard progress={achievementProgress} variant="dashboard" studentName={student.name} />

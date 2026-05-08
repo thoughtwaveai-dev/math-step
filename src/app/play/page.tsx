@@ -8,6 +8,8 @@ import { deriveAchievementProgress, pickNextWin } from '@/lib/achievements'
 import AchievementsCard from '@/components/AchievementsCard'
 import NextWinCard from '@/components/NextWinCard'
 import TargetedPracticeCTA from '@/components/TargetedPracticeCTA'
+import HabitCard from '@/components/HabitCard'
+import { deriveHabitStatus } from '@/lib/habit'
 import { deriveWeakAreas } from '@/lib/mistakeJournal'
 
 const SESSION_FETCH_LIMIT = 500
@@ -100,6 +102,13 @@ export default async function PlayPage({
     levelsMasteredCount,
   })
   const nextWin = pickNextWin(achievementProgress)
+
+  const habitStatus = deriveHabitStatus({
+    sessionCompletedAts: sessions.map(s => s.completed_at),
+    totalSessions,
+    currentStreak: streak,
+    longestStreak,
+  })
 
   // Parallel: all three depend on level.id but not each other
   const [
@@ -250,6 +259,9 @@ export default async function PlayPage({
             <p className="mt-1 text-3xl font-bold text-[#2d6a35]">{totalPoints}</p>
           </div>
         </div>
+
+        {/* Daily habit — today's practice + 7-day rhythm */}
+        <HabitCard status={habitStatus} variant="play" />
 
         {/* Start worksheet CTA */}
         <Link

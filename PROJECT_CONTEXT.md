@@ -356,6 +356,44 @@ Surfaces top weak areas for the selected student and offers an optional, side-ef
 
 `src/app/dashboard/page.tsx` formats completed_at via `formatNzDateTime()` — `en-NZ` date + 12-hour NZT time on a single subline (e.g. `7 May 2026, 6:20 pm NZT · 20/20 · 100% · 29s`). Up to 25 entries are shown inside a `max-h-[26rem] overflow-y-auto` scroll container with a thin scrollbar (Chromium + Firefox styling). When the row count exceeds the visible threshold, a subtle "Showing latest N worksheets — scroll to see more." helper line appears below the panel.
 
+## Daily Habit Loop v1 (Milestone 56)
+
+In-app, gentle daily-practice surface — no email or push reminders.
+
+- **Source of truth for "today / yesterday / this week" is NZ-local
+  (`Pacific/Auckland`)**, not UTC. Helper `src/lib/habit.ts → nzDateKey()`
+  produces a `YYYY-MM-DD` key from any `Date | string` via
+  `Intl.DateTimeFormat({timeZone:'Pacific/Auckland'}).formatToParts()`. Day
+  arithmetic uses `shiftDateKey()` (UTC date math on the parsed key) so DST
+  transitions can't drift the result.
+- **No schema changes, no extra Supabase queries.** Both `/play` and
+  `/dashboard` already fetch `sessions` with `.not('completed_at','is',null)
+  .order(... desc).limit(500)`; the new `deriveHabitStatus()` consumes
+  `sessions.map(s => s.completed_at)` plus the existing `streaks` row.
+- **Multiple sessions on the same NZ day collapse to one habit-day** via a
+  `Set<string>` of NZ date keys.
+- **`HabitCard` component** with `variant: 'play' | 'dashboard'`:
+  - Play variant: between the stats row and the *Start Today's Worksheet*
+    CTA. Headline flips between *"Today's practice"* and *"Today's practice
+    done"*; body line is *"Ready for a short practice session?"* /
+    *"Nice work — you practised today!"*; one optional line *"Nice — that's
+    day {n}!"* only when `todayDone && currentStreak >= 2` (streak number
+    is *not* re-emphasised here — the stat tile above already carries it);
+    a 7-tile rhythm row (oldest left → today right) with completed days
+    filled green and today ringed.
+  - Dashboard variant: between *Progress at a Glance* and *Milestones*.
+    Header *"Daily habit"* + meta *"X / 7 days this week"*. Body sentence
+    is parent-voice (e.g. *"{name} has practised 4 of the last 7 days."*),
+    plus *"Practice completed today."* / *"No practice yet today."* /
+    *"No sessions yet."*. 4 stat tiles: Today (Done ✓ / Not yet), Streak,
+    Best, This week (X / 7). Same 7-tile rhythm row as Play.
+- **Tone is gentle.** No words like *missed / behind / broken streak* —
+  the empty / no-recent-practice copy is *"a short session helps them get
+  back into rhythm"*.
+- **Mobile (≤ sm)** uses single-letter labels (`M T W T F S S`); `≥ sm`
+  uses three-letter labels (`Mon Tue Wed Thu Fri Sat Sun`). Both via
+  `sm:hidden` / `hidden sm:inline`.
+
 ## Next Planned Milestone
 
 - Deploy to Vercel (or similar) to test real mobile install flow

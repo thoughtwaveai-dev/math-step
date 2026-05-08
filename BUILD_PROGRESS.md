@@ -6,8 +6,71 @@
 
 ## Current Status
 
-**Phase:** Milestone 55 — Next Win motivation card on Student Play. ✓ `pickNextWin()` helper picks the closest unearned tier across all 7 achievement families by progress ratio (tie-break = `ACHIEVEMENT_FAMILIES` declaration order). ✓ New `NextWinCard` server component renders above `AchievementsCard variant="play"`. ✓ Brand-new students see *"Finish your first worksheet to earn your first win!"*; maxed students see *"All wins earned for now"*. No DB schema changes, no extra queries.
+**Phase:** Milestone 56 — Daily Habit Loop v1. ✓ Pure helper `src/lib/habit.ts` with `nzDateKey` / `shiftDateKey` / `deriveHabitStatus` — Pacific/Auckland source-of-truth, DST-safe, dedupes same-day sessions. ✓ New `HabitCard` component with `play` / `dashboard` variants. ✓ Wired into `/play` between the stats row and the worksheet CTA, and into `/dashboard` between *Progress at a Glance* and *Milestones*. ✓ No schema changes, no extra Supabase queries — feeds off the existing `sessions.completed_at` data both pages already fetch. ✓ Tone is intentionally gentle (no "missed / behind / broken streak"). ✓ No email or push reminders in v1.
 **Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+
+---
+
+### Milestone 56 — Daily Habit Loop v1 (2026-05-09)
+
+**Goal:** Gently help families build a consistent daily-practice rhythm without email or push reminders. Surface "is today done?" and a 7-day pattern on both `/play` (child-voice) and `/dashboard` (parent-voice), derived entirely from existing data.
+
+**Habit strategy:**
+- All "today / yesterday / this week" boundaries are NZ-local (`Pacific/Auckland`), not UTC.
+- `nzDateKey(d)` produces a `YYYY-MM-DD` key via `Intl.DateTimeFormat({timeZone:'Pacific/Auckland'}).formatToParts()`.
+- `shiftDateKey(key, deltaDays)` does date math on the parsed key via `setUTCDate(getUTCDate() + n)` — DST-safe because we never touch wall-clock time.
+- `deriveHabitStatus()` builds a `Set<string>` of NZ date keys from `sessions.completed_at`, then projects today + 6 prior days into a `last7` array. Multiple sessions same NZ day collapse to one habit-day.
+- Pure JS, no Supabase dependency. No new DB queries — both `/play` and `/dashboard` already fetched `sessions.completed_at` with `.not('completed_at','is',null).limit(500)` from earlier milestones.
+
+**Files added:**
+- `src/lib/habit.ts` — `NZ_TIME_ZONE`, `nzDateKey`, `shiftDateKey`, `weekdayShortLabel`, `weekdayLetterLabel`, `deriveHabitStatus`, types `HabitDay` / `HabitStatus`.
+- `src/components/HabitCard.tsx` — server component with `variant: 'play' | 'dashboard'`. Shared `SevenDayRow` sub-component with `sm:` breakpoint switching one-letter labels (`M T W T F S S`) to three-letter (`Mon Tue Wed Thu Fri Sat Sun`).
+
+**Files modified:**
+- `src/app/play/page.tsx` — imports `deriveHabitStatus` + `HabitCard`, computes `habitStatus` from `sessions.map(s => s.completed_at)`, mounts `<HabitCard variant="play" />` between the stats row and the *Start Today's Worksheet* CTA.
+- `src/app/dashboard/page.tsx` — same helper call, mounts `<HabitCard variant="dashboard" studentName={student.name} />` between *Progress at a Glance* and *Milestones*.
+- `PROJECT_CONTEXT.md` — Milestone 56 section under the curriculum block.
+
+**No schema changes. No extra queries.** Reuses the bounded `sessions` fetch already in place.
+
+**Copy ladder (parent voice, `/dashboard`):**
+- New student (`totalSessions === 0`): *"{name} hasn't started practising yet — the first short session is the easiest way to begin."*
+- Returning student, no week activity: *"{name} hasn't practised in the last week — a short session helps them get back into rhythm."*
+- Otherwise: *"{name} has practised N of the last 7 days."*
+- Today subline: *"Practice completed today."* / *"No practice yet today."* / *"No sessions yet."*
+- Stat tiles: Today (Done ✓ / Not yet), Streak, Best, This week (X / 7).
+- Header meta: *"X / 7 days this week"*.
+
+**Copy ladder (child voice, `/play`):**
+- `!todayDone`: heading *"Today's practice"* + body *"Ready for a short practice session?"*.
+- `todayDone`: heading *"Today's practice done"* + ✓ chip + body *"Nice work — you practised today!"*.
+- Optional one-liner *"Nice — that's day {n}!"* only when `todayDone && currentStreak >= 2`. Otherwise no streak number on this card — the stat tile above already carries it.
+
+**Validation (Playwright + helper smoke, fresh signup `habit-v1@test.local` → student "Riley", second student "Mira", clock 2026-05-09 NZT):**
+- Helper smoke (Node + tsx, deleted after):
+  - `nzDateKey('2026-05-09T03:00:00Z')` → `2026-05-09`. ✓
+  - `nzDateKey('2026-05-09T11:30:00Z')` (≈ 11:30 pm NZT 9 May) → `2026-05-09`. ✓
+  - `nzDateKey('2026-05-09T12:30:00Z')` (≈ 12:30 am NZT 10 May) → `2026-05-10`. ✓
+  - Mixed scenario: 4 sessions across 3 NZ days → `todayDone=true`, `practisedYesterday=true`, `daysPractisedThisWeek=3`. ✓
+  - Same-day dedup (3 sessions at 02:00/05:00/08:00 UTC on 9 May) → `daysPractisedThisWeek=1`. ✓
+  - Empty student → `todayDone=false`, `daysPractisedThisWeek=0`, `last7.length=7`. ✓
+  - Boundary: 11:30Z 9 May (today NZ) + 12:30Z 9 May (tomorrow NZ, future) → `todayDone=true`, `daysPractisedThisWeek=1` (future day not in window). ✓
+- `/play` empty state (Riley, before any worksheet): habit card shows *"Today's practice — Ready for a short practice session?"* + 7 empty tiles, Saturday tile ringed (today). ✓
+- After 1 perfect 20/20 worksheet: `/play` flips to *"Today's practice done ✓ · Nice work — you practised today!"*, Saturday tile filled green + ringed. `/dashboard` shows *"Riley has practised 1 of the last 7 days · Practice completed today · Today: Done ✓ · Streak: 1 day · Best: 1 day · This week: 1 / 7"*. ✓
+- After a second worksheet on the same NZ day: `daysPractisedThisWeek` stays at **1**, only one tile filled — same-day dedup confirmed in the live UI (not just in the unit smoke). Recent Worksheets shows both rows separately as expected. ✓
+- Multi-student switching: added "Mira" → habit card resets to *"Mira hasn't started practising yet …"* + 0 tiles. Switched back to "Riley" → state preserved (1 / 7 days, today done). No bleed across students. ✓
+- Parent PIN regression: set PIN `1234`, hit *Hand over to child* → `/play` still renders the habit card (PIN-ungated route, child-voice copy intact). Navigating to `/dashboard` redirects to `/parent-pin?next=%2Fdashboard` as expected. After PIN unlock, the dashboard habit card renders with parent copy. ✓
+- Mobile (390 × 844): no horizontal overflow (`scrollWidth === clientWidth === 375`), single-letter day labels visible (`sm:hidden` shown, `hidden sm:inline` hidden). ✓
+- Tablet (768 × 1024): three-letter labels (`Sun`, `Mon`, …) visible, no overflow. ✓
+- Console errors across signup → onboarding → play → worksheet → results → play → dashboard → student-mode → parent-pin → dashboard: **0**. ✓
+- `npx tsc --noEmit` clean. `npx eslint` clean on changed files.
+
+**v1 limitations (documented for future revisit):**
+- **No reminders.** No email, no push, no scheduled toast. Pure passive surface — the family decides when to come back.
+- **Last 7 rolling days, not a calendar week.** Always "today + 6 prior" — there is no Monday-reset moment, by design (gentler tone).
+- **Dots are days, not minutes.** No depiction of session length / intensity.
+- **No celebration animation when today flips to ✓** — the existing per-session Milestones strip on the results page remains the in-the-moment celebration surface.
+- **No persistence — habit state is derived per render.** Same caveat as Achievements: the bounded 500-session fetch covers any realistic student dataset; only > 500 sessions in lifetime would clip earliest history.
 
 ---
 
