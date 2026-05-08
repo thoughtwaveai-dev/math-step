@@ -114,8 +114,10 @@ RLS: users can only access streak rows for their own students.
 | parent_pin | text | nullable; format `saltHex:scryptHashHex` (Milestone 50) |
 | pin_failed_attempts | int | default 0 (Milestone 50) |
 | pin_locked_until | timestamptz | nullable; cooldown end (Milestone 50) |
+| reminders_enabled | bool | default true; Daily Reminder Email v1 (Milestone 60). Existing rows backfilled to `false`. |
+| last_reminder_sent_date | date | nullable; NZ-local date key of last successful reminder send (Milestone 60). |
 
-RLS: insert/select/update own row (`auth.uid() = id`). No new policies were needed for the PIN columns.
+RLS: insert/select/update own row (`auth.uid() = id`). No new policies were needed for the PIN or reminder columns — the daily-reminder cron handler bypasses RLS via the service role client.
 
 ### `feedback`
 | Column | Type | Notes |
@@ -211,7 +213,7 @@ No RLS — publicly readable. Seeded with curriculum data.
 - **Multi-student support** — parents can add multiple students. Student selection uses `?student=<uuid>` URL param on all pages (`/dashboard`, `/play`, `/worksheet`, `/worksheet/results/[sessionId]`). Falls back to first student by `created_at asc` when param is absent or invalid.
 - **Email confirmation** — Supabase may require email confirmation depending on project settings. If enabled, users redirected to `/dashboard` but won't have a session until confirmed.
 - **No Supabase CLI** — migrations are manual via Supabase SQL editor. Schema SQL lives in `supabase/schema.sql`.
-- **No service role key in `.env.local`** — only `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are used. DDL requires Supabase dashboard.
+- **Service role key** — allowed in server-side cron/background routes only (currently used by `src/app/api/cron/daily-reminders/route.ts` and `src/app/account/reminders/unsubscribe/page.tsx` via `src/lib/supabase/serviceRole.ts`). Never in client bundles or Edge runtime. DDL still requires the Supabase SQL editor.
 - **`total_points` lives in `streaks`**, not `students`. The original schema assumption was wrong; corrected after introspection.
 - **Tailwind v4** — uses `@tailwindcss/postcss`, not the older `tailwind.config.js` approach.
 
@@ -422,6 +424,68 @@ In-app, gentle daily-practice surface — no email or push reminders.
 - **Mobile (≤ sm)** uses single-letter labels (`M T W T F S S`); `≥ sm`
   uses three-letter labels (`Mon Tue Wed Thu Fri Sat Sun`). Both via
   `sm:hidden` / `hidden sm:inline`.
+
+## Daily Reminder Email v1 (Milestone 60)
+
+Optional, parent-facing email that nudges when at least one of a parent's
+students hasn't practised today (NZ-local). Single email per parent
+covering all their pending students — chosen as the simpler v1 path over
+one-email-per-student.
+
+- **Schema (added on `profiles`, no new table):** `reminders_enabled
+  boolean not null default true`, `last_reminder_sent_date date`. Index
+  `idx_profiles_reminders_pending` on `(reminders_enabled,
+  last_reminder_sent_date) where reminders_enabled = true`. Existing
+  rows backfilled to `false` via a one-time `UPDATE` since existing
+  testers never consented; new signups inherit the column default.
+- **Trigger:** Vercel Cron entry in `vercel.json` runs
+  `GET /api/cron/daily-reminders` at `0 3 * * *` UTC = **4:00 pm NZDT**
+  (UTC+13) / **3:00 pm NZST** (UTC+12). The ±1h DST drift is an accepted
+  v1 limitation.
+- **Auth:** the route handler verifies `Authorization: Bearer
+  ${CRON_SECRET}` and 401s anything else, so the public endpoint can't
+  be swept by unauthenticated traffic.
+- **NZ time logic:** `getNzWeekRange()` and `nzDateKey()` in
+  `src/lib/habit.ts` — same helpers the dashboard's Practice History
+  and HabitCard already use, so the email's "X of 7 days this week"
+  cannot drift from the in-app surfaces. A student counts as "practised
+  today" iff some `sessions.completed_at` has `nzDateKey() ===
+  todayKey`.
+- **RLS bypass:** `src/lib/supabase/serviceRole.ts` wraps a
+  `SUPABASE_SERVICE_ROLE_KEY` client. Used **only** by the cron route
+  handler and the unsubscribe page. Never imported from client
+  components or middleware.
+- **Email content** (in `src/lib/email/templates/dailyReminder.ts`):
+  greeting, one line per pending child (with optional "Current streak:
+  N days · X of 7 days this week" when `currentStreak ≥ 1`), one
+  friendly line, an "Open MathStep" CTA, and a footer with both an
+  in-app reminder and a one-tap unsubscribe link. Subject is
+  `{Child}'s MathStep practice today?` for one child or `Time for
+  MathStep practice?` for two or more.
+- **Opt-out paths:**
+  1. **In-app toggle** in Parent View → Admin controls
+     (`src/app/dashboard/RemindersToggle.tsx` →
+     `src/app/actions/reminders.ts → setRemindersEnabled`).
+  2. **One-tap email footer link** to
+     `/account/reminders/unsubscribe?token=…`. Token is HMAC-signed
+     `parent_id` via `src/lib/reminderToken.ts` (uses
+     `node:crypto.createHmac('sha256', REMINDER_UNSUB_SECRET)` — no new
+     dependency). Public route, no Supabase auth required.
+- **Duplicate-send prevention:** select clause filters out anyone with
+  `last_reminder_sent_date = todayKey`. The handler updates that column
+  only after Resend reports success. At-least-once cron firings are
+  therefore idempotent within a single NZ day.
+- **Production gate (intentional, not yet flipped):** real-parent
+  sending requires (a) a verified domain in Resend, and (b)
+  `REMINDER_FROM_EMAIL` set to an address on that domain. Until both
+  are true, `reminders_enabled` should stay `false` for every existing
+  account and `REMINDER_FROM_EMAIL=onboarding@resend.dev` is acceptable
+  for local dev only (delivers solely to the Resend account owner's
+  verified inbox).
+- **v1 limitations (deferred):** weekly-summary email, weak-area
+  digests, achievement emails, push notifications, public-holiday /
+  school-day filtering, DST drift correction, per-parent send-time
+  preferences, bounce/complaint handling.
 
 ## Next Planned Milestone
 

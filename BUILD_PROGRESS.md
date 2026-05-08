@@ -6,8 +6,78 @@
 
 ## Current Status
 
-**Phase:** Milestone 59 — Level 12/1 Functions. ✓ New algorithmic generator `src/lib/math/generators/functions.ts` covers 5 sub-skills: function evaluation (linear, quadratic, with negatives), simple composition, and inverse-solve. ✓ Routing, supported-level keys, lesson card, mistake-journal labels, and worksheet input-mode helper all wired. ✓ All answers are plain signed integers — no `gradeAnswer.ts` change required. ✓ `function_evaluate_negative` uses `inputMode="text"` (matches `neg_*` precedent and the stylus-bug rule); the four always-positive types use `numeric`. ✓ Levels row for 12/1 was already seeded — no schema change.
-**Next:** Deploy to Vercel (or similar) to test real mobile install flow.
+**Phase:** Milestone 60 — Daily Reminder Email v1. ✓ New columns on `profiles` (`reminders_enabled boolean default true`, `last_reminder_sent_date date`); existing 10 rows backfilled to `false` since they never consented. ✓ Resend SDK integrated server-side only via `src/lib/email/resend.ts`. ✓ Vercel Cron entry in `vercel.json` triggers `GET /api/cron/daily-reminders` at `0 3 * * *` UTC = 4:00 pm NZDT / 3:00 pm NZST. ✓ Service-role Supabase client (`src/lib/supabase/serviceRole.ts`) used only by the cron route + unsubscribe page. ✓ HMAC unsubscribe token (`src/lib/reminderToken.ts`, `node:crypto.createHmac`, no new dep). ✓ Parent View toggle in Admin controls (`RemindersToggle` + `setRemindersEnabled` action). ✓ Pure refactor: lifted Mon-start week math into `getNzWeekRange()` in `src/lib/habit.ts`, used by both dashboard and email so they cannot drift. ✓ Production gate documented: real-parent sending requires verified Resend domain + `REMINDER_FROM_EMAIL` on that domain.
+**Next:** Real end-to-end Resend send once a verified domain is in place; then deploy to Vercel and verify cron entry in the Vercel dashboard.
+
+---
+
+### Milestone 60 — Daily Reminder Email v1 (2026-05-09)
+
+**Goal:** Optional, parent-facing email that nudges when at least one of a parent's students hasn't practised today (NZ-local). Single combined email per parent. Tone matches the rest of the app — gentle, easy to disable.
+
+**Approved decisions (from plan):**
+- Existing-user default = `false`. New signups inherit column default `true`.
+- RLS bypass via service role key (option a). Constraint added to PROJECT_CONTEXT.md: *"Service role key is allowed in server-side cron/background routes only. Never in client bundles or Edge runtime."*
+- Cron schedule `0 3 * * *` UTC → 4:00 pm NZDT / 3:00 pm NZST (±1h DST drift accepted in v1).
+- Subject line for 2+ children = `Time for MathStep practice?` (1 child unchanged: `{Child}'s MathStep practice today?`).
+
+**Schema (applied via Supabase SQL Editor before any code):**
+```
+alter table profiles
+  add column if not exists reminders_enabled boolean not null default true,
+  add column if not exists last_reminder_sent_date date;
+update profiles set reminders_enabled = false where reminders_enabled is distinct from false;
+create index if not exists idx_profiles_reminders_pending
+  on profiles (reminders_enabled, last_reminder_sent_date)
+  where reminders_enabled = true;
+```
+Verification at apply time: `select reminders_enabled, count(*) from profiles group by 1` → `false | 10`. All 10 existing testers opted out as intended.
+
+**Files added:**
+- `src/lib/supabase/serviceRole.ts` — server-only client; lazy singleton over `SUPABASE_SERVICE_ROLE_KEY`. Throws if env vars missing.
+- `src/lib/email/resend.ts` — `sendDailyReminder({to, subject, html, text})`. Lazy Resend singleton. Returns `{ ok, id? } | { ok: false, error }`. Never throws.
+- `src/lib/email/templates/dailyReminder.ts` — `buildDailyReminder({ parentName, pendingStudents, appUrl, unsubscribeUrl })`. Pure function, HTML + plaintext, escapes user-supplied strings. Streak/this-week line only renders when `currentStreak ≥ 1`.
+- `src/lib/reminderToken.ts` — `createUnsubscribeToken(parentId)` / `verifyUnsubscribeToken(token)`. HMAC-SHA256 of `parent_id`, base64url-encoded, two-part `<id>.<sig>` token. `timingSafeEqual` for verification.
+- `src/app/api/cron/daily-reminders/route.ts` — GET handler, `runtime='nodejs'`, `dynamic='force-dynamic'`. Bearer-auth via `CRON_SECRET`. Pulls all opted-in parents, filters dedup in JS (v1 user counts are small), per-parent computes pending-students from an 8-day session window bucketed by `nzDateKey()`. Updates `last_reminder_sent_date` only after Resend success. Returns `{ todayKey, candidates, sent, skipped, errors, errorDetails? }`.
+- `src/app/actions/reminders.ts` — `setRemindersEnabled` server action. RLS-safe via the standard server Supabase client. `revalidatePath('/dashboard')`.
+- `src/app/dashboard/RemindersToggle.tsx` — client component, `useActionState`, mirrors `PinSettings` styling.
+- `src/app/account/reminders/unsubscribe/page.tsx` — public server component, `dynamic='force-dynamic'`. Verifies token → flips `reminders_enabled = false` via service-role client. Three rendered outcomes: `success` / `invalid` / `error`, each with parent-friendly copy.
+- `vercel.json` — single cron entry.
+- `.env.example` — all six env vars documented (Supabase URL/anon, service role, Resend API key, REMINDER_FROM_EMAIL with local-vs-prod guidance, CRON_SECRET, REMINDER_UNSUB_SECRET, NEXT_PUBLIC_APP_URL).
+
+**Files modified:**
+- `src/lib/habit.ts` — added `getNzWeekRange(now?)`. `deriveHabitStatus` now consumes it instead of inlining the Monday math (no behaviour change; verified by existing tests still passing through tsc + eslint).
+- `src/app/dashboard/page.tsx` — imports `getNzWeekRange`, drops the inlined Mon-start block; profile select extended to include `reminders_enabled`; `RemindersToggle` mounted inside the existing Admin controls `<details>` block.
+- `supabase/schema.sql` — appended the new columns + index for parity with the live DB (no DDL rerun; was already applied via SQL Editor).
+- `package.json` — `resend ^6.12.3`.
+- `PROJECT_CONTEXT.md` — new "Daily Reminder Email v1" section + service-role-key constraint line under Known Implementation Decisions; `profiles` schema row updated.
+
+**Validation (this session):**
+| Check | Result |
+|------|--------|
+| `npx tsc --noEmit` | PASS (clean) |
+| `npx eslint` on touched files | PASS (clean) |
+| `GET /api/cron/daily-reminders` no auth | 401 ✓ |
+| `GET /api/cron/daily-reminders` wrong bearer | 401 ✓ |
+| `GET /account/reminders/unsubscribe?token=bogus` | 200, renders "This link looks expired" copy ✓ |
+| `GET /dashboard` unauth | 307 → `/login` (auth guard intact) ✓ |
+| `GET /login` | 200 (no compile error from refactored dashboard) ✓ |
+
+**Validation deferred to once production env vars are in place:**
+- Authenticated cron run with a real `CRON_SECRET` against a parent flipped to `reminders_enabled = true` → expect 1 Resend send, `last_reminder_sent_date` populated, second curl returns 0 sends (dedup).
+- Multi-student scenario: only one child practised → email lists only the other.
+- Both children practised → no email, no dedup write (so tomorrow stays eligible).
+- One-tap unsubscribe link from a real email → confirmation page + row flipped.
+
+**Production gate (intentional, not yet flipped):**
+- Real-parent sending requires a verified domain in Resend + `REMINDER_FROM_EMAIL` set to an address on that domain. Until both are true, `reminders_enabled` should remain `false` for every existing account. Local dev validation may use `REMINDER_FROM_EMAIL=onboarding@resend.dev`, which only delivers to the Resend account owner's verified inbox.
+
+**v1 limitations (deferred):**
+- Weekly summary email, weak-area digests, achievement emails, push notifications.
+- NZ public-holiday / school-day filtering.
+- DST drift correction (single static UTC cron entry; ±1h shift twice a year).
+- Per-parent send-time preferences.
+- Bounce / complaint handling (Resend errors are logged in the response body but not persisted).
 
 ---
 

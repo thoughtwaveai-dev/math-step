@@ -46,6 +46,29 @@ export function weekdayLetterLabel(key: string): string {
   return WEEKDAY_LABELS_SHORT[weekdayIndex(key)]
 }
 
+// Returns NZ-local week boundaries: Monday 00:00 → Sunday 23:59 (inclusive).
+// All keys are "YYYY-MM-DD" NZ-local. Used by both the dashboard's
+// Practice History "this week" count and the daily-reminder email so the
+// two surfaces cannot drift apart.
+export interface NzWeekRange {
+  todayKey: string
+  mondayKey: string
+  sundayKey: string
+}
+
+export function getNzWeekRange(now?: Date): NzWeekRange {
+  const todayKey = nzDateKey(now ?? new Date())
+  const todayDow = new Date(Date.UTC(
+    Number(todayKey.slice(0, 4)),
+    Number(todayKey.slice(5, 7)) - 1,
+    Number(todayKey.slice(8, 10)),
+  )).getUTCDay()
+  const daysBackToMonday = (todayDow + 6) % 7
+  const mondayKey = shiftDateKey(todayKey, -daysBackToMonday)
+  const sundayKey = shiftDateKey(mondayKey, 6)
+  return { todayKey, mondayKey, sundayKey }
+}
+
 export interface HabitDay {
   key: string
   shortLabel: string   // "Mon"
@@ -75,23 +98,13 @@ export interface DeriveHabitInput {
 
 export function deriveHabitStatus(input: DeriveHabitInput): HabitStatus {
   const now = input.now ?? new Date()
-  const todayKey = nzDateKey(now)
+  const { todayKey, mondayKey } = getNzWeekRange(now)
 
   const completedDays = new Set<string>()
   for (const iso of input.sessionCompletedAts) {
     if (!iso) continue
     completedDays.add(nzDateKey(iso))
   }
-
-  // Monday-first NZ calendar week: shift back so we land on Monday.
-  // weekdayIndex returns 0=Sun ... 6=Sat; (i + 6) % 7 → days back to Monday.
-  const todayDow = new Date(Date.UTC(
-    Number(todayKey.slice(0, 4)),
-    Number(todayKey.slice(5, 7)) - 1,
-    Number(todayKey.slice(8, 10)),
-  )).getUTCDay()
-  const daysBackToMonday = (todayDow + 6) % 7
-  const mondayKey = shiftDateKey(todayKey, -daysBackToMonday)
 
   const weekDays: HabitDay[] = []
   for (let offset = 0; offset < 7; offset++) {

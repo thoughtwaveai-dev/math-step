@@ -7,6 +7,7 @@ import Link from 'next/link'
 import SetLevelForm from './SetLevelForm'
 import PinSettings from './PinSettings'
 import StudentModeCard from './StudentModeCard'
+import RemindersToggle from './RemindersToggle'
 import AchievementsCard from '@/components/AchievementsCard'
 import MistakeJournalCard from '@/components/MistakeJournalCard'
 import PracticeHistoryCard, { type PracticeHistoryEntry } from '@/components/PracticeHistoryCard'
@@ -14,8 +15,7 @@ import HabitCard from '@/components/HabitCard'
 import { formatSpeed, formatNzDateTime } from '@/lib/format'
 import { isStudentStuck } from '@/lib/stuckDetector'
 import { deriveAchievementProgress } from '@/lib/achievements'
-import { deriveHabitStatus } from '@/lib/habit'
-import { nzDateKey, shiftDateKey } from '@/lib/habit'
+import { deriveHabitStatus, getNzWeekRange, nzDateKey } from '@/lib/habit'
 import { deriveWeakAreas } from '@/lib/mistakeJournal'
 
 const SESSION_FETCH_LIMIT = 500
@@ -51,10 +51,11 @@ export default async function DashboardPage({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('parent_pin')
+    .select('parent_pin, reminders_enabled')
     .eq('id', user.id)
     .maybeSingle()
   const hasPin = Boolean(profile?.parent_pin)
+  const remindersEnabled = Boolean(profile?.reminders_enabled)
 
   // Parallel: streaks/levels lookups + bounded full-history sessions + self-correction count + practice history
   const [
@@ -197,15 +198,7 @@ export default async function DashboardPage({
   }
 
   // --- Practice History: map rows + count this NZ-week (Mon-start, matches HabitCard) ---
-  const todayKey = nzDateKey(new Date())
-  const todayDow = new Date(Date.UTC(
-    Number(todayKey.slice(0, 4)),
-    Number(todayKey.slice(5, 7)) - 1,
-    Number(todayKey.slice(8, 10)),
-  )).getUTCDay()
-  const daysBackToMonday = (todayDow + 6) % 7
-  const mondayKey = shiftDateKey(todayKey, -daysBackToMonday)
-  const sundayKey = shiftDateKey(mondayKey, 6)
+  const { mondayKey, sundayKey } = getNzWeekRange()
 
   const practiceEntries: PracticeHistoryEntry[] = []
   let practiceThisWeekCount = 0
@@ -593,6 +586,7 @@ export default async function DashboardPage({
           </summary>
           <div className="px-5 pb-5 space-y-5">
             <PinSettings hasPin={hasPin} />
+            <RemindersToggle enabled={remindersEnabled} />
             {allLevels && allLevels.length > 0 && (
               <SetLevelForm
                 studentId={student.id}

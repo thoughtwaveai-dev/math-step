@@ -78,3 +78,14 @@ create policy "Users can manage practice for their students" on practice_session
         and students.parent_id = auth.uid()
     )
   );
+
+-- Daily Reminder Email v1 (Milestone 60) — applied via Supabase SQL Editor.
+-- Adds opt-in/out + same-day dedup columns on `profiles`. Existing rows were
+-- backfilled to `reminders_enabled = false` immediately after the column add.
+alter table profiles
+  add column if not exists reminders_enabled boolean not null default true,
+  add column if not exists last_reminder_sent_date date;
+
+create index if not exists idx_profiles_reminders_pending
+  on profiles (reminders_enabled, last_reminder_sent_date)
+  where reminders_enabled = true;
