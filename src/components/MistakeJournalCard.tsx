@@ -33,7 +33,7 @@ export default function MistakeJournalCard({ weakAreas, studentId, studentName }
 
       {weakAreas.length === 0 ? (
         <p className="text-sm text-[#4a6b4e]">
-          No clear weak spots yet — keep practising. {studentName} hasn&apos;t made enough mistakes for us to spot a pattern.
+          {`No clear weak spots yet — keep practising. ${studentName} hasn't made enough mistakes for us to spot a pattern.`}
         </p>
       ) : (
         <ul className="space-y-3">

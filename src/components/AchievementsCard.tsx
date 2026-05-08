@@ -57,7 +57,7 @@ export default function AchievementsCard({ progress, variant, studentName }: Pro
 
       {allEmpty && (
         <p className="text-sm text-[#4a6b4e] mb-4">
-          {studentName ?? 'Your student'} hasn&apos;t earned any milestones yet — the first finished worksheet unlocks the first badge.
+          {`${studentName ?? 'Your student'} hasn't earned any milestones yet — the first finished worksheet unlocks the first badge.`}
         </p>
       )}
 
