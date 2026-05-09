@@ -23,6 +23,16 @@ export default function PlacementForm({ studentId, studentName }: Props) {
     runPlacementDiagnostic,
     null
   )
+  const [primaryApplyState, primaryApplyAction, primaryApplyPending] = useActionState<
+    { error: string } | null,
+    FormData
+  >(applyPlacement, null)
+  const [fallbackApplyState, fallbackApplyAction, fallbackApplyPending] = useActionState<
+    { error: string } | null,
+    FormData
+  >(applyPlacement, null)
+  const anyApplyPending = primaryApplyPending || fallbackApplyPending
+  const applyError = primaryApplyState?.error || fallbackApplyState?.error
 
   if (state && 'step' in state && state.step === 'result') {
     return (
@@ -115,27 +125,37 @@ export default function PlacementForm({ studentId, studentName }: Props) {
         </div>
 
         <div className="space-y-3">
-          <form action={applyPlacement}>
+          {applyError && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {applyError}
+            </div>
+          )}
+
+          <form action={primaryApplyAction}>
             <input type="hidden" name="student_id" value={studentId} />
             <input type="hidden" name="level" value={state.level} />
             <input type="hidden" name="sublevel" value={state.sublevel} />
             <button
               type="submit"
-              className="w-full rounded-xl bg-[#2d6a35] px-4 py-4 text-base font-semibold text-white hover:bg-[#1f4d26] transition-colors"
+              disabled={anyApplyPending}
+              className="w-full rounded-xl bg-[#2d6a35] px-4 py-4 text-base font-semibold text-white hover:bg-[#1f4d26] disabled:opacity-50 transition-colors"
             >
-              Start practising at Level {state.level}.{state.sublevel}
+              {primaryApplyPending
+                ? 'Starting…'
+                : `Start practising at Level ${state.level}.${state.sublevel}`}
             </button>
           </form>
 
-          <form action={applyPlacement}>
+          <form action={fallbackApplyAction}>
             <input type="hidden" name="student_id" value={studentId} />
             <input type="hidden" name="level" value="1" />
             <input type="hidden" name="sublevel" value="1" />
             <button
               type="submit"
-              className="w-full rounded-xl border border-[#bae0bd] bg-white px-4 py-3.5 text-sm font-medium text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors"
+              disabled={anyApplyPending}
+              className="w-full rounded-xl border border-[#bae0bd] bg-white px-4 py-3.5 text-sm font-medium text-[#4a6b4e] hover:bg-[#f2faf3] disabled:opacity-50 transition-colors"
             >
-              Start at Level 1.1 instead
+              {fallbackApplyPending ? 'Starting…' : 'Start at Level 1.1 instead'}
             </button>
           </form>
         </div>

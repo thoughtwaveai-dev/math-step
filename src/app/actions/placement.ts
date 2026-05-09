@@ -73,16 +73,24 @@ export async function runPlacementDiagnostic(
   }
 }
 
-export async function applyPlacement(formData: FormData): Promise<void> {
+const APPLY_PLACEMENT_GENERIC_ERROR =
+  'Something went wrong starting this level. Please try again.'
+
+export async function applyPlacement(
+  _prevState: { error: string } | null,
+  formData: FormData
+): Promise<{ error: string } | null> {
   const studentId = formData.get('student_id') as string
   const levelNumber = parseInt(formData.get('level') as string, 10)
   const sublevelNumber = parseInt(formData.get('sublevel') as string, 10)
 
-  if (!studentId || isNaN(levelNumber) || isNaN(sublevelNumber)) return
+  if (!studentId || isNaN(levelNumber) || isNaN(sublevelNumber)) {
+    return { error: APPLY_PLACEMENT_GENERIC_ERROR }
+  }
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return
+  if (!user) return { error: APPLY_PLACEMENT_GENERIC_ERROR }
 
   const { data: student } = await supabase
     .from('students')
@@ -91,7 +99,7 @@ export async function applyPlacement(formData: FormData): Promise<void> {
     .eq('parent_id', user.id)
     .maybeSingle()
 
-  if (!student) return
+  if (!student) return { error: APPLY_PLACEMENT_GENERIC_ERROR }
 
   const { data: level } = await supabase
     .from('levels')
@@ -100,12 +108,14 @@ export async function applyPlacement(formData: FormData): Promise<void> {
     .eq('sublevel_number', sublevelNumber)
     .maybeSingle()
 
-  if (!level) return
+  if (!level) return { error: APPLY_PLACEMENT_GENERIC_ERROR }
 
-  await supabase
+  const { error: updateErr } = await supabase
     .from('students')
     .update({ current_level: levelNumber, current_sublevel: sublevelNumber })
     .eq('id', studentId)
+
+  if (updateErr) return { error: APPLY_PLACEMENT_GENERIC_ERROR }
 
   // Reset any stale progress for the new level (no-op if no row exists yet)
   await supabase

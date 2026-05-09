@@ -73,6 +73,26 @@ export async function createStudent(
 
   if (!user) return { error: 'Not authenticated.' }
 
+  const startMode = (formData.get('start_mode') as string) ?? 'default'
+
+  // Dedup: if the parent already has a student with the same normalized name,
+  // reuse that row instead of creating an accidental duplicate. v1 trade-off —
+  // intentional same-name siblings are unsupported until we add a disambiguation UI.
+  const normalized = name.toLowerCase()
+  const { data: existing } = await supabase
+    .from('students')
+    .select('id, name')
+    .eq('parent_id', user.id)
+
+  const match = existing?.find(s => s.name.trim().toLowerCase() === normalized)
+
+  if (match) {
+    if (startMode === 'diagnostic') {
+      redirect(`/placement?student=${match.id}`)
+    }
+    redirect(`/dashboard?student=${match.id}`)
+  }
+
   const { data: student, error: studentError } = await supabase
     .from('students')
     .insert({
@@ -92,20 +112,11 @@ export async function createStudent(
 
   if (streakError) return { error: streakError.message }
 
-  const startMode = (formData.get('start_mode') as string) ?? 'default'
-
   if (startMode === 'diagnostic') {
     redirect(`/placement?student=${student.id}`)
   }
 
-  // Count students owned before this insert to decide where to land
-  const { count } = await supabase
-    .from('students')
-    .select('id', { count: 'exact', head: true })
-    .eq('parent_id', user.id)
-    .neq('id', student.id)
-
-  const isFirstStudent = (count ?? 0) === 0
+  const isFirstStudent = (existing?.length ?? 0) === 0
   if (isFirstStudent) {
     redirect(`/onboarding/pin?student=${student.id}`)
   } else {

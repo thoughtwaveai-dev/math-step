@@ -181,6 +181,7 @@ No RLS — publicly readable. Seeded with curriculum data.
 1. Triggered automatically when authenticated user has no students
 2. `/onboarding` — single field: student name
 3. `createStudent` server action:
+   - **dedup guard:** if the parent already has a student whose name matches the submitted one after `trim().toLowerCase()`, no insert happens — the action redirects straight to `/dashboard?student=<existing.id>` (or `/placement?student=<existing.id>` for `start_mode=diagnostic`). Best-effort, race-tolerant; no DB unique constraint. Intentionally blocks intentional same-name siblings in v1.
    - inserts student row (`parent_id = user.id`, `current_level = 1`, `current_sublevel = 1`)
    - inserts streak row for that student
    - redirects to `/dashboard`

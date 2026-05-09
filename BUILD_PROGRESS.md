@@ -6,8 +6,39 @@
 
 ## Current Status
 
-**Phase:** Milestone 62 — Daily reminder refinement + Weekly Review email shipped. Daily email now picks one evidence-backed reason per pending student (streak ≥ 1 → streak line; week ≥ 1 → "X of 7 days"; otherwise "5 minutes today helps") plus a "Current focus: Level X.Y — Topic" line, with an explicit "Parent View → Admin controls" footer alongside the one-tap unsubscribe. New Weekly Review email sends Sundays 04:00 UTC (5 pm NZDT / 4 pm NZST) — one combined email per parent across all students with practice-days/worksheets/accuracy, current focus, "🏆 New this week" milestone tier crossings (derived by diffing achievement snapshots before/after the week — no schema for it), and a top weak area. Empty-week variant supported. Two separate toggles (`reminders_enabled` / `weekly_enabled`) in Parent View → Admin controls; separate HMAC-prefixed unsubscribe streams. Daily defaults stay OFF for existing users; weekly defaults ON for everyone (mandatory by default, easy to disable).
+**Phase:** Duplicate-student prevention + placement CTA feedback shipped on top of Milestone 62. `createStudent` now silently reuses an existing same-name student (trim+lowercase) instead of inserting a duplicate row; `applyPlacement` was reshaped to the standard `useActionState` server-action signature with a friendly inline error and a "Starting…" pending state on both result-page CTAs (cross-disabled while either is pending). No schema change. See entry below.
+
+**Phase (preceding):** Milestone 62 — Daily reminder refinement + Weekly Review email shipped. Daily email now picks one evidence-backed reason per pending student (streak ≥ 1 → streak line; week ≥ 1 → "X of 7 days"; otherwise "5 minutes today helps") plus a "Current focus: Level X.Y — Topic" line, with an explicit "Parent View → Admin controls" footer alongside the one-tap unsubscribe. New Weekly Review email sends Sundays 04:00 UTC (5 pm NZDT / 4 pm NZST) — one combined email per parent across all students with practice-days/worksheets/accuracy, current focus, "🏆 New this week" milestone tier crossings (derived by diffing achievement snapshots before/after the week — no schema for it), and a top weak area. Empty-week variant supported. Two separate toggles (`reminders_enabled` / `weekly_enabled`) in Parent View → Admin controls; separate HMAC-prefixed unsubscribe streams. Daily defaults stay OFF for existing users; weekly defaults ON for everyone (mandatory by default, easy to disable).
 **Next:** Real Resend verified-domain send + Vercel deploy verification (cron entries in dashboard).
+
+### Duplicate-student prevention + placement CTA feedback (2026-05-10)
+
+**Trigger:** Real beta parent (`raji.r.nair@gmail.com`) ended up with three "Aryan" student rows under one account — two stuck at Level 1.1, one at the placement-recommended Level 9.1 — and reported that *"Start practising at Level 9.1"* on the placement results screen "seemed to do nothing." We manually deleted the two Level 1.1 duplicates in Supabase (the Level 9.1 row remains), then patched the two contributing causes.
+
+**Audit:**
+- Only one place inserts into `students` — `createStudent` in `src/app/actions/students.ts`. It was inserting on every onboarding submit with no name dedup, so revisiting `/onboarding` (e.g. via "Add another student" or back-button) and re-typing "Aryan" produced a new row each time.
+- Placement (`runPlacementDiagnostic`, `applyPlacement`) only ever `update`s — it does not create students. So the missing CTA feedback didn't itself multiply rows; it just amplified parent confusion.
+- Student-list ordering is already deterministic everywhere (`.order('created_at', { ascending: true })` on `/play`, `/dashboard`, `/worksheet`, `/practice/weak-spots`, `/feedback`, both crons, `pin.ts`, `students.ts → deleteStudent`). No change needed.
+
+**Files modified:**
+- `src/app/actions/students.ts` — `createStudent` now fetches the parent's existing students after auth, normalizes the submitted name (`trim().toLowerCase()`), and if a match exists, redirects directly to `/dashboard?student=<existing.id>` (or `/placement?student=<existing.id>` when `start_mode=diagnostic`) without inserting a `students` or `streaks` row. Also reuses the same fetched list as the source of truth for the first-student check, so it doubles as a count saving one extra Supabase round-trip.
+- `src/app/actions/placement.ts` — `applyPlacement` reshaped to `(prev, formData) => Promise<{error}|null>`. Every guard returns the same parent-friendly copy *"Something went wrong starting this level. Please try again."* (no internal-state leakage). On success, still `redirect('/play?student=<id>')` — `useActionState` propagates `NEXT_REDIRECT` correctly.
+- `src/app/placement/PlacementForm.tsx` — result branch now uses two `useActionState(applyPlacement, null)` instances (one per CTA form). `anyApplyPending = primaryApplyPending || fallbackApplyPending` cross-disables both buttons while either is mid-submit, but each button's text only flips to *"Starting…"* when its own form is the one mid-submit, so the parent sees which one they tapped. `applyError = primaryApplyState?.error || fallbackApplyState?.error` renders a single inline red-50 error block above the CTAs.
+
+**Validation (this session):**
+| Check | Result |
+|------|--------|
+| `npx tsc --noEmit` | PASS (clean) |
+| `npx eslint` on the three touched files | PASS (clean) |
+| `npx next build` | PASS — only the pre-existing themeColor warnings on unrelated pages |
+| End-to-end Playwright walk | Skipped — placement and onboarding are auth-gated, no fresh test credentials available in this session. The behaviour is exercised by typecheck + build, and the user will dogfood the live flow. |
+
+**v1 trade-offs (intentional):**
+- Dedup is best-effort. Two near-simultaneous submits could in theory both pass the existence check and both insert, but the form button is `disabled={pending}` and parents do not realistically double-submit faster than a Supabase round-trip + insert. No DB unique constraint added (no schema change).
+- Intentional same-name siblings are unsupported until a future "you already have a student named X — open their dashboard or use a different name" disambiguation UI is added. The requirement explicitly preferred preventing accidental duplicates over supporting that case in v1.
+- Placement CTA error copy is a single generic message for every guard. Logs aren't surfaced to the parent.
+
+---
 
 ### Milestone 62 — Daily reminder refinement + Weekly Review email (2026-05-10)
 
