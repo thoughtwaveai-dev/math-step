@@ -17,18 +17,19 @@ function getClient(): Resend {
 
 export type SendResult = { ok: true; id?: string } | { ok: false; error: string }
 
-export async function sendDailyReminder(args: {
+interface SendArgs {
+  from: string
   to: string
   subject: string
   html: string
   text: string
-}): Promise<SendResult> {
-  const from = process.env.REMINDER_FROM_EMAIL
-  if (!from) return { ok: false, error: 'REMINDER_FROM_EMAIL is not set.' }
+}
+
+async function send(args: SendArgs): Promise<SendResult> {
   try {
     const resend = getClient()
     const { data, error } = await resend.emails.send({
-      from,
+      from: args.from,
       to: args.to,
       subject: args.subject,
       html: args.html,
@@ -42,4 +43,26 @@ export async function sendDailyReminder(args: {
       error: err instanceof Error ? err.message : 'Unknown send error',
     }
   }
+}
+
+export async function sendDailyReminder(args: {
+  to: string
+  subject: string
+  html: string
+  text: string
+}): Promise<SendResult> {
+  const from = process.env.REMINDER_FROM_EMAIL
+  if (!from) return { ok: false, error: 'REMINDER_FROM_EMAIL is not set.' }
+  return send({ from, ...args })
+}
+
+export async function sendWeeklyReview(args: {
+  to: string
+  subject: string
+  html: string
+  text: string
+}): Promise<SendResult> {
+  const from = process.env.WEEKLY_FROM_EMAIL ?? process.env.REMINDER_FROM_EMAIL
+  if (!from) return { ok: false, error: 'WEEKLY_FROM_EMAIL / REMINDER_FROM_EMAIL is not set.' }
+  return send({ from, ...args })
 }

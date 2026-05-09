@@ -6,8 +6,77 @@
 
 ## Current Status
 
-**Phase:** Placement diagnostic results review. ✓ After scoring, students/parents now see a "Placement complete" view with `score / total`, the recommended starting level + topic, supportive copy ("This helps MathStep choose the best starting level — placement is about finding the right fit, not passing or failing."), and a per-question review list with prompt, student's answer, correct answer (only shown on misses), and a "Correct ✓" / "Needs practice" status line. Worksheet-style Tailwind styling, soft amber for incorrect (no harsh red). No schema, no scoring, no flow changes — `scorePlacement` now also returns `correct[]` + `score` + `total`; `runPlacementDiagnostic` builds the review payload from existing FormData and `PLACEMENT_QUESTIONS`. Existing CTAs preserved ("Start practising at Level X.Y" / "Start at Level 1.1 instead").
-**Next:** Milestone 61 deferred items + Vercel deploy verification.
+**Phase:** Milestone 62 — Daily reminder refinement + Weekly Review email shipped. Daily email now picks one evidence-backed reason per pending student (streak ≥ 1 → streak line; week ≥ 1 → "X of 7 days"; otherwise "5 minutes today helps") plus a "Current focus: Level X.Y — Topic" line, with an explicit "Parent View → Admin controls" footer alongside the one-tap unsubscribe. New Weekly Review email sends Sundays 04:00 UTC (5 pm NZDT / 4 pm NZST) — one combined email per parent across all students with practice-days/worksheets/accuracy, current focus, "🏆 New this week" milestone tier crossings (derived by diffing achievement snapshots before/after the week — no schema for it), and a top weak area. Empty-week variant supported. Two separate toggles (`reminders_enabled` / `weekly_enabled`) in Parent View → Admin controls; separate HMAC-prefixed unsubscribe streams. Daily defaults stay OFF for existing users; weekly defaults ON for everyone (mandatory by default, easy to disable).
+**Next:** Real Resend verified-domain send + Vercel deploy verification (cron entries in dashboard).
+
+### Milestone 62 — Daily reminder refinement + Weekly Review email (2026-05-10)
+
+**Goal:** Two parts. (1) Refine the existing Daily Reminder so it's shorter, evidence-backed, and clearly skippable. (2) Add a new Weekly Review email — mandatory by default, sent Sundays 5 pm NZ, useful even on quiet weeks.
+
+**Approved decisions (from plan):**
+- Combined per parent for both streams — one email covers all students.
+- Defaults: Daily OFF (unchanged), Weekly ON (mandatory by default for new + existing users).
+- Single fixed UTC schedule with documented ±1h DST drift, mirroring the daily approach.
+- "New this week" milestones are derived by diffing achievement snapshots before/after the week — no snapshot table needed.
+- Reuse `REMINDER_UNSUB_SECRET`; isolate streams via HMAC input prefix (`weekly:` for weekly tokens), so a daily token cannot validate the weekly route and vice versa.
+
+**Phase 1 schema (applied via SQL editor, verified):**
+```sql
+alter table profiles
+  add column if not exists weekly_enabled boolean not null default true,
+  add column if not exists last_weekly_sent_date date;
+create index if not exists idx_profiles_weekly_pending
+  on profiles (weekly_enabled, last_weekly_sent_date)
+  where weekly_enabled = true;
+```
+All 6 existing profiles auto-backfilled to `weekly_enabled = true` via the column default. No separate UPDATE.
+
+**Files added:**
+- `src/lib/email/escapeHtml.ts` — shared escaper, used by both templates.
+- `src/lib/email/templates/weeklyReview.ts` — pure template builder, HTML + plaintext mirror, empty-week variant.
+- `src/app/api/cron/weekly-review/route.ts` — Bearer auth, levels fetched once per run, per-parent: students → bounded sessions (limit 500) → self-corrected problems → mistake-journal problems → snapshot diff for "new this week" → email send → dedup write only on Resend success.
+- `src/app/dashboard/WeeklyReviewToggle.tsx` — mirrors `RemindersToggle.tsx`.
+- `src/app/account/weekly/unsubscribe/page.tsx` — public route, service-role write, friendly "Weekly recap turned off" copy.
+
+**Files modified:**
+- `src/lib/email/templates/dailyReminder.ts` — body rewritten: per-pending-student block now has bold "{Child} hasn't practised today yet.", "Current focus: Level X.Y — Topic", plus exactly one reason line by priority (streak ≥ 1 → "{n}-day streak", week ≥ 1 → "{x} of 7 days", else → "5 minutes today helps"). Footer split into in-app instructions + one-tap unsub link.
+- `src/app/api/cron/daily-reminders/route.ts` — fetches `levels.topic` once per run, passes `currentLevel`, `currentSublevel`, `currentTopic` into each `PendingStudent`.
+- `src/app/dashboard/RemindersToggle.tsx` — copy: "Only sent on days no practice has happened yet."
+- `src/app/actions/reminders.ts` — added `setWeeklyEnabled` server action (mirrors `setRemindersEnabled`).
+- `src/app/dashboard/page.tsx` — selects `weekly_enabled` alongside `reminders_enabled` from `profiles`, renders `<WeeklyReviewToggle>` below `<RemindersToggle>` in Admin controls.
+- `src/lib/reminderToken.ts` — added `createWeeklyUnsubscribeToken` / `verifyWeeklyUnsubscribeToken` with `weekly:` HMAC prefix; daily helpers unchanged so already-issued tokens stay valid.
+- `src/lib/email/resend.ts` — extracted shared `send()`, added `sendWeeklyReview` (reads `WEEKLY_FROM_EMAIL`, falls back to `REMINDER_FROM_EMAIL`).
+- `vercel.json` — added second cron entry: `{ "path": "/api/cron/weekly-review", "schedule": "0 4 * * 0" }`.
+- `supabase/schema.sql` — recorded the new alter.
+
+**Validation (this session):**
+| Check | Result |
+|------|--------|
+| `npx tsc --noEmit` | PASS (clean) |
+| `npx eslint` on touched files | PASS (clean) |
+| Daily template renders (3 reason variants) | PASS — streak line, week-count line, cold-start line all rendered correctly with focus line |
+| Weekly template renders (1 student / 2 students mixed / empty-week) | PASS — milestones list, weak-area line, "Ready to continue" empty-week variant all rendered correctly |
+| Daily cron — 401 without Bearer | PASS |
+| Daily cron — 200 + JSON with Bearer (`sent: 3`) | PASS |
+| Daily cron — same-day dedup (`sent: 0` on retry) | PASS |
+| Weekly cron — 401 without Bearer | PASS |
+| Weekly cron — 200 + JSON with Bearer (`sent: 6`) | PASS — initial send went to all 6 profiles since weekly default is ON; 5 of 6 then disabled to leave only `melq64@gmail.com` opted in for ongoing dev sends |
+| Weekly cron — same-day dedup (`sent: 0` on retry) | PASS |
+| Response shape includes `weekStartKey` / `weekEndKey` | PASS |
+
+**v1 limitations (intentional, deferred):**
+- ±1h DST drift on the weekly cron (matches the daily approach). Single fixed UTC schedule.
+- Snapshot derivation for "new this week" milestones is bounded by the same 500-session fetch limit the dashboard uses; very long histories could miss tier crossings on `streak`/`selfcorrect` for old data. Not a real issue at v1 user counts.
+- No per-parent send-time preferences, no public-holiday filtering, no bounce/complaint handling, no push notifications.
+- No per-tier earned-date persistence — diff is recomputed each run.
+
+**Follow-up to address in a later milestone (not implemented now):**
+- `profiles.reminders_enabled` column default is currently `not null default true` in the SQL editor schema, but existing users were one-time UPDATE'd to `false` for Milestone 60. New signups still default ON for the daily stream, which contradicts the documented "Daily: OFF for new + existing users" intent. Two clean options:
+  1. Change the column default to `false` (DDL: `alter table profiles alter column reminders_enabled set default false;`).
+  2. Set `reminders_enabled = false` explicitly inside the signup / profile-row creation path so the SQL default no longer matters.
+  Option 1 is the simpler fix; option 2 makes the intent explicit at the application layer. Pick one before broader public signup is enabled.
+
+---
 
 ### Placement results review (2026-05-09)
 

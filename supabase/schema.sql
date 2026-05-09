@@ -89,3 +89,15 @@ alter table profiles
 create index if not exists idx_profiles_reminders_pending
   on profiles (reminders_enabled, last_reminder_sent_date)
   where reminders_enabled = true;
+
+-- Weekly Review Email v1 (Milestone 62) — applied via Supabase SQL Editor.
+-- Adds weekly opt-in/out (default ON, mandatory) + same-day dedup column on
+-- `profiles`. Existing rows inherit `weekly_enabled = true` automatically via
+-- the column default (NOT NULL DEFAULT TRUE) — no separate UPDATE needed.
+alter table profiles
+  add column if not exists weekly_enabled boolean not null default true,
+  add column if not exists last_weekly_sent_date date;
+
+create index if not exists idx_profiles_weekly_pending
+  on profiles (weekly_enabled, last_weekly_sent_date)
+  where weekly_enabled = true;

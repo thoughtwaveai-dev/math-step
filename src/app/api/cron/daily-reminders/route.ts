@@ -1,4 +1,4 @@
-// Daily Reminder Email v1 — Vercel Cron route handler.
+// Daily Reminder Email — Vercel Cron route handler.
 // Schedule: vercel.json runs this at 03:00 UTC = 4:00 pm NZDT / 3:00 pm NZST.
 // Auth: requires `Authorization: Bearer ${CRON_SECRET}` (Vercel Cron sets it).
 
@@ -34,6 +34,15 @@ export async function GET(request: Request) {
 
   const pendingProfiles = (profiles ?? []).filter(p => p.last_reminder_sent_date !== todayKey)
 
+  // Levels are public + small — fetch once per cron run, key by (level, sublevel).
+  const { data: allLevels } = await supabase
+    .from('levels')
+    .select('level_number, sublevel_number, topic')
+  const levelTopicMap = new Map<string, string>()
+  for (const l of allLevels ?? []) {
+    levelTopicMap.set(`${l.level_number}.${l.sublevel_number}`, l.topic)
+  }
+
   let sent = 0
   let skipped = 0
   let errors = 0
@@ -47,7 +56,7 @@ export async function GET(request: Request) {
 
     const { data: students } = await supabase
       .from('students')
-      .select('id, name')
+      .select('id, name, current_level, current_sublevel')
       .eq('parent_id', profile.id)
       .order('created_at', { ascending: true })
 
@@ -93,10 +102,14 @@ export async function GET(request: Request) {
         if (days.has(cursor)) weekCount++
         cursor = shiftDateKey(cursor, 1)
       }
+      const topic = levelTopicMap.get(`${stu.current_level}.${stu.current_sublevel}`) ?? null
       pending.push({
         name: stu.name,
         currentStreak: streakByStudent.get(stu.id) ?? 0,
         daysPractisedThisWeek: weekCount,
+        currentLevel: stu.current_level,
+        currentSublevel: stu.current_sublevel,
+        currentTopic: topic,
       })
     }
 

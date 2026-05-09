@@ -1,9 +1,14 @@
 // HMAC-signed tokens for one-tap email unsubscribe links.
-// Format: <base64url(parent_id)>.<base64url(hmacSha256(parent_id))>
-// No expiry — the link stays valid until the parent re-enables reminders.
+// Format: <base64url(parent_id)>.<base64url(hmacSha256(stream + parent_id))>
+// No expiry — the link stays valid until the parent re-enables that stream.
 // If a token leaks, the worst case is the recipient gets unsubscribed; they
 // can re-enable from Parent View. Re-keying REMINDER_UNSUB_SECRET invalidates
 // every previously-issued link.
+//
+// Stream isolation: daily tokens sign the bare parent_id (kept for backward
+// compatibility with already-issued links); weekly tokens sign
+// `weekly:${parent_id}`. A token from one stream cannot validate against the
+// other because the HMAC inputs differ.
 
 import { createHmac, timingSafeEqual } from 'node:crypto'
 
@@ -28,16 +33,11 @@ function b64urlDecode(input: string): Buffer {
   return Buffer.from(padded + '='.repeat(padLen), 'base64')
 }
 
-function sign(parentId: string): Buffer {
-  return createHmac('sha256', getSecret()).update(parentId).digest()
+function sign(payload: string): Buffer {
+  return createHmac('sha256', getSecret()).update(payload).digest()
 }
 
-export function createUnsubscribeToken(parentId: string): string {
-  const sig = sign(parentId)
-  return `${b64urlEncode(parentId)}.${b64urlEncode(sig)}`
-}
-
-export function verifyUnsubscribeToken(token: string | null | undefined): string | null {
+function verify(token: string | null | undefined, prefix: string): string | null {
   if (!token) return null
   const parts = token.split('.')
   if (parts.length !== 2) return null
@@ -50,8 +50,28 @@ export function verifyUnsubscribeToken(token: string | null | undefined): string
     return null
   }
   if (!parentId) return null
-  const expected = sign(parentId)
+  const expected = sign(`${prefix}${parentId}`)
   if (providedSig.length !== expected.length) return null
   if (!timingSafeEqual(providedSig, expected)) return null
   return parentId
+}
+
+// Daily stream — bare parent_id for backward compatibility.
+export function createUnsubscribeToken(parentId: string): string {
+  const sig = sign(parentId)
+  return `${b64urlEncode(parentId)}.${b64urlEncode(sig)}`
+}
+
+export function verifyUnsubscribeToken(token: string | null | undefined): string | null {
+  return verify(token, '')
+}
+
+// Weekly stream — prefixed input so a daily token can't validate here.
+export function createWeeklyUnsubscribeToken(parentId: string): string {
+  const sig = sign(`weekly:${parentId}`)
+  return `${b64urlEncode(parentId)}.${b64urlEncode(sig)}`
+}
+
+export function verifyWeeklyUnsubscribeToken(token: string | null | undefined): string | null {
+  return verify(token, 'weekly:')
 }

@@ -1,10 +1,16 @@
-// Daily Reminder Email v1 — pure template builder.
+// Daily Reminder Email — pure template builder.
+// One evidence-backed reason per pending student plus current focus.
 // No Resend/Supabase imports — easy to unit-test by string-comparison.
+
+import { escapeHtml } from '@/lib/email/escapeHtml'
 
 export interface PendingStudent {
   name: string
   currentStreak: number
   daysPractisedThisWeek: number  // 0..7, NZ Mon-start week
+  currentLevel: number
+  currentSublevel: number
+  currentTopic: string | null    // null when no matching levels row
 }
 
 export interface BuildDailyReminderArgs {
@@ -20,22 +26,19 @@ export interface BuiltEmail {
   text: string
 }
 
-function escapeHtml(input: string): string {
-  return input
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
+function reasonLine(s: PendingStudent): string {
+  if (s.currentStreak >= 1) {
+    return `${s.name} is on a ${s.currentStreak}-day streak — a quick session keeps it going.`
+  }
+  if (s.daysPractisedThisWeek >= 1) {
+    return `${s.name} has practised ${s.daysPractisedThisWeek} of 7 days this week — one more keeps the routine.`
+  }
+  return 'Consistency is what builds skill — 5 minutes today helps.'
 }
 
-function studentLine(s: PendingStudent): string {
-  if (s.currentStreak >= 1) {
-    return `${s.name} hasn't practised today yet. Current streak: ${s.currentStreak} day${
-      s.currentStreak === 1 ? '' : 's'
-    } · ${s.daysPractisedThisWeek} of 7 days this week.`
-  }
-  return `${s.name} hasn't practised today yet.`
+function focusLine(s: PendingStudent): string | null {
+  if (!s.currentTopic) return null
+  return `Current focus: Level ${s.currentLevel}.${s.currentSublevel} — ${s.currentTopic}`
 }
 
 export function buildDailyReminder(args: BuildDailyReminderArgs): BuiltEmail {
@@ -51,25 +54,38 @@ export function buildDailyReminder(args: BuildDailyReminderArgs): BuiltEmail {
       : 'Time for MathStep practice?'
 
   const playUrl = `${appUrl}/play`
-  const lines = pendingStudents.map(studentLine)
 
   // Plain-text version
-  const text = [
-    `Hi ${greetingName},`,
-    '',
-    ...lines,
-    '',
-    'A quick session keeps the routine going.',
-    '',
+  const textBlocks: string[] = [`Hi ${greetingName},`, '']
+  for (const s of pendingStudents) {
+    textBlocks.push(`${s.name} hasn't practised today yet.`)
+    const focus = focusLine(s)
+    if (focus) textBlocks.push(focus)
+    textBlocks.push(reasonLine(s))
+    textBlocks.push('')
+  }
+  textBlocks.push(
     `Open MathStep: ${playUrl}`,
     '',
-    "You're getting this because daily reminders are on. Turn them off any time from Parent View, or unsubscribe with one click:",
-    unsubscribeUrl,
-  ].join('\n')
+    "You're getting daily reminders because they're turned on.",
+    '- Turn off daily reminders in Parent View → Admin controls',
+    `- Or unsubscribe from daily reminders with one click: ${unsubscribeUrl}`,
+  )
+  const text = textBlocks.join('\n')
 
   // HTML version — table-based, inline styles, narrow safe palette.
-  const linesHtml = lines
-    .map(l => `<p style="margin:0 0 8px 0;font-size:15px;line-height:1.5;color:#1a2e1c;">${escapeHtml(l)}</p>`)
+  const studentBlocksHtml = pendingStudents
+    .map(s => {
+      const focus = focusLine(s)
+      const focusHtml = focus
+        ? `<p style="margin:0 0 4px 0;font-size:14px;line-height:1.5;color:#4a6b4e;">${escapeHtml(focus)}</p>`
+        : ''
+      return `<div style="margin:0 0 16px 0;">
+        <p style="margin:0 0 4px 0;font-size:15px;line-height:1.5;color:#1a2e1c;font-weight:600;">${escapeHtml(`${s.name} hasn't practised today yet.`)}</p>
+        ${focusHtml}
+        <p style="margin:0;font-size:14px;line-height:1.5;color:#4a6b4e;">${escapeHtml(reasonLine(s))}</p>
+      </div>`
+    })
     .join('')
 
   const html = `<!doctype html>
@@ -81,16 +97,16 @@ export function buildDailyReminder(args: BuildDailyReminderArgs): BuiltEmail {
           <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;width:100%;background:#ffffff;border:1px solid #bae0bd;border-radius:12px;padding:28px 28px 20px 28px;">
             <tr>
               <td>
-                <p style="margin:0 0 12px 0;font-size:15px;color:#1a2e1c;">Hi ${escapeHtml(greetingName)},</p>
-                ${linesHtml}
-                <p style="margin:12px 0 20px 0;font-size:15px;line-height:1.5;color:#4a6b4e;">A quick session keeps the routine going.</p>
-                <p style="margin:0 0 24px 0;">
+                <p style="margin:0 0 16px 0;font-size:15px;color:#1a2e1c;">Hi ${escapeHtml(greetingName)},</p>
+                ${studentBlocksHtml}
+                <p style="margin:8px 0 24px 0;">
                   <a href="${escapeHtml(playUrl)}" style="display:inline-block;background:#2d6a35;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 22px;border-radius:10px;">Open MathStep</a>
                 </p>
                 <hr style="border:none;border-top:1px solid #e1f4e3;margin:16px 0;" />
+                <p style="margin:0 0 6px 0;font-size:12px;line-height:1.5;color:#4a6b4e;">You're getting daily reminders because they're turned on.</p>
+                <p style="margin:0 0 4px 0;font-size:12px;line-height:1.5;color:#4a6b4e;">Turn off daily reminders in Parent View → Admin controls.</p>
                 <p style="margin:0;font-size:12px;line-height:1.5;color:#4a6b4e;">
-                  You're getting this because daily reminders are on. Turn them off any time from Parent View, or
-                  <a href="${escapeHtml(unsubscribeUrl)}" style="color:#2d6a35;">unsubscribe with one click</a>.
+                  Or <a href="${escapeHtml(unsubscribeUrl)}" style="color:#2d6a35;">unsubscribe from daily reminders with one click</a>.
                 </p>
               </td>
             </tr>

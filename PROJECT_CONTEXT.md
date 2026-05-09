@@ -116,6 +116,8 @@ RLS: users can only access streak rows for their own students.
 | pin_locked_until | timestamptz | nullable; cooldown end (Milestone 50) |
 | reminders_enabled | bool | default true; Daily Reminder Email v1 (Milestone 60). Existing rows backfilled to `false`. |
 | last_reminder_sent_date | date | nullable; NZ-local date key of last successful reminder send (Milestone 60). |
+| weekly_enabled | bool | default true; Weekly Review Email v1 (Milestone 62). Mandatory by default — existing rows inherit `true` via column default at column-add time. |
+| last_weekly_sent_date | date | nullable; NZ-local date key of last successful weekly review send (Milestone 62). |
 
 RLS: insert/select/update own row (`auth.uid() = id`). No new policies were needed for the PIN or reminder columns — the daily-reminder cron handler bypasses RLS via the service role client.
 
@@ -456,12 +458,18 @@ one-email-per-student.
   handler and the unsubscribe page. Never imported from client
   components or middleware.
 - **Email content** (in `src/lib/email/templates/dailyReminder.ts`):
-  greeting, one line per pending child (with optional "Current streak:
-  N days · X of 7 days this week" when `currentStreak ≥ 1`), one
-  friendly line, an "Open MathStep" CTA, and a footer with both an
-  in-app reminder and a one-tap unsubscribe link. Subject is
-  `{Child}'s MathStep practice today?` for one child or `Time for
-  MathStep practice?` for two or more.
+  Greeting, then one block per pending child containing a bold "{Child}
+  hasn't practised today yet." headline, a "Current focus: Level X.Y —
+  Topic" line (looked up from `levels` once per cron run), and exactly
+  one evidence-backed reason picked by priority (Milestone 62):
+  `currentStreak ≥ 1` → *"{Child} is on a {n}-day streak — a quick
+  session keeps it going."*; else `daysPractisedThisWeek ≥ 1` →
+  *"{Child} has practised {x} of 7 days this week — one more keeps
+  the routine."*; else → *"Consistency is what builds skill — 5
+  minutes today helps."* Footer makes both escape hatches explicit:
+  an in-app "Parent View → Admin controls" line plus a one-tap
+  unsubscribe link. Subject is `{Child}'s MathStep practice today?`
+  for one child or `Time for MathStep practice?` for two or more.
 - **Opt-out paths:**
   1. **In-app toggle** in Parent View → Admin controls
      (`src/app/dashboard/RemindersToggle.tsx` →
@@ -482,10 +490,93 @@ one-email-per-student.
   account and `REMINDER_FROM_EMAIL=onboarding@resend.dev` is acceptable
   for local dev only (delivers solely to the Resend account owner's
   verified inbox).
-- **v1 limitations (deferred):** weekly-summary email, weak-area
-  digests, achievement emails, push notifications, public-holiday /
-  school-day filtering, DST drift correction, per-parent send-time
-  preferences, bounce/complaint handling.
+- **v1 limitations (deferred):** weak-area digests, achievement
+  emails, push notifications, public-holiday / school-day filtering,
+  DST drift correction, per-parent send-time preferences,
+  bounce/complaint handling. (Weekly summary email shipped in
+  Milestone 62 — see below.)
+
+## Weekly Review Email v1 (Milestone 62)
+
+Sunday-evening recap email — combined per parent across all their
+students. Mandatory by default (`weekly_enabled = true` for new + existing
+users), separate one-tap unsubscribe stream from the daily reminder.
+
+- **Schema (added on `profiles`, no new table):** `weekly_enabled
+  boolean not null default true`, `last_weekly_sent_date date`. Index
+  `idx_profiles_weekly_pending` on `(weekly_enabled,
+  last_weekly_sent_date) where weekly_enabled = true`. Existing rows
+  inherit `true` automatically via the column default — no separate
+  backfill UPDATE.
+- **Trigger:** Vercel Cron entry in `vercel.json` runs
+  `GET /api/cron/weekly-review` at `0 4 * * 0` UTC = **5:00 pm NZDT**
+  (UTC+13) / **4:00 pm NZST** (UTC+12) on Sunday. ±1h DST drift is an
+  accepted v1 limitation (matches the daily approach).
+- **Auth:** the route handler verifies `Authorization: Bearer
+  ${CRON_SECRET}` and 401s anything else.
+- **NZ time logic:** reuses `getNzWeekRange()` / `nzDateKey()` /
+  `shiftDateKey()` from `src/lib/habit.ts`, so the email's "X practice
+  days · N worksheets · Y% accuracy" cannot drift from the dashboard's
+  HabitCard / Practice History counts. Week range is Mon 00:00 NZ →
+  Sun 23:59:59 NZ.
+- **Per-student block:** `📊 {practiceDays} practice days · {worksheets}
+  worksheets · {accuracy}% accuracy`, `🎯 Current focus: Level X.Y —
+  Topic`, optional `🏆 New this week: …`, optional `⚠️ Needs practice:
+  {parentLabelForType}`. Empty-week variant replaces metrics with
+  *"No worksheets this week — that's okay, every week is a fresh
+  start."* and `🎯 Ready to continue: Level X.Y — Topic`. Subject is
+  `{Child}'s MathStep week` for one child or `Your kids' MathStep
+  week` for two or more.
+- **"New this week" derivation (no schema):** the cron handler
+  computes two `deriveAchievementProgress()` snapshots per student —
+  one as of the previous NZ Sunday (`shiftDateKey(mondayKey, -1)`) and
+  one as of now — over the bounded `sessions` fetch (limit 500).
+  Inputs derived from sessions+problems: `totalSessions =
+  count(filtered)`, `perfectCount = filtered.accuracy = 100`,
+  `speedyPassCount = passed AND time_taken_seconds ≤
+  speedTarget(level_id)`, `levelsMasteredCount = distinct
+  passed.level_id`, `totalPoints = sum(passed ? 15 : 10)` (formula
+  matches `src/app/actions/worksheet.ts`), `selfCorrectCount =
+  problems.self_corrected = true joined on filtered sessions`,
+  `longestStreak = longest consecutive run of NZ date keys from
+  filtered sessions`. Any family whose `earnedTier` strictly
+  increased between snapshots crosses one or more new tiers this
+  week — every newly-crossed tier in `family.tiers` is listed
+  individually using `family.formatTierBadge(tier)`.
+- **Top weak area:** reuses `deriveWeakAreas()` over the student's
+  recent 20 sessions (same window `MistakeJournalCard` uses on the
+  dashboard). Top 1 result rendered using its `.label`
+  (`parentLabelForType` for new rows, `Level X.Y — Topic` fallback
+  for legacy rows).
+- **RLS bypass:** same `createServiceRoleClient()` pattern as the
+  daily cron. Service role key is allowed in server-side
+  cron/background routes only.
+- **Opt-out paths:**
+  1. **In-app toggle** in Parent View → Admin controls
+     (`src/app/dashboard/WeeklyReviewToggle.tsx` →
+     `src/app/actions/reminders.ts → setWeeklyEnabled`).
+  2. **One-tap email footer link** to
+     `/account/weekly/unsubscribe?token=…`. Token is HMAC-signed
+     `weekly:${parent_id}` via
+     `createWeeklyUnsubscribeToken(parentId)` in
+     `src/lib/reminderToken.ts`. The `weekly:` prefix isolates streams
+     so a daily token cannot validate the weekly route, and vice versa.
+     Reuses the existing `REMINDER_UNSUB_SECRET` env var — no new
+     secret needed.
+- **Duplicate-send prevention:** select clause filters out anyone
+  with `last_weekly_sent_date = todayKey`. The handler updates the
+  column only after Resend reports success. At-least-once cron
+  firings are therefore idempotent within the same NZ Sunday.
+- **From address:** the route reads `WEEKLY_FROM_EMAIL` if set,
+  falling back to `REMINDER_FROM_EMAIL`. Same Resend-domain
+  prerequisites as the daily stream.
+- **v1 limitations (deferred):** ±1h DST drift, snapshot derivation
+  bounded by the 500-session fetch limit (very-long histories could
+  miss `streak` / `selfcorrect` tier crossings for ancient data — not
+  a real issue at v1 counts), no per-parent send-time preferences, no
+  public-holiday / school-day filtering, no bounce/complaint
+  handling, no per-tier earned-date persistence (diff recomputed
+  each run).
 
 ## Delete Student admin control (Milestone 61)
 

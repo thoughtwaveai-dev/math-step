@@ -1,20 +1,20 @@
 'use client'
 
 import { useActionState } from 'react'
-import { setRemindersEnabled } from '@/app/actions/reminders'
+import { setWeeklyEnabled } from '@/app/actions/reminders'
 
 type Props = {
   enabled: boolean
 }
 
-export default function RemindersToggle({ enabled }: Props) {
-  const [state, action, pending] = useActionState(setRemindersEnabled, null)
+export default function WeeklyReviewToggle({ enabled }: Props) {
+  const [state, action, pending] = useActionState(setWeeklyEnabled, null)
 
   return (
     <div>
-      <h3 className="text-sm font-semibold text-[#1a2e1c]">Daily reminder email</h3>
+      <h3 className="text-sm font-semibold text-[#1a2e1c]">Weekly progress email</h3>
       <p className="mt-1 text-xs text-[#4a6b4e]">
-        Only sent on days no practice has happened yet.
+        Sent Sunday evenings — a short recap of your kids&apos; week.
       </p>
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -25,7 +25,7 @@ export default function RemindersToggle({ enabled }: Props) {
               : 'border border-[#bae0bd] bg-white text-[#4a6b4e]'
           }`}
         >
-          {enabled ? 'Reminders on' : 'Reminders off'}
+          {enabled ? 'Weekly recap on' : 'Weekly recap off'}
         </span>
         <form action={action}>
           <input type="hidden" name="enabled" value={enabled ? 'false' : 'true'} />
