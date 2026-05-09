@@ -12,7 +12,7 @@ export type PlacementQuestion = {
   id: number
   prompt: string
   answer: string
-  inputMode: 'numeric' | 'text'
+  inputMode: 'numeric' | 'decimal' | 'text'
   band: PlacementBand
   hint?: string
 }
@@ -47,7 +47,7 @@ export const PLACEMENT_QUESTIONS: PlacementQuestion[] = [
   },
 
   // Band 4 — Decimals & Percentages (levels 6/1–6/2)
-  { id: 7, prompt: '4.5 + 3.7 = ?', answer: '8.2', inputMode: 'numeric', band: 'decimals_pct' },
+  { id: 7, prompt: '4.5 + 3.7 = ?', answer: '8.2', inputMode: 'decimal', band: 'decimals_pct' },
   { id: 8, prompt: 'What is 25% of 80?', answer: '20', inputMode: 'numeric', band: 'decimals_pct' },
 
   // Band 5 — Negative Numbers & Order of Operations (levels 7/1–7/2)
