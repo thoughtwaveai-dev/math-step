@@ -11,6 +11,37 @@
 
 ---
 
+### Legacy Vercel URL → custom domain redirect (2026-05-09)
+
+**Goal:** Redirect `https://math-steps.vercel.app/*` to `https://mathstep.nz/*` preserving path and query, without breaking Vercel cron.
+
+**Approach:** Host-based redirect added to existing `src/middleware.ts` (chosen over `next.config.redirects()` to avoid path-to-regexp ambiguity around capturing multi-segment paths while excluding `/api/`). The middleware was already running on every non-static request, so this is a single header check + origin swap with no new matcher work.
+
+```ts
+if (host === 'math-steps.vercel.app' && !pathname.startsWith('/api/')) {
+  return NextResponse.redirect(`https://mathstep.nz${pathname}${search}`, 308)
+}
+```
+
+- **Status:** 308 (permanent, method-preserving — safer than 301 for any future POSTs).
+- **Excluded:** `/api/*` — keeps `/api/cron/daily-reminders` working regardless of which host Vercel routes the cron through internally. Headers like `Authorization: Bearer ${CRON_SECRET}` are not at risk of being dropped on a cross-origin redirect.
+- **Local dev unaffected:** `host` is `localhost:PORT` in dev, never matches.
+- **No loop on `mathstep.nz`:** redirect only fires when host equals the legacy Vercel domain.
+- **Preview deployments unaffected:** preview URLs are `math-steps-git-*.vercel.app`, not the exact production alias matched here.
+
+**Files modified:**
+- `src/middleware.ts` — added host check + 308 redirect before `updateSession`.
+
+**Validation (this session):**
+| Check | Result |
+|------|--------|
+| `npx tsc --noEmit` | PASS (clean) |
+| `npx eslint src/middleware.ts` | PASS (clean) |
+| Live old-URL → new-URL redirect | Pending deploy — host-based behaviour can't be reproduced on `localhost` |
+| `/api/cron/daily-reminders` on `mathstep.nz` | Pending post-deploy verification (path is excluded from redirect rule) |
+
+---
+
 ### Milestone 61 — Safe Delete Student admin control (2026-05-09)
 
 **Goal:** Let parents remove a mistaken/test student profile from inside the app instead of editing Supabase manually. Parent-only, gated by Student Mode/PIN, exact-name typed confirmation, refuses when it would leave the parent with zero students, no schema changes.
