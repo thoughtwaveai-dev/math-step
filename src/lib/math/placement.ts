@@ -71,6 +71,9 @@ export type PlacementResult = {
   sublevel: number
   topic: string
   explanation: string
+  correct: boolean[]
+  score: number
+  total: number
 }
 
 const PLACEMENT_INFO: Record<string, { topic: string; explanation: string }> = {
@@ -202,11 +205,15 @@ export function scorePlacement(answers: string[]): PlacementResult {
 
   const info = PLACEMENT_INFO[key]
   const [levelStr, sublevelStr] = key.split('/')
+  const score = correct.reduce((acc, c) => acc + (c ? 1 : 0), 0)
 
   return {
     level: parseInt(levelStr, 10),
     sublevel: parseInt(sublevelStr, 10),
     topic: info.topic,
     explanation: info.explanation,
+    correct,
+    score,
+    total: PLACEMENT_QUESTIONS.length,
   }
 }

@@ -6,7 +6,36 @@
 
 ## Current Status
 
-**Phase:** Milestone 61 — Safe Delete Student admin control. ✓ Live cascade audit on the Math-Step Supabase project confirmed `sessions`, `problems` (via sessions), `streaks`, `student_level_progress`, `practice_sessions` all `ON DELETE CASCADE` from `students`; `feedback.student_id ON DELETE SET NULL` (parent_id rows preserved). No schema changes required. ✓ `deleteStudent` server action added to `src/app/actions/students.ts` — verifies parent ownership via `parent_id = auth.uid()`, requires exact typed-name match (case-sensitive after trim), refuses when parent has only one student, redirects to dashboard for first remaining student (oldest by `created_at`). ✓ `src/app/dashboard/DeleteStudentSection.tsx` mounted inside the existing Admin controls `<details>` block at the bottom — collapsed trigger + inline confirmation form, soft outline-only red styling (`border-red-300 / text-red-700`) per user direction. ✓ One-student case shows calm copy with no active button. ✓ Existing `enforceParentMode('/dashboard')` keeps the section unreachable from Student Mode without PIN; `/play` and `/worksheet` intentionally untouched.
+**Phase:** Placement diagnostic results review. ✓ After scoring, students/parents now see a "Placement complete" view with `score / total`, the recommended starting level + topic, supportive copy ("This helps MathStep choose the best starting level — placement is about finding the right fit, not passing or failing."), and a per-question review list with prompt, student's answer, correct answer (only shown on misses), and a "Correct ✓" / "Needs practice" status line. Worksheet-style Tailwind styling, soft amber for incorrect (no harsh red). No schema, no scoring, no flow changes — `scorePlacement` now also returns `correct[]` + `score` + `total`; `runPlacementDiagnostic` builds the review payload from existing FormData and `PLACEMENT_QUESTIONS`. Existing CTAs preserved ("Start practising at Level X.Y" / "Start at Level 1.1 instead").
+**Next:** Milestone 61 deferred items + Vercel deploy verification.
+
+### Placement results review (2026-05-09)
+
+**Goal:** A student asked "Can I see the score or if my answers were correct for the placement quiz?". Make placement results inspectable like a worksheet without changing scoring or persistence.
+
+**Approach (no schema change):**
+- `src/lib/math/placement.ts` — `PlacementResult` extended with `correct: boolean[]`, `score`, `total`. `scorePlacement` already calls `gradeAnswer` per question; we now return that array alongside the existing fields.
+- `src/app/actions/placement.ts` — `PlacementState` (result branch) gains `score`, `total`, `questions: PlacementReviewItem[]` (per-question id, prompt, hint, studentAnswer, correctAnswer, isCorrect). Built from FormData + `PLACEMENT_QUESTIONS` inside `runPlacementDiagnostic` — no extra DB calls.
+- `src/app/placement/PlacementForm.tsx` — result branch reworked to show: "Placement complete" header, score/recommended-level card with supportive copy, per-question review cards (worksheet styling, ✓ / ✕, "no answer" placeholder when blank), then existing CTAs.
+
+**Tone:** kept supportive throughout — "Recommended starting point", "Needs practice", "This helps MathStep choose the best starting level — placement is about finding the right fit, not passing or failing." No "failed" / "wrong level" copy, no harsh red.
+
+**Files modified:**
+- `src/lib/math/placement.ts`
+- `src/app/actions/placement.ts`
+- `src/app/placement/PlacementForm.tsx`
+
+**Validation (this session):**
+| Check | Result |
+|------|--------|
+| `npx tsc --noEmit` | PASS |
+| `npx eslint` on touched files | PASS |
+| `npx next build` | PASS (only pre-existing themeColor warnings on unrelated pages) |
+| End-to-end Playwright walk | Skipped — placement is auth-gated and no test credentials available in this session. Code paths are exercised by build + typecheck. |
+
+---
+
+ ✓ Live cascade audit on the Math-Step Supabase project confirmed `sessions`, `problems` (via sessions), `streaks`, `student_level_progress`, `practice_sessions` all `ON DELETE CASCADE` from `students`; `feedback.student_id ON DELETE SET NULL` (parent_id rows preserved). No schema changes required. ✓ `deleteStudent` server action added to `src/app/actions/students.ts` — verifies parent ownership via `parent_id = auth.uid()`, requires exact typed-name match (case-sensitive after trim), refuses when parent has only one student, redirects to dashboard for first remaining student (oldest by `created_at`). ✓ `src/app/dashboard/DeleteStudentSection.tsx` mounted inside the existing Admin controls `<details>` block at the bottom — collapsed trigger + inline confirmation form, soft outline-only red styling (`border-red-300 / text-red-700`) per user direction. ✓ One-student case shows calm copy with no active button. ✓ Existing `enforceParentMode('/dashboard')` keeps the section unreachable from Student Mode without PIN; `/play` and `/worksheet` intentionally untouched.
 **Next:** Real end-to-end Resend send once a verified domain is in place; then deploy to Vercel and verify cron entry in the Vercel dashboard.
 
 ---

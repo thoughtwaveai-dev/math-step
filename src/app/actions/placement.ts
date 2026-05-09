@@ -4,9 +4,27 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { scorePlacement, PLACEMENT_QUESTIONS } from '@/lib/math/placement'
 
+export type PlacementReviewItem = {
+  id: number
+  prompt: string
+  hint?: string
+  studentAnswer: string
+  correctAnswer: string
+  isCorrect: boolean
+}
+
 export type PlacementState =
   | null
-  | { step: 'result'; level: number; sublevel: number; topic: string; explanation: string }
+  | {
+      step: 'result'
+      level: number
+      sublevel: number
+      topic: string
+      explanation: string
+      score: number
+      total: number
+      questions: PlacementReviewItem[]
+    }
   | { error: string }
 
 export async function runPlacementDiagnostic(
@@ -34,7 +52,25 @@ export async function runPlacementDiagnostic(
   )
   const result = scorePlacement(answers)
 
-  return { step: 'result', ...result }
+  const questions: PlacementReviewItem[] = PLACEMENT_QUESTIONS.map((q, i) => ({
+    id: q.id,
+    prompt: q.prompt,
+    hint: q.hint,
+    studentAnswer: (answers[i] ?? '').trim(),
+    correctAnswer: q.answer,
+    isCorrect: result.correct[i],
+  }))
+
+  return {
+    step: 'result',
+    level: result.level,
+    sublevel: result.sublevel,
+    topic: result.topic,
+    explanation: result.explanation,
+    score: result.score,
+    total: result.total,
+    questions,
+  }
 }
 
 export async function applyPlacement(formData: FormData): Promise<void> {

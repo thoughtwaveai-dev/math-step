@@ -31,17 +31,87 @@ export default function PlacementForm({ studentId, studentName }: Props) {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-[#e1f4e3] mb-4">
             <span className="text-3xl">🎯</span>
           </div>
-          <h1 className="text-2xl font-bold text-[#1a2e1c]">Placement Result</h1>
-          <p className="mt-1 text-sm text-[#4a6b4e]">Based on {studentName}&apos;s answers</p>
+          <h1 className="text-2xl font-bold text-[#1a2e1c]">Placement complete</h1>
+          <p className="mt-1 text-sm text-[#4a6b4e]">Nice work, {studentName}!</p>
         </div>
 
         <div className="rounded-2xl border-2 border-[#2d6a35] bg-white p-6 text-center shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#4a6b4e] mb-1">Recommended Level</p>
-          <p className="text-5xl font-bold text-[#2d6a35] mb-2">
-            {state.level}.{state.sublevel}
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#4a6b4e] mb-1">Score</p>
+          <p className="text-3xl font-bold text-[#1a2e1c] mb-4">
+            {state.score} <span className="text-[#4a6b4e]">/ {state.total}</span>
           </p>
-          <p className="text-xl font-semibold text-[#1a2e1c] mb-3">{state.topic}</p>
-          <p className="text-sm text-[#4a6b4e]">{state.explanation}</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#4a6b4e] mb-1">Recommended starting point</p>
+          <p className="text-4xl font-bold text-[#2d6a35]">
+            Level {state.level}.{state.sublevel}
+          </p>
+          <p className="text-lg font-semibold text-[#1a2e1c] mt-1 mb-3">{state.topic}</p>
+          <p className="text-sm text-[#4a6b4e]">
+            This helps MathStep choose the best starting level — placement is about finding the right fit, not passing or failing.
+          </p>
+          <p className="mt-2 text-sm text-[#4a6b4e]">{state.explanation}</p>
+        </div>
+
+        <div className="space-y-3">
+          <h2 className="text-lg font-bold text-[#1a2e1c]">Review your answers</h2>
+          {state.questions.map((q, i) => (
+            <div
+              key={q.id}
+              className={`rounded-xl border bg-white p-4 ${
+                q.isCorrect ? 'border-[#bae0bd]' : 'border-amber-200'
+              }`}
+            >
+              <div className="flex items-start gap-3">
+                <span
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                    q.isCorrect
+                      ? 'bg-[#e1f4e3] text-[#2d6a35]'
+                      : 'bg-amber-100 text-amber-700'
+                  }`}
+                >
+                  {q.isCorrect ? '✓' : '✕'}
+                </span>
+
+                <div className="flex-1 space-y-2">
+                  <p className="text-xs font-medium text-[#4a6b4e]">Question {i + 1}</p>
+                  <p className="text-base font-semibold text-[#1a2e1c]">{q.prompt}</p>
+
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">
+                        Your answer
+                      </p>
+                      <p
+                        className={`mt-0.5 font-semibold ${
+                          q.isCorrect ? 'text-[#2d6a35]' : 'text-amber-700'
+                        }`}
+                      >
+                        {q.studentAnswer || (
+                          <span className="italic text-[#a0b8a3]">no answer</span>
+                        )}
+                      </p>
+                    </div>
+
+                    {!q.isCorrect && (
+                      <div>
+                        <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">
+                          Correct answer
+                        </p>
+                        <p className="mt-0.5 font-semibold text-[#2d6a35]">{q.correctAnswer}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <p
+                    className={`text-xs font-semibold ${
+                      q.isCorrect ? 'text-[#2d6a35]' : 'text-amber-700'
+                    }`}
+                  >
+                    {q.isCorrect ? 'Correct ✓' : 'Needs practice'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="space-y-3">
@@ -53,7 +123,7 @@ export default function PlacementForm({ studentId, studentName }: Props) {
               type="submit"
               className="w-full rounded-xl bg-[#2d6a35] px-4 py-4 text-base font-semibold text-white hover:bg-[#1f4d26] transition-colors"
             >
-              Start at Level {state.level}.{state.sublevel} — {state.topic}
+              Start practising at Level {state.level}.{state.sublevel}
             </button>
           </form>
 
