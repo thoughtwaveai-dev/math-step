@@ -487,6 +487,19 @@ one-email-per-student.
   school-day filtering, DST drift correction, per-parent send-time
   preferences, bounce/complaint handling.
 
+## Delete Student admin control (Milestone 61)
+
+Parent-only destructive action inside the dashboard's Admin controls. Server action: `deleteStudent` in `src/app/actions/students.ts`. UI: `src/app/dashboard/DeleteStudentSection.tsx`, mounted at the bottom of the Admin controls `<details>` block.
+
+- **Ownership:** server action filters by `parent_id = auth.uid()` on `students`. RLS is a backstop.
+- **Confirmation:** typed-name input must match `student.name` exactly after `trim()` on both sides (case-sensitive). Submit button is live-disabled until match.
+- **Only-student guard:** if the parent has ≤ 1 students the section shows the message *"You need at least one student profile. Add another student before deleting this one."* and renders no active button. Server action also re-checks the count and refuses with the same copy.
+- **Cleanup:** relies entirely on existing FK cascades — `sessions`, `problems` (via sessions), `streaks`, `student_level_progress`, `practice_sessions` all CASCADE from `students`; `feedback.student_id` is SET NULL so parent-owned feedback is preserved with `student_id = NULL`. No manual child-row deletes, no DDL.
+- **Redirect:** after deletion the action redirects to `/dashboard?student=<oldest remaining student>` (ordered by `created_at asc`). Redirect goes to `/onboarding` only as a defensive fallback — the count check should make that unreachable.
+- **Mode gate:** the parent dashboard already calls `enforceParentMode('/dashboard')`, so the section is unreachable from Student Mode without PIN. `/play` and `/worksheet` intentionally do not import the component or action — child surfaces have no delete UI and no delete code path.
+- **Tone:** soft outline-only red (`border-red-300 / bg-white / text-red-700`) — destructive intent is clear without scary fills, matching the existing red usage on the failed-worksheet badge.
+- **v1 limitations:** no second PIN re-entry just before delete, no undo / soft-delete, no server-side guard against in-flight worksheets in another tab; parent auth user never touched.
+
 ## Next Planned Milestone
 
 - Deploy to Vercel (or similar) to test real mobile install flow

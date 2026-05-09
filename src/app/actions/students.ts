@@ -112,3 +112,64 @@ export async function createStudent(
     redirect(`/dashboard?student=${student.id}`)
   }
 }
+
+export async function deleteStudent(
+  _prevState: { error: string } | null,
+  formData: FormData
+): Promise<{ error: string } | null> {
+  const studentId = (formData.get('student_id') as string | null)?.trim() ?? ''
+  const confirmName = (formData.get('confirm_name') as string | null)?.trim() ?? ''
+
+  if (!studentId) return { error: 'Invalid input.' }
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Not authenticated.' }
+
+  const { data: target } = await supabase
+    .from('students')
+    .select('id, name')
+    .eq('id', studentId)
+    .eq('parent_id', user.id)
+    .maybeSingle()
+
+  if (!target) return { error: 'Student not found or access denied.' }
+
+  if (confirmName !== target.name.trim()) {
+    return { error: `Type "${target.name}" exactly to confirm.` }
+  }
+
+  const { count: totalCount } = await supabase
+    .from('students')
+    .select('id', { count: 'exact', head: true })
+    .eq('parent_id', user.id)
+
+  if ((totalCount ?? 0) <= 1) {
+    return {
+      error:
+        'You need at least one student profile. Add another student before deleting this one.',
+    }
+  }
+
+  const { error: delErr } = await supabase
+    .from('students')
+    .delete()
+    .eq('id', studentId)
+    .eq('parent_id', user.id)
+
+  if (delErr) return { error: delErr.message }
+
+  const { data: remaining } = await supabase
+    .from('students')
+    .select('id')
+    .eq('parent_id', user.id)
+    .order('created_at', { ascending: true })
+    .limit(1)
+
+  const next = remaining?.[0]?.id
+  if (next) {
+    redirect(`/dashboard?student=${next}`)
+  } else {
+    redirect('/onboarding')
+  }
+}

@@ -8,6 +8,7 @@ import SetLevelForm from './SetLevelForm'
 import PinSettings from './PinSettings'
 import StudentModeCard from './StudentModeCard'
 import RemindersToggle from './RemindersToggle'
+import DeleteStudentSection from './DeleteStudentSection'
 import AchievementsCard from '@/components/AchievementsCard'
 import MistakeJournalCard from '@/components/MistakeJournalCard'
 import PracticeHistoryCard, { type PracticeHistoryEntry } from '@/components/PracticeHistoryCard'
@@ -606,6 +607,11 @@ export default async function DashboardPage({
                 Run Placement Diagnostic →
               </Link>
             </div>
+            <DeleteStudentSection
+              studentId={student.id}
+              studentName={student.name}
+              studentCount={students.length}
+            />
           </div>
         </details>
 

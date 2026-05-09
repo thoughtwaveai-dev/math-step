@@ -6,8 +6,48 @@
 
 ## Current Status
 
-**Phase:** Milestone 60 — Daily Reminder Email v1. ✓ New columns on `profiles` (`reminders_enabled boolean default true`, `last_reminder_sent_date date`); existing 10 rows backfilled to `false` since they never consented. ✓ Resend SDK integrated server-side only via `src/lib/email/resend.ts`. ✓ Vercel Cron entry in `vercel.json` triggers `GET /api/cron/daily-reminders` at `0 3 * * *` UTC = 4:00 pm NZDT / 3:00 pm NZST. ✓ Service-role Supabase client (`src/lib/supabase/serviceRole.ts`) used only by the cron route + unsubscribe page. ✓ HMAC unsubscribe token (`src/lib/reminderToken.ts`, `node:crypto.createHmac`, no new dep). ✓ Parent View toggle in Admin controls (`RemindersToggle` + `setRemindersEnabled` action). ✓ Pure refactor: lifted Mon-start week math into `getNzWeekRange()` in `src/lib/habit.ts`, used by both dashboard and email so they cannot drift. ✓ Production gate documented: real-parent sending requires verified Resend domain + `REMINDER_FROM_EMAIL` on that domain.
+**Phase:** Milestone 61 — Safe Delete Student admin control. ✓ Live cascade audit on the Math-Step Supabase project confirmed `sessions`, `problems` (via sessions), `streaks`, `student_level_progress`, `practice_sessions` all `ON DELETE CASCADE` from `students`; `feedback.student_id ON DELETE SET NULL` (parent_id rows preserved). No schema changes required. ✓ `deleteStudent` server action added to `src/app/actions/students.ts` — verifies parent ownership via `parent_id = auth.uid()`, requires exact typed-name match (case-sensitive after trim), refuses when parent has only one student, redirects to dashboard for first remaining student (oldest by `created_at`). ✓ `src/app/dashboard/DeleteStudentSection.tsx` mounted inside the existing Admin controls `<details>` block at the bottom — collapsed trigger + inline confirmation form, soft outline-only red styling (`border-red-300 / text-red-700`) per user direction. ✓ One-student case shows calm copy with no active button. ✓ Existing `enforceParentMode('/dashboard')` keeps the section unreachable from Student Mode without PIN; `/play` and `/worksheet` intentionally untouched.
 **Next:** Real end-to-end Resend send once a verified domain is in place; then deploy to Vercel and verify cron entry in the Vercel dashboard.
+
+---
+
+### Milestone 61 — Safe Delete Student admin control (2026-05-09)
+
+**Goal:** Let parents remove a mistaken/test student profile from inside the app instead of editing Supabase manually. Parent-only, gated by Student Mode/PIN, exact-name typed confirmation, refuses when it would leave the parent with zero students, no schema changes.
+
+**Phase 1 cascade audit (live DB, project `wuwmqbeazgsolsrxbhsh`):**
+
+| Child | Column → Parent | ON DELETE |
+|---|---|---|
+| sessions | student_id → students.id | CASCADE |
+| problems | session_id → sessions.id | CASCADE (transitive) |
+| streaks | student_id → students.id | CASCADE |
+| student_level_progress | student_id → students.id | CASCADE |
+| practice_sessions | student_id → students.id | CASCADE |
+| feedback | student_id → students.id | SET NULL (parent_id retained) |
+
+Verified via `information_schema.referential_constraints`. **No DDL needed.** `feedback` rows survive with `student_id = NULL`, matching the documented intent (parent-owned messages preserved).
+
+**Files added:**
+- `src/app/dashboard/DeleteStudentSection.tsx` — client component, `useActionState`, mirrors `PinSettings.tsx` skeleton. Live-disabled submit until typed name matches (case-sensitive after trim). Soft outline-only red palette, in-form confirmation in a `red-50` panel.
+
+**Files modified:**
+- `src/app/actions/students.ts` — appended `deleteStudent` server action. Pattern matches `updateStudentPlacement`: same `{ error: string } | null` return, same `parent_id` ownership filter, `redirect()` from the action on success.
+- `src/app/dashboard/page.tsx` — imported `DeleteStudentSection` and mounted it as the last child of the Admin controls `<details>` block, after the Placement Diagnostic link. Passes `studentId`, `studentName`, `studentCount`.
+
+**Validation (this session):**
+| Check | Result |
+|------|--------|
+| `npx tsc --noEmit` | PASS (clean) |
+| `npx eslint` on touched files | PASS (clean) |
+| Live FK audit via Supabase MCP | All cascades confirmed (see table above) |
+
+**v1 limitations (intentional, deferred):**
+- No second PIN re-entry immediately before delete fires — the dashboard PIN gate plus typed-name confirmation is enough for v1.
+- No undo / soft-delete window. Confirmation is the safety mechanism.
+- Case-sensitive name match after `trim()`. Can relax to case-insensitive if real parents report friction.
+- No server-side check for in-flight worksheets in another tab — a deleted student's session results just disappear.
+- Parent auth user is never touched.
 
 ---
 
