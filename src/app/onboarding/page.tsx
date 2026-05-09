@@ -12,12 +12,14 @@ export default async function OnboardingPage() {
 
   if (!user) redirect('/login')
 
-  const { count } = await supabase
+  const { data: existingStudents } = await supabase
     .from('students')
-    .select('id', { count: 'exact', head: true })
+    .select('id, name')
     .eq('parent_id', user.id)
+    .order('created_at', { ascending: true })
 
-  const hasStudents = (count ?? 0) > 0
+  const existing = existingStudents ?? []
+  const hasStudents = existing.length > 0
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f7faf7] px-6">
@@ -50,7 +52,7 @@ export default async function OnboardingPage() {
         {hasStudents && <div className="mb-6" />}
 
         <div className="rounded-2xl border border-[#bae0bd] bg-white p-6 shadow-sm">
-          <OnboardingForm />
+          <OnboardingForm existingStudents={existing} />
         </div>
 
         {hasStudents && (

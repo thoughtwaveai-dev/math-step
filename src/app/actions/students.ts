@@ -87,9 +87,8 @@ export async function createStudent(
   const match = existing?.find(s => s.name.trim().toLowerCase() === normalized)
 
   if (match) {
-    if (startMode === 'diagnostic') {
-      redirect(`/placement?student=${match.id}`)
-    }
+    // Ignore diagnostic mode for duplicate reuse — running placement on an
+    // existing student would overwrite their current_level/current_sublevel.
     redirect(`/dashboard?student=${match.id}`)
   }
 
