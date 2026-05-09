@@ -70,11 +70,8 @@ All 6 existing profiles auto-backfilled to `weekly_enabled = true` via the colum
 - No per-parent send-time preferences, no public-holiday filtering, no bounce/complaint handling, no push notifications.
 - No per-tier earned-date persistence — diff is recomputed each run.
 
-**Follow-up to address in a later milestone (not implemented now):**
-- `profiles.reminders_enabled` column default is currently `not null default true` in the SQL editor schema, but existing users were one-time UPDATE'd to `false` for Milestone 60. New signups still default ON for the daily stream, which contradicts the documented "Daily: OFF for new + existing users" intent. Two clean options:
-  1. Change the column default to `false` (DDL: `alter table profiles alter column reminders_enabled set default false;`).
-  2. Set `reminders_enabled = false` explicitly inside the signup / profile-row creation path so the SQL default no longer matters.
-  Option 1 is the simpler fix; option 2 makes the intent explicit at the application layer. Pick one before broader public signup is enabled.
+**Follow-up — resolved (2026-05-10):**
+- `profiles.reminders_enabled` column default flipped from `true` to `false` via `alter table profiles alter column reminders_enabled set default false;` in the production SQL editor. New signups now start opted out, matching the documented "Daily: OFF for new + existing users" intent. `weekly_enabled` default stays `true` (mandatory by default). Repo schema (`supabase/schema.sql`) updated to record the new default.
 
 ---
 

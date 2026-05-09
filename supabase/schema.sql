@@ -82,9 +82,15 @@ create policy "Users can manage practice for their students" on practice_session
 -- Daily Reminder Email v1 (Milestone 60) — applied via Supabase SQL Editor.
 -- Adds opt-in/out + same-day dedup columns on `profiles`. Existing rows were
 -- backfilled to `reminders_enabled = false` immediately after the column add.
+-- Note: the column was originally added with `default true`. After Milestone 62
+-- the default was flipped to `false` (see the `set default false` line below)
+-- so new signups also start opted out, matching the documented intent.
 alter table profiles
-  add column if not exists reminders_enabled boolean not null default true,
+  add column if not exists reminders_enabled boolean not null default false,
   add column if not exists last_reminder_sent_date date;
+
+alter table profiles
+  alter column reminders_enabled set default false;
 
 create index if not exists idx_profiles_reminders_pending
   on profiles (reminders_enabled, last_reminder_sent_date)

@@ -114,7 +114,7 @@ RLS: users can only access streak rows for their own students.
 | parent_pin | text | nullable; format `saltHex:scryptHashHex` (Milestone 50) |
 | pin_failed_attempts | int | default 0 (Milestone 50) |
 | pin_locked_until | timestamptz | nullable; cooldown end (Milestone 50) |
-| reminders_enabled | bool | default true; Daily Reminder Email v1 (Milestone 60). Existing rows backfilled to `false`. |
+| reminders_enabled | bool | default `false` (originally `true` at Milestone 60, flipped to `false` in Milestone 62 so new signups start opted out). Daily Reminder Email v1 (Milestone 60). Existing rows were one-time backfilled to `false`. |
 | last_reminder_sent_date | date | nullable; NZ-local date key of last successful reminder send (Milestone 60). |
 | weekly_enabled | bool | default true; Weekly Review Email v1 (Milestone 62). Mandatory by default — existing rows inherit `true` via column default at column-add time. |
 | last_weekly_sent_date | date | nullable; NZ-local date key of last successful weekly review send (Milestone 62). |
@@ -435,11 +435,13 @@ covering all their pending students — chosen as the simpler v1 path over
 one-email-per-student.
 
 - **Schema (added on `profiles`, no new table):** `reminders_enabled
-  boolean not null default true`, `last_reminder_sent_date date`. Index
+  boolean not null default false`, `last_reminder_sent_date date`. Index
   `idx_profiles_reminders_pending` on `(reminders_enabled,
-  last_reminder_sent_date) where reminders_enabled = true`. Existing
-  rows backfilled to `false` via a one-time `UPDATE` since existing
-  testers never consented; new signups inherit the column default.
+  last_reminder_sent_date) where reminders_enabled = true`. Originally
+  added with `default true`; after Milestone 62 the column default was
+  flipped to `false` so new signups also start opted out. Existing rows
+  were one-time backfilled to `false` at Milestone 60 since existing
+  testers had not consented.
 - **Trigger:** Vercel Cron entry in `vercel.json` runs
   `GET /api/cron/daily-reminders` at `0 3 * * *` UTC = **4:00 pm NZDT**
   (UTC+13) / **3:00 pm NZST** (UTC+12). The ±1h DST drift is an accepted
