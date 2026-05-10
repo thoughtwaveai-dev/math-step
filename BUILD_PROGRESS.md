@@ -6,7 +6,9 @@
 
 ## Current Status
 
-**Phase:** Milestone 63 — Weekly Email Copy Recipient v1 shipped (2026-05-10). Parent can optionally add one extra email address (e.g. spouse/partner) to receive the Sunday weekly recap. Schema: `weekly_cc_email text` added to `profiles`. UI: "Weekly email copy" control in Admin controls. Cron sends to `[primary, cc]` as a single Resend call. Daily reminders unaffected. See entry below.
+**Phase:** Insight line added to Weekly Review email (2026-05-10). Each student block now shows one plain-English interpretation sentence below the metrics row (priority-ranked: high consistency → solid progress → low accuracy → small start → fallback). Empty-week variant unchanged. Template-only change — no schema, no cron, no send-behaviour changes.
+
+**Phase (preceding):** Milestone 63 — Weekly Email Copy Recipient v1 shipped (2026-05-10). Parent can optionally add one extra email address (e.g. spouse/partner) to receive the Sunday weekly recap. Schema: `weekly_cc_email text` added to `profiles`. UI: "Weekly email copy" control in Admin controls. Cron sends to `[primary, cc]` as a single Resend call. Daily reminders unaffected. See entry below.
 
 **Phase (preceding):** `problems.problem_type` backfilled for all 680 legacy null rows (2026-05-10). Mistake Journal and Weekly Review weak-area labels now show precise type names (e.g. "Factor pairs", "Prime factorization") for all historical problems instead of the coarse "Level X.Y — Topic" fallback. No schema change, no app UX change. See entry below.
 
@@ -14,6 +16,32 @@
 
 **Phase (preceding):** Milestone 62 — Daily reminder refinement + Weekly Review email shipped. Daily email now picks one evidence-backed reason per pending student (streak ≥ 1 → streak line; week ≥ 1 → "X of 7 days"; otherwise "5 minutes today helps") plus a "Current focus: Level X.Y — Topic" line, with an explicit "Parent View → Admin controls" footer alongside the one-tap unsubscribe. New Weekly Review email sends Sundays 04:00 UTC (5 pm NZDT / 4 pm NZST) — one combined email per parent across all students with practice-days/worksheets/accuracy, current focus, "🏆 New this week" milestone tier crossings (derived by diffing achievement snapshots before/after the week — no schema for it), and a top weak area. Empty-week variant supported. Two separate toggles (`reminders_enabled` / `weekly_enabled`) in Parent View → Admin controls; separate HMAC-prefixed unsubscribe streams. Daily defaults stay OFF for existing users; weekly defaults ON for everyone (mandatory by default, easy to disable).
 **Next:** Real Resend verified-domain send + Vercel deploy verification (cron entries in dashboard).
+
+---
+
+### Weekly Review — insight line per student (2026-05-10)
+
+**Trigger:** Metrics are useful but parents may not immediately know what they mean. Added one plain-English interpretation sentence per student between the metrics row and "Current focus".
+
+**Logic (priority-ranked, worksheets > 0):**
+1. `practiceDays >= 5 && accuracy >= 90` → "Great consistency this week — {name} practised {n} days and averaged {acc}%."
+2. `practiceDays >= 3 && accuracy >= 80` → "Solid progress — {name} kept practising and is building momentum."
+3. `accuracy < 80` → "Good effort this week — the lower accuracy shows where practice can help next."
+4. `practiceDays <= 1` → "A small start this week — one or two short sessions next week can build the routine."
+5. Fallback → "{name} kept the routine going this week."
+
+Empty-week (worksheets === 0) is unchanged — no extra insight line added there.
+
+**Files modified:**
+- `src/lib/email/templates/weeklyReview.ts` — `insightLine()` function; plaintext push after `📊` line; `insightHtml` between `metricsHtml` and `focusHtml`
+- `BUILD_PROGRESS.md` — this entry
+
+**Validation:**
+| Check | Result |
+|-------|--------|
+| `npx tsc --noEmit` | PASS |
+| `npx eslint` (touched file) | PASS |
+| Manual cron trigger | not executed (credentials not available in session) |
 
 ---
 

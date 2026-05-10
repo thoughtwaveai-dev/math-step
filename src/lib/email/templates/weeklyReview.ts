@@ -36,6 +36,23 @@ function focusLabel(s: WeeklyStudentBlock): string | null {
   return `Level ${s.currentLevel}.${s.currentSublevel} — ${s.currentTopic}`
 }
 
+function insightLine(s: WeeklyStudentBlock): string {
+  const acc = s.accuracy ?? 0
+  if (s.practiceDays >= 5 && acc >= 90) {
+    return `Great consistency this week — ${s.name} practised ${s.practiceDays} days and averaged ${acc}%.`
+  }
+  if (s.practiceDays >= 3 && acc >= 80) {
+    return `Solid progress — ${s.name} kept practising and is building momentum.`
+  }
+  if (acc < 80) {
+    return `Good effort this week — the lower accuracy shows where practice can help next.`
+  }
+  if (s.practiceDays <= 1) {
+    return `A small start this week — one or two short sessions next week can build the routine.`
+  }
+  return `${s.name} kept the routine going this week.`
+}
+
 export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
   const { parentName, weekStartLabel, weekEndLabel, students, appUrl, unsubscribeUrl } = args
   if (students.length === 0) {
@@ -66,6 +83,7 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
       textBlocks.push(
         `📊 ${s.practiceDays} practice days · ${s.worksheets} worksheets · ${acc}% accuracy`,
       )
+      textBlocks.push(insightLine(s))
       const focus = focusLabel(s)
       if (focus) textBlocks.push(`🎯 Current focus: ${focus}`)
       if (s.newMilestoneLabels.length > 0) {
@@ -107,6 +125,8 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
       const acc = s.accuracy ?? 0
       const metricsHtml = `<p style="margin:0 0 6px 0;font-size:14px;line-height:1.5;color:#1a2e1c;">📊 ${s.practiceDays} practice days · ${s.worksheets} worksheets · ${acc}% accuracy</p>`
 
+      const insightHtml = `<p style="margin:0 0 10px 0;font-size:14px;line-height:1.5;color:#4a6b4e;">${escapeHtml(insightLine(s))}</p>`
+
       const focus = focusLabel(s)
       const focusHtml = focus
         ? `<p style="margin:0 0 6px 0;font-size:14px;line-height:1.5;color:#1a2e1c;">🎯 Current focus: ${escapeHtml(focus)}</p>`
@@ -126,6 +146,7 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
       return `<div style="margin:0 0 20px 0;padding:14px 16px;background:#f7faf7;border:1px solid #e1f4e3;border-radius:10px;">
         ${headingHtml}
         ${metricsHtml}
+        ${insightHtml}
         ${focusHtml}
         ${milestonesHtml}
         ${weakHtml}
