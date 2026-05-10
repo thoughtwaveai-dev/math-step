@@ -160,7 +160,7 @@ export async function GET(request: Request) {
 
   const { data: profiles, error: profilesErr } = await supabase
     .from('profiles')
-    .select('id, email, name, last_weekly_sent_date')
+    .select('id, email, name, last_weekly_sent_date, weekly_cc_email')
     .eq('weekly_enabled', true)
 
   if (profilesErr) {
@@ -342,8 +342,11 @@ export async function GET(request: Request) {
       unsubscribeUrl,
     })
 
+    const ccEmail = (profile as { weekly_cc_email?: string | null }).weekly_cc_email ?? null
+    const to: string | string[] = ccEmail ? [profile.email, ccEmail] : profile.email
+
     const result = await sendWeeklyReview({
-      to: profile.email,
+      to,
       subject: email.subject,
       html: email.html,
       text: email.text,

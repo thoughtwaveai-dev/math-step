@@ -9,6 +9,7 @@ import PinSettings from './PinSettings'
 import StudentModeCard from './StudentModeCard'
 import RemindersToggle from './RemindersToggle'
 import WeeklyReviewToggle from './WeeklyReviewToggle'
+import WeeklyCcEmailForm from './WeeklyCcEmailForm'
 import DeleteStudentSection from './DeleteStudentSection'
 import AchievementsCard from '@/components/AchievementsCard'
 import MistakeJournalCard from '@/components/MistakeJournalCard'
@@ -53,12 +54,13 @@ export default async function DashboardPage({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('parent_pin, reminders_enabled, weekly_enabled')
+    .select('parent_pin, reminders_enabled, weekly_enabled, weekly_cc_email')
     .eq('id', user.id)
     .maybeSingle()
   const hasPin = Boolean(profile?.parent_pin)
   const remindersEnabled = Boolean(profile?.reminders_enabled)
   const weeklyEnabled = Boolean(profile?.weekly_enabled)
+  const weeklyCcEmail = (profile?.weekly_cc_email as string | null) ?? null
 
   // Parallel: streaks/levels lookups + bounded full-history sessions + self-correction count + practice history
   const [
@@ -591,6 +593,7 @@ export default async function DashboardPage({
             <PinSettings hasPin={hasPin} />
             <RemindersToggle enabled={remindersEnabled} />
             <WeeklyReviewToggle enabled={weeklyEnabled} />
+            <WeeklyCcEmailForm currentCcEmail={weeklyCcEmail} />
             {allLevels && allLevels.length > 0 && (
               <SetLevelForm
                 studentId={student.id}

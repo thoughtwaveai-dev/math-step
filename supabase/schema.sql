@@ -109,3 +109,10 @@ alter table profiles
 create index if not exists idx_profiles_weekly_pending
   on profiles (weekly_enabled, last_weekly_sent_date)
   where weekly_enabled = true;
+
+-- Weekly CC recipient v1 (Milestone 63) — applied via Supabase SQL Editor.
+-- One optional extra email per parent. App-level validated: trimmed lowercase,
+-- basic format check, not same as profile.email. Daily reminders unaffected.
+-- Unsubscribe disables weekly for the whole account (cc recipient not tracked separately).
+alter table profiles
+  add column if not exists weekly_cc_email text;

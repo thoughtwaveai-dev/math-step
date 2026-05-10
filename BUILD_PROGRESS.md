@@ -6,12 +6,45 @@
 
 ## Current Status
 
-**Phase:** `problems.problem_type` backfilled for all 680 legacy null rows (2026-05-10). Mistake Journal and Weekly Review weak-area labels now show precise type names (e.g. "Factor pairs", "Prime factorization") for all historical problems instead of the coarse "Level X.Y — Topic" fallback. No schema change, no app UX change. See entry below.
+**Phase:** Milestone 63 — Weekly Email Copy Recipient v1 shipped (2026-05-10). Parent can optionally add one extra email address (e.g. spouse/partner) to receive the Sunday weekly recap. Schema: `weekly_cc_email text` added to `profiles`. UI: "Weekly email copy" control in Admin controls. Cron sends to `[primary, cc]` as a single Resend call. Daily reminders unaffected. See entry below.
+
+**Phase (preceding):** `problems.problem_type` backfilled for all 680 legacy null rows (2026-05-10). Mistake Journal and Weekly Review weak-area labels now show precise type names (e.g. "Factor pairs", "Prime factorization") for all historical problems instead of the coarse "Level X.Y — Topic" fallback. No schema change, no app UX change. See entry below.
 
 **Phase (preceding):** Duplicate-student prevention + placement CTA feedback shipped on top of Milestone 62. `createStudent` now silently reuses an existing same-name student (trim+lowercase) instead of inserting a duplicate row; `applyPlacement` was reshaped to the standard `useActionState` server-action signature with a friendly inline error and a "Starting…" pending state on both result-page CTAs (cross-disabled while either is pending). No schema change. See entry below.
 
 **Phase (preceding):** Milestone 62 — Daily reminder refinement + Weekly Review email shipped. Daily email now picks one evidence-backed reason per pending student (streak ≥ 1 → streak line; week ≥ 1 → "X of 7 days"; otherwise "5 minutes today helps") plus a "Current focus: Level X.Y — Topic" line, with an explicit "Parent View → Admin controls" footer alongside the one-tap unsubscribe. New Weekly Review email sends Sundays 04:00 UTC (5 pm NZDT / 4 pm NZST) — one combined email per parent across all students with practice-days/worksheets/accuracy, current focus, "🏆 New this week" milestone tier crossings (derived by diffing achievement snapshots before/after the week — no schema for it), and a top weak area. Empty-week variant supported. Two separate toggles (`reminders_enabled` / `weekly_enabled`) in Parent View → Admin controls; separate HMAC-prefixed unsubscribe streams. Daily defaults stay OFF for existing users; weekly defaults ON for everyone (mandatory by default, easy to disable).
 **Next:** Real Resend verified-domain send + Vercel deploy verification (cron entries in dashboard).
+
+---
+
+### Milestone 63 — Weekly Email Copy Recipient v1 (2026-05-10)
+
+**Trigger:** Parents wanted to share the Sunday weekly recap with a partner or co-parent without giving them a separate login.
+
+**Files modified:**
+- `supabase/schema.sql` — `alter table profiles add column if not exists weekly_cc_email text`
+- `src/app/actions/reminders.ts` — `setWeeklyCcEmail` server action (auth, validate, trim/lowercase, same-as-account-email guard, blank = clear)
+- `src/app/dashboard/WeeklyCcEmailForm.tsx` — new client component; `useActionState`; two forms sharing one action ref (save + remove); shows current address when set
+- `src/app/dashboard/page.tsx` — added `weekly_cc_email` to profile select; derived `weeklyCcEmail`; imported and rendered `WeeklyCcEmailForm`
+- `src/lib/email/resend.ts` — `sendWeeklyReview` `to` param widened from `string` to `string | string[]`
+- `src/app/api/cron/weekly-review/route.ts` — fetches `weekly_cc_email`; passes `to: [primary, cc]` when set, else `to: primary` (single Resend call; `last_weekly_sent_date` updated only on success)
+- `PROJECT_CONTEXT.md` — profiles table + new Milestone 63 section
+- `BUILD_PROGRESS.md` — this entry
+
+**Validation:**
+| Check | Result |
+|-------|--------|
+| `npx tsc --noEmit` | PASS |
+| `npx eslint` (touched files) | PASS |
+| Playwright UI | not executed (login credentials unavailable in session) |
+
+**v1 limitations:**
+- One extra recipient only
+- CC address not separately confirmed or unsubscribed
+- Daily reminders not sent to CC address
+- Email body does not mention the CC recipient
+
+---
 
 ### problem_type backfill (2026-05-10)
 

@@ -118,6 +118,7 @@ RLS: users can only access streak rows for their own students.
 | last_reminder_sent_date | date | nullable; NZ-local date key of last successful reminder send (Milestone 60). |
 | weekly_enabled | bool | default true; Weekly Review Email v1 (Milestone 62). Mandatory by default — existing rows inherit `true` via column default at column-add time. |
 | last_weekly_sent_date | date | nullable; NZ-local date key of last successful weekly review send (Milestone 62). |
+| weekly_cc_email | text | nullable; optional extra recipient for weekly review email (Milestone 63). App-level validated. Daily reminders unaffected. |
 
 RLS: insert/select/update own row (`auth.uid() = id`). No new policies were needed for the PIN or reminder columns — the daily-reminder cron handler bypasses RLS via the service role client.
 
@@ -580,6 +581,39 @@ users), separate one-tap unsubscribe stream from the daily reminder.
   public-holiday / school-day filtering, no bounce/complaint
   handling, no per-tier earned-date persistence (diff recomputed
   each run).
+
+## Weekly Email Copy Recipient v1 (Milestone 63)
+
+Optional second recipient for the Sunday weekly review email. One extra
+email per parent account — no new login, no new student ownership changes.
+
+- **Schema:** `weekly_cc_email text` (nullable) added to `profiles`. No
+  index — queried only during cron run alongside the existing
+  `weekly_enabled` filter. App-level validated only (no DB CHECK).
+- **UI:** "Weekly email copy" control in Parent View → Admin controls,
+  rendered by `src/app/dashboard/WeeklyCcEmailForm.tsx` (client component,
+  `useActionState`). Label + helper text, current saved address shown if
+  set, text input with placeholder `"partner@example.com"`, Save button,
+  Remove button when an address is saved.
+- **Validation (app-level):** trimmed + lowercased before save; must
+  contain `@` with ≥1 char before it, a `.` after `@` (not at end), no
+  spaces. Blank clears the field. Same-as-account-email blocked with a
+  specific message.
+- **Server action:** `setWeeklyCcEmail` in `src/app/actions/reminders.ts`.
+  Auth required; updates only the current user's profile row;
+  `revalidatePath('/dashboard')` on success.
+- **Cron send:** `src/app/api/cron/weekly-review/route.ts` fetches
+  `weekly_cc_email` alongside the existing profile columns. If set, Resend
+  receives `to: [primary_email, weekly_cc_email]` — one send, one
+  success/failure. `last_weekly_sent_date` is updated only after a
+  successful send. If the send fails (either recipient), the cron retries
+  on the next run as before. `src/lib/email/resend.ts` `sendWeeklyReview`
+  now accepts `to: string | string[]`.
+- **Unsubscribe:** disables `weekly_enabled` for the whole account (cc
+  recipient not tracked separately). Daily reminders are unaffected.
+- **v1 limitations:** one extra recipient only; cc address not separately
+  confirmed or unsubscribed; email body does not mention the cc recipient;
+  daily reminders not sent to cc address.
 
 ## Delete Student admin control (Milestone 61)
 

@@ -19,7 +19,7 @@ export type SendResult = { ok: true; id?: string } | { ok: false; error: string 
 
 interface SendArgs {
   from: string
-  to: string
+  to: string | string[]
   subject: string
   html: string
   text: string
@@ -57,7 +57,7 @@ export async function sendDailyReminder(args: {
 }
 
 export async function sendWeeklyReview(args: {
-  to: string
+  to: string | string[]
   subject: string
   html: string
   text: string
