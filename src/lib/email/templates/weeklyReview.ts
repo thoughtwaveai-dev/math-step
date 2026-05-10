@@ -39,16 +39,16 @@ function focusLabel(s: WeeklyStudentBlock): string | null {
 function insightLine(s: WeeklyStudentBlock): string {
   const acc = s.accuracy ?? 0
   if (s.practiceDays >= 5 && acc >= 90) {
-    return `Great consistency this week — ${s.name} practised ${s.practiceDays} days and averaged ${acc}%.`
+    return `Great consistency this week — ${s.name} completed worksheets on ${s.practiceDays} days and averaged ${acc}%.`
   }
   if (s.practiceDays >= 3 && acc >= 80) {
-    return `Solid progress — ${s.name} kept practising and is building momentum.`
+    return `Solid progress — ${s.name} kept the worksheet routine going and is building momentum.`
   }
   if (acc < 80) {
     return `Good effort this week — the lower accuracy shows where practice can help next.`
   }
   if (s.practiceDays <= 1) {
-    return `A small start this week — one or two short sessions next week can build the routine.`
+    return `A small start this week — one or two worksheets next week can build the routine.`
   }
   return `${s.name} kept the routine going this week.`
 }
@@ -81,7 +81,7 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
     } else {
       const acc = s.accuracy ?? 0
       textBlocks.push(
-        `📊 ${s.practiceDays} practice days · ${s.worksheets} worksheets · ${acc}% accuracy`,
+        `📊 ${s.practiceDays} worksheet days · ${s.worksheets} worksheets · ${acc}% accuracy`,
       )
       const focus = focusLabel(s)
       if (focus) textBlocks.push(`🎯 Current focus: ${focus}`)
@@ -125,7 +125,7 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
       }
 
       const acc = s.accuracy ?? 0
-      const metricsHtml = `<p style="margin:0 0 6px 0;font-size:14px;line-height:1.5;color:#1a2e1c;">📊 ${s.practiceDays} practice days · ${s.worksheets} worksheets · ${acc}% accuracy</p>`
+      const metricsHtml = `<p style="margin:0 0 6px 0;font-size:14px;line-height:1.5;color:#1a2e1c;">📊 ${s.practiceDays} worksheet days · ${s.worksheets} worksheets · ${acc}% accuracy</p>`
 
       const focus = focusLabel(s)
       const focusHtml = focus

@@ -69,20 +69,25 @@ export default function AchievementsCard({ progress, variant, studentName }: Pro
           const rightLabel = p.isMaxed
             ? 'All badges earned 🏆'
             : p.earnedTier !== null
-              ? `Latest badge: ${p.earnedTier}${unit} ✓`
+              ? `Latest badge earned: ${p.earnedTier}${unit} ✓`
               : 'No badges yet'
           const progressLabel = p.isMaxed
             ? `${p.value.toLocaleString('en-NZ')}${unit}`
-            : `${p.value.toLocaleString('en-NZ')} / ${target.toLocaleString('en-NZ')}${unit}`
+            : `${p.value.toLocaleString('en-NZ')} / ${target.toLocaleString('en-NZ')}${unit} toward next badge`
 
           return (
             <li key={p.family.id} className="rounded-lg bg-[#f7faf7] px-4 py-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2 min-w-0">
                   <span aria-hidden="true" className="text-lg leading-none">{p.family.emoji}</span>
-                  <span className="text-sm font-semibold text-[#1a2e1c] truncate">
-                    {p.family.parentLabel}
-                  </span>
+                  <div className="min-w-0">
+                    <span className="text-sm font-semibold text-[#1a2e1c] truncate block">
+                      {p.family.parentLabel}
+                    </span>
+                    {p.family.description && (
+                      <span className="text-xs text-[#4a6b4e] truncate block">{p.family.description}</span>
+                    )}
+                  </div>
                 </div>
                 <span
                   className={`shrink-0 text-xs font-semibold tabular-nums ${
@@ -92,11 +97,11 @@ export default function AchievementsCard({ progress, variant, studentName }: Pro
                   {rightLabel}
                 </span>
               </div>
-              <div className="mt-2 flex items-center gap-3">
-                <span className="text-xs font-medium text-[#4a6b4e] tabular-nums shrink-0 w-[5.5rem] sm:w-[6.5rem]">
+              <div className="mt-2 space-y-1">
+                <span className="text-xs font-medium text-[#4a6b4e] tabular-nums">
                   {progressLabel}
                 </span>
-                <div className="h-2 flex-1 rounded-full bg-[#e1f4e3] overflow-hidden">
+                <div className="h-2 w-full rounded-full bg-[#e1f4e3] overflow-hidden">
                   <div
                     className={`h-full rounded-full ${
                       p.isMaxed ? 'bg-[#2d6a35]' : p.earnedTier !== null ? 'bg-[#2d6a35]' : 'bg-[#4ade80]'
@@ -112,3 +117,4 @@ export default function AchievementsCard({ progress, variant, studentName }: Pro
     </div>
   )
 }
+

@@ -57,20 +57,20 @@ function DashboardVariant({
 
   let bodyCopy: string
   if (status.totalSessions === 0) {
-    bodyCopy = `${name} hasn't started practising yet — the first short session is the easiest way to begin.`
+    bodyCopy = `${name} hasn't done any worksheets yet — the first short session is the easiest way to begin.`
   } else if (status.daysPractisedThisWeek === 0) {
-    bodyCopy = `${name} hasn't practised yet this week — a short session helps them get back into rhythm.`
+    bodyCopy = `${name} hasn't completed a worksheet this week — a short session helps them get back into rhythm.`
   } else if (status.daysPractisedThisWeek === 1) {
-    bodyCopy = `${name} has practised 1 day this week.`
+    bodyCopy = `${name} completed worksheets on 1 day this week.`
   } else {
-    bodyCopy = `${name} has practised ${status.daysPractisedThisWeek} of 7 days this week.`
+    bodyCopy = `${name} completed worksheets on ${status.daysPractisedThisWeek} of 7 days this week.`
   }
 
   const todaySubline = status.todayDone
-    ? 'Practice completed today.'
+    ? 'Worksheet completed today.'
     : status.totalSessions === 0
-      ? 'No sessions yet.'
-      : 'No practice yet today.'
+      ? 'No worksheets yet.'
+      : 'No worksheet yet today.'
 
   return (
     <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
@@ -130,10 +130,10 @@ function SevenDayRow({ weekDays }: { weekDays: HabitStatus['weekDays'] }) {
         }
         const todayRing = day.isToday ? 'ring-2 ring-[#2d6a35]' : ''
         const ariaLabel = day.completed
-          ? `${day.shortLabel} — practised`
+          ? `${day.shortLabel} — worksheet done`
           : day.isFuture
             ? `${day.shortLabel} — upcoming`
-            : `${day.shortLabel} — no practice`
+            : `${day.shortLabel} — no worksheet`
         return (
           <li key={day.key} className="flex flex-col items-center gap-1">
             <span className="text-[10px] font-medium uppercase tracking-wide text-[#4a6b4e] sm:text-xs">

@@ -428,7 +428,7 @@ export default async function DashboardPage({
                 <div className="rounded-lg bg-[#f7faf7] p-3 text-center">
                   <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Accuracy</p>
                   <p className="mt-1 text-2xl font-bold text-[#1a2e1c] tabular-nums">{avgAccuracy}%</p>
-                  <p className="text-xs text-[#4a6b4e]">last {sessions10.length} sessions</p>
+                  <p className="text-xs text-[#4a6b4e]">last {sessions10.length} worksheets</p>
                 </div>
                 <div className="rounded-lg bg-[#f7faf7] p-3 text-center">
                   <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Pass rate</p>
@@ -436,12 +436,12 @@ export default async function DashboardPage({
                   <p className="text-xs text-[#4a6b4e] tabular-nums">{passCount}/{sessions10.length} passed</p>
                 </div>
                 <div className="rounded-lg bg-[#f7faf7] p-3 text-center">
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Time</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Avg Time</p>
                   <p className="mt-1 text-2xl font-bold text-[#1a2e1c] tabular-nums">{formatSpeed(avgTimeSec ?? 0)}</p>
-                  <p className="text-xs text-[#4a6b4e]">per session</p>
+                  <p className="text-xs text-[#4a6b4e]">per worksheet</p>
                 </div>
                 <div className="rounded-lg bg-[#f7faf7] p-3 text-center">
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Sessions</p>
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Worksheets</p>
                   <p className="mt-1 text-2xl font-bold text-[#1a2e1c] tabular-nums">{totalSessions}</p>
                   <p className="text-xs text-[#4a6b4e] tabular-nums">best streak: {longestStreak}</p>
                 </div>
@@ -518,7 +518,6 @@ export default async function DashboardPage({
         {/* Mistake Journal — needs practice */}
         <MistakeJournalCard
           weakAreas={weakAreas}
-          studentId={student.id}
           studentName={student.name}
         />
 

@@ -15,6 +15,7 @@ export interface AchievementFamilyDef {
   id: AchievementFamilyId
   emoji: string
   parentLabel: string
+  description?: string
   unitSuffix?: string
   tiers: number[]
   formatTierBadge: (tier: number) => string
@@ -25,6 +26,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamilyDef[] = [
     id: 'worksheets',
     emoji: '📘',
     parentLabel: 'Worksheets completed',
+    description: 'Total worksheets finished.',
     tiers: [1, 5, 10, 25, 50, 100],
     formatTierBadge: t => (t === 1 ? 'First Worksheet' : `${t} Worksheets`),
   },
@@ -32,6 +34,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamilyDef[] = [
     id: 'perfect',
     emoji: '💯',
     parentLabel: 'Perfect scores',
+    description: 'Worksheets completed with 100%.',
     tiers: [1, 5, 10, 25],
     formatTierBadge: t => (t === 1 ? 'Perfect Score' : `${t} Perfect Scores`),
   },
@@ -39,6 +42,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamilyDef[] = [
     id: 'streak',
     emoji: '🔥',
     parentLabel: 'Best streak',
+    description: 'Longest run of worksheet days.',
     unitSuffix: ' days',
     tiers: [3, 5, 7, 14, 30],
     formatTierBadge: t => `${t}-Day Streak`,
@@ -47,6 +51,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamilyDef[] = [
     id: 'levels',
     emoji: '🚀',
     parentLabel: 'Levels mastered',
+    description: 'Levels completed after the required passes.',
     tiers: [1, 3, 5, 10],
     formatTierBadge: t => (t === 1 ? 'Level Mastered' : `${t} Levels Mastered`),
   },
@@ -54,6 +59,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamilyDef[] = [
     id: 'points',
     emoji: '⭐',
     parentLabel: 'Points earned',
+    description: 'Points earned from completed worksheets.',
     tiers: [100, 500, 1000, 2500],
     formatTierBadge: t => `${t.toLocaleString('en-NZ')} Points`,
   },
@@ -61,6 +67,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamilyDef[] = [
     id: 'selfcorrect',
     emoji: '✏️',
     parentLabel: 'Self-correction wins',
+    description: 'Mistakes fixed correctly after feedback.',
     tiers: [1, 5, 10],
     formatTierBadge: t => (t === 1 ? 'Fixed a Mistake' : `${t} Mistakes Fixed`),
   },
@@ -68,6 +75,7 @@ export const ACHIEVEMENT_FAMILIES: AchievementFamilyDef[] = [
     id: 'speedy',
     emoji: '⚡',
     parentLabel: 'Speedy passes',
+    description: 'Passed worksheets finished under the time target.',
     tiers: [1, 5, 10],
     formatTierBadge: t => (t === 1 ? 'Speedy Pass' : `${t} Speedy Passes`),
   },

@@ -6,6 +6,48 @@
 
 ## Current Status
 
+**Phase:** Parent Dashboard clarity + QA pass (2026-05-10). Copy and label audit across dashboard, HabitCard, AchievementsCard, MistakeJournalCard, and weekly review email. "Practice" wording tightened to "worksheet" where appropriate. Needs Practice card made parent visibility-only. Milestone descriptions added. No calculation or schema changes.
+
+---
+
+### Parent Dashboard clarity and QA pass (2026-05-10)
+
+**Trigger:** Parent feedback — TIME label ambiguous, "practice" vs "worksheet" wording inconsistent, milestone progress values unexplained, Needs Practice card launched targeted practice from Parent View.
+
+**Audit findings:**
+- TIME metric confirmed as average time per worksheet over last 10 sessions. No calculation bug.
+- Daily Habit THIS WEEK confirmed correct: Pacific/Auckland TZ, Monday-first week, worksheet sessions only, no bug.
+- "Practise" button in MistakeJournalCard launched `/practice/weak-spots` from Parent Dashboard — removed.
+- Targeted practice remains accessible from Student View (TargetedPracticeCTA) and direct route.
+
+**Changes made:**
+- `src/app/dashboard/page.tsx`: "Time" → "Avg Time", "per session" → "per worksheet", "Sessions" → "Worksheets", "last N sessions" → "last N worksheets"; removed `studentId` prop from `MistakeJournalCard` call.
+- `src/components/HabitCard.tsx`: Dashboard body copy uses "completed worksheets on X of 7 days"; today sublines say "Worksheet completed today." / "No worksheet yet today." / "No worksheets yet."; aria-labels updated.
+- `src/lib/achievements.ts`: Added `description` field to `AchievementFamilyDef`; all 7 families populated with short parent-friendly descriptions.
+- `src/components/AchievementsCard.tsx`: Descriptions rendered below family label; progress label shows "X / Y toward next badge"; "Latest badge earned:" wording; layout stacks label above bar (avoids width clip).
+- `src/components/MistakeJournalCard.tsx`: Removed "Practise" button and `studentId` prop; accuracy reworded to "Recent accuracy: X% over N questions. Missed N questions recently."; "Recent missed examples:" label; note "Targeted practice is available in Student View and does not affect level progress."
+- `src/lib/email/templates/weeklyReview.ts`: "practice days" → "worksheet days" in metrics line (text + HTML); insight lines updated ("completed worksheets on X days", "kept the worksheet routine going", "worksheets next week").
+
+**Files modified:**
+- `src/app/dashboard/page.tsx`
+- `src/components/HabitCard.tsx`
+- `src/lib/achievements.ts`
+- `src/components/AchievementsCard.tsx`
+- `src/components/MistakeJournalCard.tsx`
+- `src/lib/email/templates/weeklyReview.ts`
+- `BUILD_PROGRESS.md`
+
+**Validation:**
+| Check | Result |
+|-------|--------|
+| `npx tsc --noEmit` | PASS |
+| `npx eslint` (touched files) | PASS |
+| Playwright UI | not executed (login credentials unavailable in session) |
+
+---
+
+### Weekly Review — subject + insight polish (2026-05-10)
+
 **Phase:** Weekly Review email polish (2026-05-10) — subject updated to "{Child}'s MathStep progress update" / "Your kids' MathStep progress update"; insight line moved to end of each student block with "So what does this mean for {Child}?" heading. Template-only change. Each student block now shows one plain-English interpretation sentence below the metrics row (priority-ranked: high consistency → solid progress → low accuracy → small start → fallback). Empty-week variant unchanged. Template-only change — no schema, no cron, no send-behaviour changes.
 
 **Phase (preceding):** Milestone 63 — Weekly Email Copy Recipient v1 shipped (2026-05-10). Parent can optionally add one extra email address (e.g. spouse/partner) to receive the Sunday weekly recap. Schema: `weekly_cc_email text` added to `profiles`. UI: "Weekly email copy" control in Admin controls. Cron sends to `[primary, cc]` as a single Resend call. Daily reminders unaffected. See entry below.

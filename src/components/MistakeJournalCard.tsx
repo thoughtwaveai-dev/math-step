@@ -1,9 +1,7 @@
-import Link from 'next/link'
 import type { WeakArea } from '@/lib/mistakeJournal'
 
 interface Props {
   weakAreas: WeakArea[]
-  studentId: string
   studentName: string
 }
 
@@ -13,17 +11,7 @@ function signalLabel(area: WeakArea): string {
   return 'A bit of polish would help'
 }
 
-function practiceHref(area: WeakArea, studentId: string): string {
-  const params = new URLSearchParams({
-    student: studentId,
-    level: String(area.levelNumber),
-    sublevel: String(area.sublevelNumber),
-  })
-  if (area.problemType) params.set('type', area.problemType)
-  return `/practice/weak-spots?${params.toString()}`
-}
-
-export default function MistakeJournalCard({ weakAreas, studentId, studentName }: Props) {
+export default function MistakeJournalCard({ weakAreas, studentName }: Props) {
   return (
     <div className="rounded-xl border border-[#bae0bd] bg-white p-5">
       <div className="mb-4 flex items-baseline justify-between gap-3">
@@ -33,45 +21,44 @@ export default function MistakeJournalCard({ weakAreas, studentId, studentName }
 
       {weakAreas.length === 0 ? (
         <p className="text-sm text-[#4a6b4e]">
-          {`No clear weak spots yet — keep practising. ${studentName} hasn't made enough mistakes for us to spot a pattern.`}
+          {`No clear weak spots yet — keep going. ${studentName} hasn't made enough mistakes for us to spot a pattern.`}
         </p>
       ) : (
-        <ul className="space-y-3">
-          {weakAreas.map((area) => (
-            <li
-              key={`${area.levelId}-${area.problemType ?? 'legacy'}`}
-              className="rounded-lg border border-[#e8f5e9] bg-[#f7faf7] p-4"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[#1a2e1c]">
-                    {area.label}
+        <>
+          <ul className="space-y-3">
+            {weakAreas.map((area) => (
+              <li
+                key={`${area.levelId}-${area.problemType ?? 'legacy'}`}
+                className="rounded-lg border border-[#e8f5e9] bg-[#f7faf7] p-4"
+              >
+                <p className="text-sm font-semibold text-[#1a2e1c]">
+                  {area.label}
+                </p>
+                <p className="mt-0.5 text-xs text-[#4a6b4e]">
+                  {signalLabel(area)}
+                </p>
+                <p className="mt-1 text-xs text-[#4a6b4e] tabular-nums">
+                  Recent accuracy: {area.accuracy}% over {area.totalAttempted} questions.
+                  {' '}Missed {area.incorrectCount} question{area.incorrectCount === 1 ? '' : 's'} recently.
+                </p>
+                {area.recentExamples.length > 0 && (
+                  <p className="mt-1.5 text-xs italic text-[#4a6b4e]">
+                    Recent missed examples:{' '}
+                    {area.recentExamples.map((ex, i) => (
+                      <span key={i}>
+                        {i > 0 && ', '}
+                        <span className="font-mono not-italic">{ex.prompt}</span>
+                      </span>
+                    ))}
                   </p>
-                  <p className="mt-0.5 text-xs text-[#4a6b4e] tabular-nums">
-                    {signalLabel(area)} · missed {area.incorrectCount} of {area.totalAttempted} ({area.accuracy}% accuracy)
-                  </p>
-                  {area.recentExamples.length > 0 && (
-                    <p className="mt-1.5 text-xs italic text-[#4a6b4e]">
-                      Recent:{' '}
-                      {area.recentExamples.map((ex, i) => (
-                        <span key={i}>
-                          {i > 0 && ', '}
-                          <span className="font-mono not-italic">{ex.prompt}</span>
-                        </span>
-                      ))}
-                    </p>
-                  )}
-                </div>
-                <Link
-                  href={practiceHref(area, studentId)}
-                  className="shrink-0 rounded-lg border border-[#bae0bd] bg-white px-3 py-1.5 text-xs font-semibold text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
-                >
-                  Practise
-                </Link>
-              </div>
-            </li>
-          ))}
-        </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 text-xs text-[#4a6b4e]">
+            Targeted practice is available in Student View and does not affect level progress.
+          </p>
+        </>
       )}
     </div>
   )
