@@ -11,6 +11,26 @@
 **Phase (preceding):** Milestone 62 — Daily reminder refinement + Weekly Review email shipped. Daily email now picks one evidence-backed reason per pending student (streak ≥ 1 → streak line; week ≥ 1 → "X of 7 days"; otherwise "5 minutes today helps") plus a "Current focus: Level X.Y — Topic" line, with an explicit "Parent View → Admin controls" footer alongside the one-tap unsubscribe. New Weekly Review email sends Sundays 04:00 UTC (5 pm NZDT / 4 pm NZST) — one combined email per parent across all students with practice-days/worksheets/accuracy, current focus, "🏆 New this week" milestone tier crossings (derived by diffing achievement snapshots before/after the week — no schema for it), and a top weak area. Empty-week variant supported. Two separate toggles (`reminders_enabled` / `weekly_enabled`) in Parent View → Admin controls; separate HMAC-prefixed unsubscribe streams. Daily defaults stay OFF for existing users; weekly defaults ON for everyone (mandatory by default, easy to disable).
 **Next:** Real Resend verified-domain send + Vercel deploy verification (cron entries in dashboard).
 
+### Help / FAQ refresh (2026-05-10)
+
+**Trigger:** The Help page hadn't kept pace with parent-facing features shipped over the last few milestones — placement results review, mobile decimal-keyboard fix, exact-duplicate student blocking, similar-name soft warning, Delete student in Admin controls, and the daily reminder + weekly progress emails (Milestones 60 / 62).
+
+**Files modified:**
+- `src/lib/helpContent.ts` — copy-only refresh. Tweaked the existing "How do I set up a student?" answer to mention the placement-quiz option, then inserted six new FAQ entries in logical positions: *What is the placement quiz?*, *Can I add more than one child?*, *Can I delete a student profile?*, *What is Targeted Practice (Needs Practice)?*, *Where can I see my child's recent activity?*, *Will MathStep email me?* All other existing entries unchanged. Total grows from 15 → 21.
+
+**Out of scope (intentional):**
+- `src/app/help/page.tsx` not touched — same renderer, same styling, same "How it works" section. Mobile-friendly already.
+- No app logic, no schema, no routing changes.
+
+**Validation:**
+| Check | Result |
+|------|--------|
+| `npx tsc --noEmit` | PASS |
+| `npx eslint src/lib/helpContent.ts` | PASS |
+| Manual page render | not executed — copy-only data change rendered through the existing `FAQ_ITEMS.map(...)` loop, no new components or props |
+
+---
+
 ### Duplicate-student prevention + placement CTA feedback (2026-05-10)
 
 **Trigger:** Real beta parent (`raji.r.nair@gmail.com`) ended up with three "Aryan" student rows under one account — two stuck at Level 1.1, one at the placement-recommended Level 9.1 — and reported that *"Start practising at Level 9.1"* on the placement results screen "seemed to do nothing." We manually deleted the two Level 1.1 duplicates in Supabase (the Level 9.1 row remains), then patched the two contributing causes.

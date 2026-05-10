@@ -17,7 +17,19 @@ export const FAQ_ITEMS = [
   },
   {
     q: 'How do I set up a student?',
-    a: "Sign up as a parent, then enter your child's first name. That's it — the whole setup takes under 60 seconds. After that, MathStep offers an optional 4-digit parent PIN you can set up now or later.",
+    a: "Sign up as a parent, then enter your child's first name. From there you can choose Start at Level 1 or take a short placement quiz to find the right starting level. The whole setup takes a couple of minutes. MathStep also offers an optional 4-digit parent PIN you can set up now or later.",
+  },
+  {
+    q: 'What is the placement quiz?',
+    a: "The placement quiz is a short set of questions (about 2 minutes) that helps MathStep recommend the right starting level. When it finishes, your child sees their score, the recommended level, and which answers were correct or need a bit more practice. It isn't a pass/fail test — just a friendly way to start at the right place.",
+  },
+  {
+    q: 'Can I add more than one child?',
+    a: "Yes. Open Parent View and use Add a student. If you type a name that already belongs to one of your students, MathStep won't create a duplicate. If the name looks similar to an existing student — a typo or close spelling — MathStep will gently ask whether this is a new student before continuing.",
+  },
+  {
+    q: 'Can I delete a student profile?',
+    a: "Yes. In Parent View, expand Admin controls and choose Delete student. You'll be asked to type the student's name to confirm. Deleting is permanent and removes that student's history, so the option is only available when you have more than one student on the account.",
   },
   {
     q: 'Who marks the answers?',
@@ -34,6 +46,14 @@ export const FAQ_ITEMS = [
   {
     q: 'What does "Review" mean on a worksheet?',
     a: "Some worksheets include a few problems from topics your child has already mastered. These review questions help keep earlier skills sharp while they work on the current level.",
+  },
+  {
+    q: 'What is Targeted Practice (Needs Practice)?',
+    a: "If MathStep notices repeated mistakes on a particular type of problem, it may suggest a short Targeted Practice run focused on that weak spot. These practice sessions help with tricky topics but don't change your child's current level — regular worksheets are what move them forward.",
+  },
+  {
+    q: "Where can I see my child's recent activity?",
+    a: "The Dashboard shows Recent Worksheets and Practice History — what was practised, when, and how it went. You'll also see streaks, accuracy, and milestones earned.",
   },
   {
     q: 'What is the difference between the parent view and student view?',
@@ -54,6 +74,10 @@ export const FAQ_ITEMS = [
   {
     q: 'What if I forget my PIN?',
     a: 'Parents can log out from the PIN screen, log back in with their email and password, and reset the PIN from Parent View.',
+  },
+  {
+    q: 'Will MathStep email me?',
+    a: "MathStep can send two optional emails. The daily reminder is off by default — when turned on, it's only sent on days your child hasn't practised yet. The weekly progress email is on by default and arrives Sunday evening with a short recap of practice days, worksheets, accuracy, current focus, and any new milestones or weak areas. You can turn either off anytime from Parent View → Admin controls, or with the unsubscribe link at the bottom of any email.",
   },
   {
     q: 'Is MathStep a live tutor or just worksheets?',
