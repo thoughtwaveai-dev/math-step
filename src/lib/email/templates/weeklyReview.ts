@@ -64,8 +64,8 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
 
   const subject =
     students.length === 1
-      ? `${students[0].name}'s MathStep week`
-      : "Your kids' MathStep week"
+      ? `${students[0].name}'s MathStep progress update`
+      : "Your kids' MathStep progress update"
 
   const dashboardUrl = `${appUrl}/dashboard`
   const headerLine = `${greetingPrefix}, here's the recap for ${weekStartLabel} – ${weekEndLabel}.`
@@ -83,7 +83,6 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
       textBlocks.push(
         `📊 ${s.practiceDays} practice days · ${s.worksheets} worksheets · ${acc}% accuracy`,
       )
-      textBlocks.push(insightLine(s))
       const focus = focusLabel(s)
       if (focus) textBlocks.push(`🎯 Current focus: ${focus}`)
       if (s.newMilestoneLabels.length > 0) {
@@ -93,6 +92,9 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
       if (s.weakAreaLabel) {
         textBlocks.push(`⚠️ Needs practice: ${s.weakAreaLabel}`)
       }
+      textBlocks.push('')
+      textBlocks.push(`So what does this mean for ${s.name}?`)
+      textBlocks.push(insightLine(s))
     }
     textBlocks.push('')
   }
@@ -125,8 +127,6 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
       const acc = s.accuracy ?? 0
       const metricsHtml = `<p style="margin:0 0 6px 0;font-size:14px;line-height:1.5;color:#1a2e1c;">📊 ${s.practiceDays} practice days · ${s.worksheets} worksheets · ${acc}% accuracy</p>`
 
-      const insightHtml = `<p style="margin:0 0 10px 0;font-size:14px;line-height:1.5;color:#4a6b4e;">${escapeHtml(insightLine(s))}</p>`
-
       const focus = focusLabel(s)
       const focusHtml = focus
         ? `<p style="margin:0 0 6px 0;font-size:14px;line-height:1.5;color:#1a2e1c;">🎯 Current focus: ${escapeHtml(focus)}</p>`
@@ -143,13 +143,16 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
         ? `<p style="margin:6px 0 0 0;font-size:14px;line-height:1.5;color:#a85630;">⚠️ Needs practice: ${escapeHtml(s.weakAreaLabel)}</p>`
         : ''
 
+      const insightHtml = `<p style="margin:14px 0 2px 0;font-size:13px;font-weight:600;color:#1a2e1c;">${escapeHtml(`So what does this mean for ${s.name}?`)}</p>
+        <p style="margin:0;font-size:14px;line-height:1.5;color:#4a6b4e;">${escapeHtml(insightLine(s))}</p>`
+
       return `<div style="margin:0 0 20px 0;padding:14px 16px;background:#f7faf7;border:1px solid #e1f4e3;border-radius:10px;">
         ${headingHtml}
         ${metricsHtml}
-        ${insightHtml}
         ${focusHtml}
         ${milestonesHtml}
         ${weakHtml}
+        ${insightHtml}
       </div>`
     })
     .join('')

@@ -6,7 +6,7 @@
 
 ## Current Status
 
-**Phase:** Insight line added to Weekly Review email (2026-05-10). Each student block now shows one plain-English interpretation sentence below the metrics row (priority-ranked: high consistency → solid progress → low accuracy → small start → fallback). Empty-week variant unchanged. Template-only change — no schema, no cron, no send-behaviour changes.
+**Phase:** Weekly Review email polish (2026-05-10) — subject updated to "{Child}'s MathStep progress update" / "Your kids' MathStep progress update"; insight line moved to end of each student block with "So what does this mean for {Child}?" heading. Template-only change. Each student block now shows one plain-English interpretation sentence below the metrics row (priority-ranked: high consistency → solid progress → low accuracy → small start → fallback). Empty-week variant unchanged. Template-only change — no schema, no cron, no send-behaviour changes.
 
 **Phase (preceding):** Milestone 63 — Weekly Email Copy Recipient v1 shipped (2026-05-10). Parent can optionally add one extra email address (e.g. spouse/partner) to receive the Sunday weekly recap. Schema: `weekly_cc_email text` added to `profiles`. UI: "Weekly email copy" control in Admin controls. Cron sends to `[primary, cc]` as a single Resend call. Daily reminders unaffected. See entry below.
 
@@ -16,6 +16,27 @@
 
 **Phase (preceding):** Milestone 62 — Daily reminder refinement + Weekly Review email shipped. Daily email now picks one evidence-backed reason per pending student (streak ≥ 1 → streak line; week ≥ 1 → "X of 7 days"; otherwise "5 minutes today helps") plus a "Current focus: Level X.Y — Topic" line, with an explicit "Parent View → Admin controls" footer alongside the one-tap unsubscribe. New Weekly Review email sends Sundays 04:00 UTC (5 pm NZDT / 4 pm NZST) — one combined email per parent across all students with practice-days/worksheets/accuracy, current focus, "🏆 New this week" milestone tier crossings (derived by diffing achievement snapshots before/after the week — no schema for it), and a top weak area. Empty-week variant supported. Two separate toggles (`reminders_enabled` / `weekly_enabled`) in Parent View → Admin controls; separate HMAC-prefixed unsubscribe streams. Daily defaults stay OFF for existing users; weekly defaults ON for everyone (mandatory by default, easy to disable).
 **Next:** Real Resend verified-domain send + Vercel deploy verification (cron entries in dashboard).
+
+---
+
+### Weekly Review — subject + insight polish (2026-05-10)
+
+**Trigger:** Subject was flat; insight line felt like another metric rather than an interpretation.
+
+**Changes:**
+- Subject: `"{Child}'s MathStep week"` → `"{Child}'s MathStep progress update"` (multi: same suffix)
+- Insight moved from immediately after metrics to end of student block
+- Added heading `"So what does this mean for {Child}?"` above the insight sentence in both HTML and plaintext
+- Empty-week variant unchanged (no heading, no insight)
+
+**Files modified:**
+- `src/lib/email/templates/weeklyReview.ts` — subject strings, text block order, `insightHtml` position + heading
+
+**Validation:**
+| Check | Result |
+|-------|--------|
+| `npx tsc --noEmit` | PASS |
+| `npx eslint` (touched file) | PASS |
 
 ---
 
