@@ -42,15 +42,17 @@ export default function MistakeJournalCard({ weakAreas, studentName }: Props) {
                   {' '}Missed {area.incorrectCount} question{area.incorrectCount === 1 ? '' : 's'} recently.
                 </p>
                 {area.recentExamples.length > 0 && (
-                  <p className="mt-1.5 text-xs italic text-[#4a6b4e]">
-                    Recent missed examples:{' '}
-                    {area.recentExamples.map((ex, i) => (
-                      <span key={i}>
-                        {i > 0 && ', '}
-                        <span className="font-mono not-italic">{ex.prompt}</span>
-                      </span>
-                    ))}
-                  </p>
+                  <div className="mt-1.5">
+                    <p className="text-xs italic text-[#4a6b4e]">Recent missed examples:</p>
+                    <ul className="mt-0.5 space-y-0.5">
+                      {area.recentExamples.slice(0, 2).map((ex, i) => (
+                        <li key={i} className="flex items-start gap-1 text-xs text-[#4a6b4e]">
+                          <span aria-hidden="true">•</span>
+                          <span className="font-mono">{ex.prompt}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </li>
             ))}
