@@ -20,8 +20,10 @@ create table if not exists streaks (
 
 -- Problems table is created elsewhere (manual via SQL editor). Recent column:
 -- alter table problems add column if not exists problem_type text;
---   nullable; stores generator type (e.g. factor_pairs, fraction_addition).
---   Old rows remain NULL and feed the level/topic fallback in Mistake Journal.
+--   nullable; stores generator type (e.g. factor_pairs, addition).
+--   All 780 existing rows were backfilled on 2026-05-10 via
+--   scripts/backfill-problem-types.ts — null_count is now 0.
+--   Any future null rows fall back to level/topic grouping in Mistake Journal.
 
 -- Practice History v1 — targeted practice runs (parent visibility only).
 -- Fully separate from sessions/problems. Does NOT feed mastery/streaks/points.

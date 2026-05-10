@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "cleanup:auth-users": "tsx scripts/cleanup-auth-users.ts"
+    "cleanup:auth-users": "tsx scripts/cleanup-auth-users.ts",
+    "backfill:problem-types": "tsx scripts/backfill-problem-types.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",

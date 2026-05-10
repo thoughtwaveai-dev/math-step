@@ -6,10 +6,59 @@
 
 ## Current Status
 
-**Phase:** Duplicate-student prevention + placement CTA feedback shipped on top of Milestone 62. `createStudent` now silently reuses an existing same-name student (trim+lowercase) instead of inserting a duplicate row; `applyPlacement` was reshaped to the standard `useActionState` server-action signature with a friendly inline error and a "Starting…" pending state on both result-page CTAs (cross-disabled while either is pending). No schema change. See entry below.
+**Phase:** `problems.problem_type` backfilled for all 680 legacy null rows (2026-05-10). Mistake Journal and Weekly Review weak-area labels now show precise type names (e.g. "Factor pairs", "Prime factorization") for all historical problems instead of the coarse "Level X.Y — Topic" fallback. No schema change, no app UX change. See entry below.
+
+**Phase (preceding):** Duplicate-student prevention + placement CTA feedback shipped on top of Milestone 62. `createStudent` now silently reuses an existing same-name student (trim+lowercase) instead of inserting a duplicate row; `applyPlacement` was reshaped to the standard `useActionState` server-action signature with a friendly inline error and a "Starting…" pending state on both result-page CTAs (cross-disabled while either is pending). No schema change. See entry below.
 
 **Phase (preceding):** Milestone 62 — Daily reminder refinement + Weekly Review email shipped. Daily email now picks one evidence-backed reason per pending student (streak ≥ 1 → streak line; week ≥ 1 → "X of 7 days"; otherwise "5 minutes today helps") plus a "Current focus: Level X.Y — Topic" line, with an explicit "Parent View → Admin controls" footer alongside the one-tap unsubscribe. New Weekly Review email sends Sundays 04:00 UTC (5 pm NZDT / 4 pm NZST) — one combined email per parent across all students with practice-days/worksheets/accuracy, current focus, "🏆 New this week" milestone tier crossings (derived by diffing achievement snapshots before/after the week — no schema for it), and a top weak area. Empty-week variant supported. Two separate toggles (`reminders_enabled` / `weekly_enabled`) in Parent View → Admin controls; separate HMAC-prefixed unsubscribe streams. Daily defaults stay OFF for existing users; weekly defaults ON for everyone (mandatory by default, easy to disable).
 **Next:** Real Resend verified-domain send + Vercel deploy verification (cron entries in dashboard).
+
+### problem_type backfill (2026-05-10)
+
+**Trigger:** `problems.problem_type` was added around Milestone 54. All 680 problem rows created before that had `NULL`, causing the Mistake Journal and Weekly Review weak-area derivation to fall back to coarse "Level X.Y — Topic" labels instead of precise type labels (e.g. "Factor pairs", "Prime factorization").
+
+**Audit:** 680 null rows across exactly 3 levels:
+- Level 1/1 Addition — 200 rows → all `addition`
+- Level 9/1 Factorization — 260 rows → `prime_factorization`, `list_factors`, `gcf`, `lcm`
+- Level 9/2 Factorization — 220 rows → `factor_pairs`, `common_factors`, `gcf`
+
+100 pre-existing non-null rows were untouched (already correct from Milestone 54 onward).
+
+**Script added:** `scripts/backfill-problem-types.ts`
+- Dry-run by default; `--apply` required to write
+- 7 deterministic keyword/pattern rules — no inference uncertainty
+- UPDATE guarded by `.is('problem_type', null)` — cannot overwrite non-null rows
+- npm script: `backfill:problem-types`
+
+**Result after apply:**
+| Type | Count |
+|------|-------|
+| `addition` | 200 |
+| `gcf` | 174 |
+| `factor_pairs` | 96 |
+| `prime_factorization` | 94 |
+| `common_factors` | 80 |
+| `list_factors` | 68 |
+| `lcm` | 68 |
+| **Total non-null** | **780** |
+| **Remaining null** | **0** |
+
+Pre-existing + backfilled totals verified to match exactly — no overwrites confirmed.
+
+**Validation:**
+| Check | Result |
+|-------|--------|
+| `npx tsc --noEmit` | PASS |
+| `npx eslint scripts/backfill-problem-types.ts` | PASS |
+| DB: null count after apply | 0 |
+| DB: non-null count after apply | 780 (all 780 problems) |
+| Pre-existing non-null rows unchanged | ✓ (cross-checked totals) |
+
+**v1 limitations:**
+- Script infers only the 7 types present in legacy null rows. Future null rows from other levels would need additional rules added to the same script.
+- Script is safe to re-run (idempotent — the WHERE clause and `.is('problem_type', null)` guard prevent re-processing already-backfilled rows).
+
+---
 
 ### Help / FAQ refresh (2026-05-10)
 

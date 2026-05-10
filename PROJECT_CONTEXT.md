@@ -144,7 +144,7 @@ RLS: parents can only insert/select rows where `parent_id = auth.uid()`.
 | is_correct | bool | nullable, set on submission |
 | self_corrected | bool | nullable, set when student corrects a wrong answer post-results |
 | order_index | int | display order within session |
-| problem_type | text | nullable; generator type (e.g. `factor_pairs`, `fraction_addition`). Old rows pre-Milestone 54 are NULL and fall back to level/topic grouping. |
+| problem_type | text | nullable; generator type (e.g. `factor_pairs`, `addition`). Backfilled for all pre-Milestone 54 rows on 2026-05-10 via `scripts/backfill-problem-types.ts` — all 780 rows now non-null. Any future null rows fall back to level/topic grouping in the Mistake Journal. |
 
 ### `levels`
 | Column | Type | Notes |
