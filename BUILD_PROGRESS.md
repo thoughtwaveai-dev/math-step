@@ -6,7 +6,44 @@
 
 ## Current Status
 
-**Phase:** Parent Dashboard clarity + QA pass (2026-05-10). Copy and label audit across dashboard, HabitCard, AchievementsCard, MistakeJournalCard, and weekly review email. "Practice" wording tightened to "worksheet" where appropriate. Needs Practice card made parent visibility-only. Milestone descriptions added. No calculation or schema changes.
+**Phase:** Password reset flow (2026-05-25). Beta-parent recovery — adds `/account/forgot-password`, `/account/update-password`, `/auth/callback` using Supabase Auth's built-in `resetPasswordForEmail` + `updateUser`. No DB changes, no impact on existing signIn/signUp/signOut.
+
+---
+
+### Password reset flow (2026-05-25)
+
+**Trigger:** A real beta parent forgot their password with no in-app way to recover.
+
+**Approach:** Supabase Auth's built-in `resetPasswordForEmail` + `updateUser`. No custom token logic. PKCE recovery code exchanged in a route handler so the update-password page has a real recovery session.
+
+**Files added:**
+- `src/app/account/forgot-password/page.tsx` — server shell, reads `?error=expired` from `searchParams`
+- `src/app/account/forgot-password/ForgotPasswordForm.tsx` — client form, `useActionState`, success-state copy always shown after submit
+- `src/app/account/update-password/page.tsx` — server shell, `getUser()` gate; no-session view links back to forgot/login
+- `src/app/account/update-password/UpdatePasswordForm.tsx` — client form, two password inputs, inline error
+- `src/app/auth/callback/route.ts` — GET handler, sanitizes `next`, calls `exchangeCodeForSession`, redirects to `/account/forgot-password?error=expired` on failure
+- `src/app/login/LoginForm.tsx` — extracted from the old client page so the page can become a server component (needed for `searchParams` access without a Suspense boundary)
+
+**Files modified:**
+- `src/app/actions/auth.ts` — added `requestPasswordReset` (always returns `{ sent: true }` to avoid leaking email existence; logs supabase errors server-side) and `updatePassword` (validates ≥8 chars + match, checks `getUser()`, calls `updateUser`, clears student-mode cookie, redirects `/login?reset=1`)
+- `src/app/login/page.tsx` — converted to server component that reads `searchParams.reset` and renders `<LoginForm justReset />`
+- `src/lib/helpContent.ts` — added "I forgot my password — how do I reset it?" FAQ entry
+
+**Routes added:** `/account/forgot-password`, `/account/update-password`, `/auth/callback`
+
+**Validation:**
+| Check | Result |
+|-------|--------|
+| `npx tsc --noEmit` | PASS |
+| `npx eslint` (touched files) | PASS |
+| Playwright — `/login` shows "Forgot password?" link | PASS |
+| Playwright — `/account/forgot-password` renders + submit shows success copy | PASS |
+| Playwright — `/account/update-password` (no session) renders "only for password reset" panel | PASS |
+| Playwright — `/login?reset=1` shows success banner | PASS |
+| Playwright — 375×667 mobile viewport clean across all three pages | PASS |
+| End-to-end with real recovery email | NOT TESTED LOCALLY — requires production deploy |
+
+**Manual Supabase config required:** add `https://mathstep.nz/auth/callback` and `http://localhost:3000/auth/callback` to Supabase → Authentication → URL Configuration → Redirect URLs. No changes to email templates — default Recovery template is fine.
 
 ---
 

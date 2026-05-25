@@ -174,6 +174,7 @@ No RLS — publicly readable. Seeded with curriculum data.
 6. Unauthenticated requests to protected pages → redirect `/login`
 7. Session refresh handled by `middleware.ts` on every non-static request
 8. `/dashboard` remains accessible; reach it from `/play` via "Parent view" link
+9. **Password reset**: `/login` → "Forgot password?" → `/account/forgot-password` (server action `requestPasswordReset` → `supabase.auth.resetPasswordForEmail` with `redirectTo` set to `${NEXT_PUBLIC_APP_URL ?? 'https://mathstep.nz'}/auth/callback?next=/account/update-password`). Email link lands on `/auth/callback` (route handler exchanges `?code=` for a recovery session) → redirects to `/account/update-password` (server-side `getUser()` gate → client form → `updatePassword` server action calls `supabase.auth.updateUser({ password })`) → `/login?reset=1` with success banner. Supabase Auth → URL Configuration → Redirect URLs must include `https://mathstep.nz/auth/callback` (plus `http://localhost:3000/auth/callback` for dev). Uses Supabase's default Recovery email template — no custom token logic, no Resend wiring in app code.
 
 ---
 

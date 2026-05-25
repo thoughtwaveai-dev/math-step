@@ -76,6 +76,10 @@ export const FAQ_ITEMS = [
     a: 'Parents can log out from the PIN screen, log back in with their email and password, and reset the PIN from Parent View.',
   },
   {
+    q: 'I forgot my password — how do I reset it?',
+    a: 'On the sign in page, tap "Forgot password?" and enter your account email. We\'ll send you a link to set a new password. If you don\'t see the email, check your spam folder.',
+  },
+  {
     q: 'Will MathStep email me?',
     a: "MathStep can send two optional emails. The daily reminder is off by default — when turned on, it's only sent on days your child hasn't practised yet. The weekly progress email is on by default and arrives Sunday evening with a short recap of practice days, worksheets, accuracy, current focus, and any new milestones or weak areas. You can turn either off anytime from Parent View → Admin controls, or with the unsubscribe link at the bottom of any email.",
   },
