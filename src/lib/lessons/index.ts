@@ -359,7 +359,7 @@ const lessons: Record<LessonKey, Lesson> = {
   },
   '13/1': {
     title: 'Linear Equations',
-    explanation: 'Every straight line can be written as y = mx + b. The number m is the slope — how many units y rises for every 1 unit x moves right. The number b is the y-intercept — the y-value where the line crosses the y-axis (this is also y when x = 0). To check whether a point is on a line, substitute its x and y into the equation: if both sides match, the point is on the line. To find a missing y when you know x, just substitute x and calculate. To find a missing x when you know y, substitute y and solve the one-step equation for x.',
+    explanation: 'Every straight line can be written as y = mx + b. The number m is the slope — how many units y rises for every 1 unit x moves right. The number b is the y-intercept — the y-value where the line crosses the y-axis (this is also y when x = 0). When you write the equation of a line, y = mx + b is just the pattern — replace m and b with the numbers from the question. For example, slope 2 and y-intercept 3 gives y = 2x + 3. To check whether a point is on a line, substitute its x and y into the equation: if both sides match, the point is on the line. To find a missing y when you know x, just substitute x and calculate. To find a missing x when you know y, substitute y and solve the one-step equation for x.',
     example: {
       problem: 'For y = 2x + 3, what is y when x = 4?',
       steps: [

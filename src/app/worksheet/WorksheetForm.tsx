@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from 'react'
 import { submitWorksheet } from '@/app/actions/worksheet'
 import type { AnyProblemType } from '@/lib/math/generators'
-import { inputModeForType, problemTypeLabel } from '@/lib/math/inputMode'
+import { inputModeForType, placeholderForType, problemTypeLabel } from '@/lib/math/inputMode'
 import { parseGraphPrompt } from '@/lib/math/graphPrompt'
 import CoordinatePlane from '@/components/CoordinatePlane'
 
@@ -126,7 +126,7 @@ export default function WorksheetForm({ sessionId, problems, reviewProblemIds }:
                   <input
                     type="text"
                     name={`answer_${problem.id}`}
-                    placeholder="Your answer"
+                    placeholder={placeholderForType(problem.type)}
                     autoComplete="off"
                     inputMode={inputModeForType(problem.type)}
                     className="w-full rounded-lg border border-[#bae0bd] px-3.5 py-3 text-base text-[#1a2e1c] placeholder-[#a0b8a3] focus:border-[#2d6a35] focus:outline-none focus:ring-2 focus:ring-[#bae0bd]"

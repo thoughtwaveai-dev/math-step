@@ -40,6 +40,12 @@ export function inputModeForType(type: AnyProblemType): InputMode {
   return 'numeric'
 }
 
+export function placeholderForType(type: AnyProblemType): string {
+  if (type === 'equation_from_slope_intercept') return 'e.g. y = 2x + 3'
+  if (type === 'point_on_line') return 'yes or no'
+  return 'Your answer'
+}
+
 export function problemTypeLabel(type: AnyProblemType): string {
   switch (type) {
     case 'addition': return 'Addition'

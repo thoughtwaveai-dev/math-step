@@ -51,13 +51,21 @@ function pickNonZeroSlope(rand: () => number): number {
   return choices[Math.floor(rand() * choices.length)]
 }
 
+// Pick a generic example for the prompt that never matches the current answer.
+// Default example is "y = 2x + 3"; if that would be the answer, swap to "y = 3x - 4".
+function pickPromptExample(m: number, b: number): string {
+  if (m === 2 && b === 3) return 'y = 3x - 4'
+  return 'y = 2x + 3'
+}
+
 // (1) "Write the equation of a line with slope m and y-intercept b."
 function makeEquationFromSI(rand: () => number) {
   const m = pickSafeSlope(rand)
   const b = pickSafeIntercept(rand)
+  const example = pickPromptExample(m, b)
   return {
     type: 'equation_from_slope_intercept' as const,
-    prompt: `Write the equation of the line with slope ${m} and y-intercept ${b}. Use the form y = mx + b.`,
+    prompt: `Write the equation of the line with slope ${m} and y-intercept ${b}. Use this format: ${example}.`,
     answer: formatEquation(m, b),
   }
 }

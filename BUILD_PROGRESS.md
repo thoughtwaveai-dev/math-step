@@ -6,7 +6,35 @@
 
 ## Current Status
 
-**Phase:** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths.
+**Phase:** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
+
+---
+
+### Level 13.1 answer-format polish (2026-05-27)
+
+**Trigger:** Prompts said *"Use the form y = mx + b."* — mathematically correct but invited students to literally type `y = mx + b` instead of substituting values.
+
+**Changes (prompt + lesson copy only; placeholder helper added):**
+- `src/lib/math/generators/linear-equations-graphs.ts` — `equation_from_slope_intercept` prompt now reads *"Write the equation of the line with slope M and y-intercept B. Use this format: y = 2x + 3."* New `pickPromptExample(m, b)` picks `'y = 2x + 3'` by default and swaps to `'y = 3x - 4'` when the actual answer would equal `y = 2x + 3`, so the example is always generic and never coincides with the answer. Grader path / answer format / generator constraints unchanged.
+- `src/lib/lessons/index.ts` — `13/1` explanation gains one extra sentence pair: *"When you write the equation of a line, y = mx + b is just the pattern — replace m and b with the numbers from the question. For example, slope 2 and y-intercept 3 gives y = 2x + 3."* All other lesson content (title, worked example, tip) preserved.
+- `src/lib/math/inputMode.ts` — new `placeholderForType()` helper. `equation_from_slope_intercept` → `'e.g. y = 2x + 3'`, `point_on_line` → `'yes or no'`, everything else → `'Your answer'` (no behaviour change for the other 40+ types).
+- `src/app/worksheet/WorksheetForm.tsx` — text input `placeholder="Your answer"` swapped for `placeholder={placeholderForType(problem.type)}`. MC fieldset (graph choices) unchanged.
+
+**Files NOT touched:**
+- `src/lib/math/gradeAnswer.ts`, `src/app/actions/worksheet.ts` — answer shape and grading paths preserved.
+- Schema, streaks, points, mastery, achievements, PIN flow — all untouched.
+- `vercel.json` — region pin `syd1` preserved.
+
+**Validation:**
+| Check | Result |
+|------|--------|
+| `npx tsc --noEmit` | PASS (clean) |
+| `npx eslint` on the 4 touched files | PASS (clean) |
+| Generator smoke (100 seeds × 20 problems = 2000): distribution 400/400/400/400/400 across the 5 types | PASS |
+| 400 equation-writing prompts inspected: example always `y = 2x + 3` or `y = 3x - 4`, **0 example/answer clashes** | PASS |
+| Found a seed producing answer `y = 2x + 3` → prompt correctly used `y = 3x - 4` as the example | PASS |
+| `gradeAnswer` round-trip on 1000 problems (50 seeds × 20) | PASS (1000/1000) |
+| Playwright UI | Deferred — `/worksheet` is auth-gated and no test credentials available in this session (matches recent milestones) |
 
 ---
 
