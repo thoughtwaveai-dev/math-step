@@ -362,7 +362,7 @@ export default async function DashboardPage({
         </div>
 
         {/* Parent PIN / Student Mode card */}
-        <StudentModeCard hasPin={hasPin} />
+        <StudentModeCard hasPin={hasPin} studentCount={students.length} />
 
         {/* Current Focus */}
         <div className="rounded-xl border border-[#bae0bd] bg-white p-5">

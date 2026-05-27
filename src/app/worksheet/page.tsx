@@ -12,6 +12,11 @@ import WorksheetForm from './WorksheetForm'
 import LessonCard from './LessonCard'
 import WorksheetScratchpad from './WorksheetScratchpad'
 import StuckSupportCard from './StuckSupportCard'
+import {
+  getLockedStudentId,
+  isSwitcherUnlocked,
+  resolveActiveStudent,
+} from '@/lib/parentMode'
 
 // Number of review problems to include in a mixed worksheet.
 const REVIEW_PROBLEM_COUNT = 4
@@ -35,7 +40,24 @@ export default async function WorksheetPage({
 
   const sp = await searchParams
   const selectedId = sp.student
-  const student = (selectedId ? students.find(s => s.id === selectedId) : null) ?? students[0]
+
+  const [profileRow, switcherUnlocked, lockedStudentId] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('parent_pin')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(r => r.data),
+    isSwitcherUnlocked(),
+    getLockedStudentId(),
+  ])
+  const student = resolveActiveStudent({
+    requested: selectedId,
+    students,
+    hasPin: Boolean(profileRow?.parent_pin),
+    switcherUnlocked,
+    lockedStudentId,
+  })
 
   const levelNumber = student.current_level as number
   const sublevelNumber = student.current_sublevel as number

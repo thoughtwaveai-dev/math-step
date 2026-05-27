@@ -5,6 +5,11 @@ import { createClient } from '@/lib/supabase/server'
 import { generateProblems } from '@/lib/math/generators'
 import { SUPPORTED_LEVEL_KEYS } from '@/lib/levelKeys'
 import PracticeForm from './PracticeForm'
+import {
+  getLockedStudentId,
+  isSwitcherUnlocked,
+  resolveActiveStudent,
+} from '@/lib/parentMode'
 
 const PRACTICE_PROBLEM_COUNT = 10
 
@@ -32,7 +37,24 @@ export default async function WeakSpotsPracticePage({
 
   const sp = await searchParams
   const selectedId = sp.student
-  const student = (selectedId ? students.find(s => s.id === selectedId) : null) ?? students[0]
+
+  const [profileRow, switcherUnlocked, lockedStudentId] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('parent_pin')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(r => r.data),
+    isSwitcherUnlocked(),
+    getLockedStudentId(),
+  ])
+  const student = resolveActiveStudent({
+    requested: selectedId,
+    students,
+    hasPin: Boolean(profileRow?.parent_pin),
+    switcherUnlocked,
+    lockedStudentId,
+  })
 
   const levelNumber = parseLevelParam(sp.level, student.current_level as number)
   const sublevelNumber = parseLevelParam(sp.sublevel, student.current_sublevel as number)

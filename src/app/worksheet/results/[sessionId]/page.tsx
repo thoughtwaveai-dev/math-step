@@ -7,6 +7,10 @@ import CorrectionInput from './CorrectionInput'
 import BackToTop from './BackToTop'
 import { isStudentStuck } from '@/lib/stuckDetector'
 import { detectSessionMilestones } from '@/lib/achievements'
+import {
+  getLockedStudentId,
+  isSwitcherUnlocked,
+} from '@/lib/parentMode'
 
 function formatTime(seconds: number | null): string {
   if (!seconds) return '—'
@@ -79,6 +83,38 @@ export default async function ResultsPage({
   if (!ownerCheck) redirect('/dashboard')
 
   const studentId = session.student_id as string
+
+  // Switcher-lock soft fail: if the parent has set a PIN, the device is locked
+  // to a specific student, and this session belongs to a different student,
+  // bounce back to /play. Single-student or unlocked sessions are unaffected.
+  // When the locked-student cookie isn't set yet, fall back to students[0] to
+  // mirror the resolver's behavior on /play.
+  const [switcherUnlocked, lockedStudentId, parentStudents] = await Promise.all([
+    isSwitcherUnlocked(),
+    getLockedStudentId(),
+    supabase
+      .from('students')
+      .select('id')
+      .eq('parent_id', user.id)
+      .order('created_at', { ascending: true })
+      .then(r => r.data ?? []),
+  ])
+  if (parentStudents.length > 1 && !switcherUnlocked) {
+    const { data: profileRow } = await supabase
+      .from('profiles')
+      .select('parent_pin')
+      .eq('id', user.id)
+      .maybeSingle()
+    if (profileRow?.parent_pin) {
+      const effectiveLocked =
+        lockedStudentId && parentStudents.some(s => s.id === lockedStudentId)
+          ? lockedStudentId
+          : parentStudents[0].id
+      if (effectiveLocked !== studentId) {
+        redirect(`/play?student=${effectiveLocked}`)
+      }
+    }
+  }
 
   const typedSession = session as Session
   if (!typedSession.completed_at) redirect('/worksheet')

@@ -2,7 +2,11 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { clearStudentModeCookie } from '@/lib/parentMode'
+import {
+  clearLockedStudentCookie,
+  clearStudentModeCookie,
+  clearSwitcherUnlockedCookie,
+} from '@/lib/parentMode'
 
 export async function signUp(
   _prevState: { error: string } | null,
@@ -22,6 +26,8 @@ export async function signUp(
   if (error) return { error: error.message }
 
   await clearStudentModeCookie()
+  await clearSwitcherUnlockedCookie()
+  await clearLockedStudentCookie()
   redirect('/play')
 }
 
@@ -38,6 +44,8 @@ export async function signIn(
   if (error) return { error: error.message }
 
   await clearStudentModeCookie()
+  await clearSwitcherUnlockedCookie()
+  await clearLockedStudentCookie()
   redirect('/play')
 }
 
@@ -45,6 +53,8 @@ export async function signOut() {
   const supabase = await createClient()
   await supabase.auth.signOut()
   await clearStudentModeCookie()
+  await clearSwitcherUnlockedCookie()
+  await clearLockedStudentCookie()
   redirect('/login')
 }
 
@@ -93,5 +103,7 @@ export async function updatePassword(
   }
 
   await clearStudentModeCookie()
+  await clearSwitcherUnlockedCookie()
+  await clearLockedStudentCookie()
   redirect('/login?reset=1')
 }

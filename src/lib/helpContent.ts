@@ -32,6 +32,10 @@ export const FAQ_ITEMS = [
     a: "Yes. In Parent View, expand Admin controls and choose Delete student. You'll be asked to type the student's name to confirm. Deleting is permanent and removes that student's history, so the option is only available when you have more than one student on the account.",
   },
   {
+    q: 'Can I lock my child to their own worksheets?',
+    a: "Yes. If you have more than one student, switching between them in Student View is protected by your Parent PIN. Tap Switch student in Student View, enter the PIN, and your child can continue on their own workbook. You can re-lock the switcher anytime.",
+  },
+  {
     q: 'Who marks the answers?',
     a: "MathStep marks every answer automatically the moment it's submitted. No manual checking needed.",
   },

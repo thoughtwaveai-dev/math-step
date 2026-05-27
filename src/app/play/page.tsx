@@ -11,6 +11,12 @@ import TargetedPracticeCTA from '@/components/TargetedPracticeCTA'
 import HabitCard from '@/components/HabitCard'
 import { deriveHabitStatus } from '@/lib/habit'
 import { deriveWeakAreas } from '@/lib/mistakeJournal'
+import {
+  getLockedStudentId,
+  isSwitcherUnlocked,
+  resolveActiveStudent,
+} from '@/lib/parentMode'
+import { lockStudentSwitcher } from '@/app/actions/pin'
 
 const SESSION_FETCH_LIMIT = 500
 const MISTAKE_JOURNAL_SESSION_WINDOW = 20
@@ -35,7 +41,26 @@ export default async function PlayPage({
 
   const sp = await searchParams
   const selectedId = sp.student
-  const student = (selectedId ? students.find(s => s.id === selectedId) : null) ?? students[0]
+
+  const [profileRow, switcherUnlocked, lockedStudentId] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('parent_pin')
+      .eq('id', user.id)
+      .maybeSingle()
+      .then(r => r.data),
+    isSwitcherUnlocked(),
+    getLockedStudentId(),
+  ])
+  const hasPin = Boolean(profileRow?.parent_pin)
+  const switcherLocked = students.length > 1 && hasPin && !switcherUnlocked
+  const student = resolveActiveStudent({
+    requested: selectedId,
+    students,
+    hasPin,
+    switcherUnlocked,
+    lockedStudentId,
+  })
 
   // Parallel: streaks, levels, full-history sessions, self-correction count
   const [
@@ -223,21 +248,47 @@ export default async function PlayPage({
 
         {/* Student switcher — shown when more than one student */}
         {students.length > 1 && (
-          <div className="flex flex-wrap items-center gap-2">
-            {students.map(s => (
+          switcherLocked ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#2d6a35] px-4 py-1.5 text-sm font-semibold text-white">
+                <span aria-hidden>🔒</span>
+                {student.name}
+              </span>
               <Link
-                key={s.id}
-                href={`/play?student=${s.id}`}
-                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
-                  s.id === student.id
-                    ? 'bg-[#2d6a35] text-white'
-                    : 'border border-[#bae0bd] bg-white text-[#2d6a35] hover:bg-[#f2faf3]'
-                }`}
+                href={`/switcher-unlock?next=/play`}
+                className="rounded-full border border-[#bae0bd] bg-white px-4 py-1.5 text-sm font-semibold text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
               >
-                {s.name}
+                Switch student
               </Link>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap items-center gap-2">
+              {students.map(s => (
+                <Link
+                  key={s.id}
+                  href={`/play?student=${s.id}`}
+                  className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${
+                    s.id === student.id
+                      ? 'bg-[#2d6a35] text-white'
+                      : 'border border-[#bae0bd] bg-white text-[#2d6a35] hover:bg-[#f2faf3]'
+                  }`}
+                >
+                  {s.name}
+                </Link>
+              ))}
+              {hasPin && (
+                <form action={lockStudentSwitcher}>
+                  <input type="hidden" name="student" value={student.id} />
+                  <button
+                    type="submit"
+                    className="rounded-full border border-[#bae0bd] bg-white px-3 py-1.5 text-xs font-medium text-[#4a6b4e] hover:bg-[#f2faf3] transition-colors"
+                  >
+                    🔒 Lock switcher
+                  </button>
+                </form>
+              )}
+            </div>
+          )
         )}
 
         {/* Stats row */}

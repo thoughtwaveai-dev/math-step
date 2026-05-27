@@ -6,9 +6,10 @@ import { lockToStudentMode, setPin } from '@/app/actions/pin'
 
 type Props = {
   hasPin: boolean
+  studentCount?: number
 }
 
-export default function StudentModeCard({ hasPin }: Props) {
+export default function StudentModeCard({ hasPin, studentCount = 1 }: Props) {
   const [setState, setAction, setPending] = useActionState(setPin, null)
   const [showSetupForm, setShowSetupForm] = useState(false)
   const router = useRouter()
@@ -55,6 +56,11 @@ export default function StudentModeCard({ hasPin }: Props) {
           <p className="mt-1 text-sm text-[#4a6b4e]">
             Add a quick 4-digit PIN so your child can practise in Student View without opening Parent View.
           </p>
+          {studentCount > 1 && (
+            <p className="mt-2 text-sm text-[#4a6b4e]">
+              With more than one child on this account, the PIN also locks the student switcher in Student View — so each child stays on their own workbook.
+            </p>
+          )}
         </div>
         {!showSetupForm && (
           <div className="mt-4 sm:mt-0 sm:shrink-0">

@@ -6,7 +6,57 @@
 
 ## Current Status
 
-**Phase:** Password reset flow (2026-05-25). Beta-parent recovery — adds `/account/forgot-password`, `/account/update-password`, `/auth/callback` using Supabase Auth's built-in `resetPasswordForEmail` + `updateUser`. No DB changes, no impact on existing signIn/signUp/signOut.
+**Phase:** Student switcher lock (2026-05-27). Beta-parent (Roc) had 2 sons under one account and wanted each son locked to their own workbook. Existing Parent PIN now also gates the student switcher on `/play` and soft-fails direct-URL `?student=<sibling>` attempts on `/worksheet`, `/worksheet/results/[sessionId]`, and `/practice/weak-spots`. Single-student accounts are completely unaffected. No DB changes.
+
+---
+
+### Student switcher lock (2026-05-27)
+
+**Trigger:** A real beta parent (Roc) has two sons on one account. He wanted each son locked to their own workbook on their own device. Until now, the Parent PIN only gated Parent View — children could freely tap a sibling's pill on `/play` or paste `?student=<sibling>` into the URL.
+
+**Approach:** Reuse the existing Parent PIN (no second PIN, no schema change). Add two new cookies:
+- `mathstep_switcher_unlocked` — `'on'` after PIN entry, httpOnly, sameSite=lax, secure in prod, `maxAge = 30 * 60` (30-min idle).
+- `mathstep_locked_student` — UUID of the student this device is assigned to. Set when the parent picks a sibling on `/switcher-unlock` and also when they press "Lock switcher" on `/play`. 30-day `maxAge`. Persists across unlock/relock cycles.
+
+Both cookies are cleared on signIn / signUp / signOut / `updatePassword` / `removePin`. `lockToStudentMode` ("Hand over to child") also clears the unlock cookie so the switcher re-locks for the next child interaction (but keeps the locked-student cookie — the device assignment stays).
+
+**Files added:**
+- `src/app/switcher-unlock/page.tsx` — server component mirroring `/parent-pin`. Auth gate, then validates `?next=…`. If no PIN saved, drops any unlock cookie and redirects. If only one student, bounces to `/play?student=<id>`. Otherwise renders the sibling picker + PIN form.
+- `src/app/switcher-unlock/SwitcherUnlockForm.tsx` — client component, `useActionState(verifySwitcherPinAction, null)` with cooldown countdown matching `PinEntryForm`. Sibling picker is a pill-style radio group above the PIN input.
+
+**Files modified:**
+- `src/lib/parentMode.ts` — added `SWITCHER_UNLOCKED_COOKIE`, `LOCKED_STUDENT_COOKIE`, `SWITCHER_UNLOCK_MAX_AGE_SECONDS`, `LOCKED_STUDENT_MAX_AGE_SECONDS` constants. New helpers: `isSwitcherUnlocked`, `setSwitcherUnlockedCookie`, `clearSwitcherUnlockedCookie`, `getLockedStudentId`, `setLockedStudentCookie`, `clearLockedStudentCookie`. New pure resolver `resolveActiveStudent({ requested, students, hasPin, switcherUnlocked, lockedStudentId })`.
+- `src/app/actions/pin.ts` — new `verifySwitcherPinAction` (clone of `verifyPinAction` that sets the unlock cookie, also persists the picked sibling as the locked student so the device assignment survives the 30-min unlock TTL). New `lockStudentSwitcher` server action (validates ownership via RLS-friendly query, writes `mathstep_locked_student`, clears unlock cookie, redirects to `/play?student=<id>`). `removePin` and `lockToStudentMode` updated to keep the new cookies consistent.
+- `src/app/actions/auth.ts` — `signIn`, `signUp`, `signOut`, `updatePassword` now clear both new cookies alongside `clearStudentModeCookie`.
+- `src/app/play/page.tsx` — fetches `parent_pin`, the unlock cookie, and the locked-student cookie in parallel with the existing student fetch. Uses `resolveActiveStudent` instead of the inline fallback. Switcher UI now branches: locked state shows the active student's pill + 🔒 lock icon + "Switch student" link; unlocked state shows the normal pills + a "🔒 Lock switcher" form (only when a PIN is saved).
+- `src/app/worksheet/page.tsx`, `src/app/practice/weak-spots/page.tsx` — same resolver wiring, no UI changes.
+- `src/app/worksheet/results/[sessionId]/page.tsx` — added a soft-fail guard: if the parent has a PIN, the device is locked (no unlock cookie), and the session belongs to a sibling, redirect to `/play?student=<locked>`. Falls back to `students[0]` when the locked-student cookie hasn't been set yet to mirror the resolver behavior on `/play`.
+- `src/app/dashboard/StudentModeCard.tsx` — when `studentCount > 1 && !hasPin`, the "no PIN" card adds a soft note explaining that the PIN also locks the switcher.
+- `src/app/dashboard/page.tsx` — passes `studentCount={students.length}` to `StudentModeCard`.
+- `src/lib/helpContent.ts` — new FAQ: *"Can I lock my child to their own worksheets?"*
+
+**Hard scope rules (preserved):**
+- No DB schema changes.
+- No new PIN system — same `parent_pin` / `pin_failed_attempts` / `pin_locked_until` columns, same 5-attempts / 30-second cooldown.
+- No changes to worksheet generation, grading, mastery, streaks, points, achievements, emails, placement, or auth flows.
+- Single-student accounts behave exactly as before — no new cookies set, no new prompts.
+- Multi-student accounts with no PIN behave exactly as before, plus a soft tip in Admin controls.
+
+**Validation:**
+| Check | Result |
+|-------|--------|
+| `npx tsc --noEmit` | PASS |
+| `npx eslint` (touched files) | Pre-existing lint debt only — new code follows the same patterns as `parent-pin/page.tsx` and `PinEntryForm.tsx` |
+| Playwright UI | Deferred to user manual testing (login credentials not available in session — same as recent milestones) |
+
+**Manual test plan (for user follow-up):**
+1. **Single-student account:** `/play` shows no switcher, no lock icon. URLs work as before.
+2. **Multi-student account, no PIN:** Switcher renders normally. Parent View → Admin controls shows the new tip about locking the switcher.
+3. **Multi-student, PIN saved, fresh device:** `/play` shows the active pill with 🔒 + "Switch student" link. Clicking goes to `/switcher-unlock`. Wrong PIN → soft error. Correct PIN + sibling pick → redirects to `/play?student=<sibling>`, the locked-student cookie is updated to the new student, switcher unlocks for 30 min.
+4. **Lock switcher button:** Visible while unlocked next to the pills. Pressing it persists `mathstep_locked_student` to the current student and clears the unlock cookie.
+5. **Direct URL bypass while locked:** `/play?student=<sibling>`, `/worksheet?student=<sibling>`, and `/practice/weak-spots?student=<sibling>` all silently show the locked student. `/worksheet/results/<sibling-session>` redirects to `/play`.
+6. **Parent View:** Existing PIN flow unchanged. Removing the PIN from Admin controls drops both new cookies.
+7. **Mobile (375×667):** Locked pill + "Switch student" link fits without wrapping awkwardly.
 
 ---
 
