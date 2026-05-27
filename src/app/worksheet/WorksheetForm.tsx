@@ -4,6 +4,8 @@ import { useActionState, useEffect, useState } from 'react'
 import { submitWorksheet } from '@/app/actions/worksheet'
 import type { AnyProblemType } from '@/lib/math/generators'
 import { inputModeForType, problemTypeLabel } from '@/lib/math/inputMode'
+import { parseGraphPrompt } from '@/lib/math/graphPrompt'
+import CoordinatePlane from '@/components/CoordinatePlane'
 
 interface PersistedProblem {
   id: string
@@ -17,6 +19,8 @@ interface Props {
   problems: PersistedProblem[]
   reviewProblemIds: string[]
 }
+
+const CHOICE_LETTERS = ['A', 'B', 'C', 'D'] as const
 
 export default function WorksheetForm({ sessionId, problems, reviewProblemIds }: Props) {
   const [state, formAction, pending] = useActionState(submitWorksheet, null)
@@ -57,41 +61,82 @@ export default function WorksheetForm({ sessionId, problems, reviewProblemIds }:
       )}
 
       {/* Problems */}
-      {problems.map((problem, index) => (
-        <div
-          key={problem.id}
-          className="rounded-xl border border-[#bae0bd] bg-white p-5"
-        >
-          <div className="flex items-start gap-4">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e1f4e3] text-sm font-bold text-[#2d6a35]">
-              {index + 1}
-            </span>
-            <div className="flex-1 space-y-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">
-                    {problemTypeLabel(problem.type)}
-                  </span>
-                  {problem.isReview && (
-                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-                      Review
+      {problems.map((problem, index) => {
+        const parsed = parseGraphPrompt(problem.prompt)
+        return (
+          <div
+            key={problem.id}
+            className="rounded-xl border border-[#bae0bd] bg-white p-5"
+          >
+            <div className="flex items-start gap-4">
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e1f4e3] text-sm font-bold text-[#2d6a35]">
+                {index + 1}
+              </span>
+              <div className="flex-1 space-y-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">
+                      {problemTypeLabel(problem.type)}
                     </span>
-                  )}
+                    {problem.isReview && (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
+                        Review
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-lg font-semibold text-[#1a2e1c] whitespace-pre-line">{parsed.displayText}</p>
                 </div>
-                <p className="mt-1 text-lg font-semibold text-[#1a2e1c]">{problem.prompt}</p>
+
+                {parsed.graph && (
+                  <div className="flex justify-center">
+                    <CoordinatePlane spec={parsed.graph} size="full" />
+                  </div>
+                )}
+
+                {parsed.choices ? (
+                  <fieldset>
+                    <legend className="sr-only">Choose the matching graph</legend>
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                      {parsed.choices.map((choiceSpec, choiceIdx) => {
+                        const letter = CHOICE_LETTERS[choiceIdx]
+                        const inputId = `${problem.id}_${letter}`
+                        return (
+                          <label
+                            key={letter}
+                            htmlFor={inputId}
+                            className="cursor-pointer"
+                          >
+                            <input
+                              id={inputId}
+                              type="radio"
+                              name={`answer_${problem.id}`}
+                              value={letter}
+                              className="peer sr-only"
+                            />
+                            <div className="flex flex-col items-center gap-2 rounded-lg border-2 border-[#bae0bd] bg-white p-2 transition-colors peer-checked:border-[#2d6a35] peer-checked:bg-[#e1f4e3] peer-focus-visible:ring-2 peer-focus-visible:ring-[#2d6a35]">
+                              <CoordinatePlane spec={choiceSpec} size="mini" />
+                              <span className="text-sm font-bold text-[#1a2e1c]">{letter}</span>
+                            </div>
+                          </label>
+                        )
+                      })}
+                    </div>
+                  </fieldset>
+                ) : (
+                  <input
+                    type="text"
+                    name={`answer_${problem.id}`}
+                    placeholder="Your answer"
+                    autoComplete="off"
+                    inputMode={inputModeForType(problem.type)}
+                    className="w-full rounded-lg border border-[#bae0bd] px-3.5 py-3 text-base text-[#1a2e1c] placeholder-[#a0b8a3] focus:border-[#2d6a35] focus:outline-none focus:ring-2 focus:ring-[#bae0bd]"
+                  />
+                )}
               </div>
-              <input
-                type="text"
-                name={`answer_${problem.id}`}
-                placeholder="Your answer"
-                autoComplete="off"
-                inputMode={inputModeForType(problem.type)}
-                className="w-full rounded-lg border border-[#bae0bd] px-3.5 py-3 text-base text-[#1a2e1c] placeholder-[#a0b8a3] focus:border-[#2d6a35] focus:outline-none focus:ring-2 focus:ring-[#bae0bd]"
-              />
             </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
 
       {state?.error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

@@ -22,6 +22,12 @@ export function inputModeForType(type: AnyProblemType): InputMode {
     type === 'function_compose_simple' ||
     type === 'function_inverse_solve'
   ) return 'numeric'
+  if (type === 'read_point_coordinates' || type === 'match_equation_to_graph') return 'text'
+  if (
+    type === 'identify_slope_from_graph' ||
+    type === 'identify_y_intercept_from_graph' ||
+    type === 'read_y_for_x'
+  ) return 'numeric'
   return 'numeric'
 }
 
@@ -71,5 +77,10 @@ export function problemTypeLabel(type: AnyProblemType): string {
     case 'function_evaluate_negative': return 'Functions with negatives'
     case 'function_compose_simple': return 'Function composition'
     case 'function_inverse_solve': return 'Solve for function input'
+    case 'read_point_coordinates': return 'Reading coordinates'
+    case 'identify_slope_from_graph': return 'Slope from graph'
+    case 'identify_y_intercept_from_graph': return 'Y-intercept from graph'
+    case 'read_y_for_x': return 'Reading values from a graph'
+    case 'match_equation_to_graph': return 'Matching equations to graphs'
   }
 }

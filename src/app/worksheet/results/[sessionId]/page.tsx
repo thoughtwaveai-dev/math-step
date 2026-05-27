@@ -5,6 +5,8 @@ import Link from 'next/link'
 import CelebrationEffect from './CelebrationEffect'
 import CorrectionInput from './CorrectionInput'
 import BackToTop from './BackToTop'
+import CoordinatePlane from '@/components/CoordinatePlane'
+import { parseGraphPrompt } from '@/lib/math/graphPrompt'
 import { isStudentStuck } from '@/lib/stuckDetector'
 import { detectSessionMilestones } from '@/lib/achievements'
 import {
@@ -348,7 +350,9 @@ export default async function ResultsPage({
         <div className="space-y-3">
           <h2 className="text-lg font-bold text-[#1a2e1c]">Problem Review</h2>
 
-          {problems.map((problem, index) => (
+          {problems.map((problem, index) => {
+            const parsed = parseGraphPrompt(problem.problem_text)
+            return (
             <div
               key={problem.id}
               className={`rounded-xl border bg-white p-5 ${
@@ -368,7 +372,35 @@ export default async function ResultsPage({
 
                 <div className="flex-1 space-y-2">
                   <p className="text-xs font-medium text-[#4a6b4e]">Problem {index + 1}</p>
-                  <p className="text-base font-semibold text-[#1a2e1c]">{problem.problem_text}</p>
+                  <p className="text-base font-semibold text-[#1a2e1c] whitespace-pre-line">{parsed.displayText}</p>
+
+                  {parsed.graph && (
+                    <div className="flex justify-center py-2">
+                      <CoordinatePlane spec={parsed.graph} size="full" />
+                    </div>
+                  )}
+
+                  {parsed.choices && (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 py-2">
+                      {parsed.choices.map((choiceSpec, idx) => {
+                        const letter = ['A', 'B', 'C', 'D'][idx]
+                        const isCorrectChoice = letter === problem.correct_answer.trim().toUpperCase()
+                        const isStudentChoice = letter === (problem.student_answer ?? '').trim().toUpperCase()
+                        const ring =
+                          isCorrectChoice
+                            ? 'border-[#2d6a35] bg-[#e1f4e3]'
+                            : isStudentChoice
+                              ? 'border-red-300 bg-red-50'
+                              : 'border-[#bae0bd] bg-white'
+                        return (
+                          <div key={letter} className={`flex flex-col items-center gap-1 rounded-lg border-2 p-2 ${ring}`}>
+                            <CoordinatePlane spec={choiceSpec} size="mini" />
+                            <span className="text-sm font-bold text-[#1a2e1c]">{letter}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
 
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
@@ -417,7 +449,8 @@ export default async function ResultsPage({
                 </div>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row">

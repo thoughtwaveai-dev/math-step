@@ -93,6 +93,11 @@ const PARENT_LABELS: Record<string, string> = {
   function_evaluate_negative: 'Functions with negatives',
   function_compose_simple: 'Function composition',
   function_inverse_solve: 'Solve for function input',
+  read_point_coordinates: 'Reading coordinates',
+  identify_slope_from_graph: 'Slope from graph',
+  identify_y_intercept_from_graph: 'Y-intercept from graph',
+  read_y_for_x: 'Reading values from a graph',
+  match_equation_to_graph: 'Matching equations to graphs',
 }
 
 export function parentLabelForType(type: string): string {

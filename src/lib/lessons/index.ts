@@ -342,6 +342,21 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Always replace every x with the input number — even when the input is negative, like f(-2). For composition f(g(c)), do the inside first: work out g(c), then put that result into f.',
   },
+  '12/2': {
+    title: 'Reading Graphs',
+    explanation: 'A coordinate plane has two number lines that cross at zero — the x-axis runs left-right and the y-axis runs up-down. Any point can be described by two numbers: how far across (x) and how far up or down (y). A line on the plane has two things you can read off: its slope (how steep it is, found by rise ÷ run between two points) and its y-intercept (where it crosses the y-axis). To find the y-value for a given x, find that x on the bottom axis, go up or down until you hit the line, then read across to the y-axis.',
+    example: {
+      problem: 'A point sits 3 to the right and 2 down from the origin.',
+      steps: [
+        'Across (x) = 3 (positive, right of zero)',
+        'Up/down (y) = -2 (negative, below zero)',
+        'Coordinates: x = 3, y = -2',
+        'Always give x first, then y.',
+      ],
+      answer: 'x = 3, y = -2',
+    },
+    tip: 'Slope is how many squares the line goes up (or down) for every one square it moves to the right. Count the gridlines — if the line rises 2 squares per 1 across, the slope is 2. If it falls 2 squares per 1 across, the slope is -2.',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

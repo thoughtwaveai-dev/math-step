@@ -263,6 +263,7 @@ Generators live in `src/lib/math/generators/`. The router is `generateProblems(l
 | 11/1 | one-variable inequalities (4 types) | `x > 4`, `x < 7`, `x <= 5`, `x >= 12` | inequality normalization |
 | 11/2 | simultaneous equations (3 shapes: x+y/x-y, 2x+y/x-y, x+2y/x+y) | `x = 3, y = 7` | sim-eq pair path (regex by name, normalizes spaces/case) |
 | 12/1 | functions (5 types: evaluate linear/quadratic/negative, compose simple, inverse-solve) | signed integer string: `"11"`, `"-8"`, `"3"` | signed integer path (`/^-?\d+$/`) |
+| 12/2 | graphing (5 types: read point coords, slope, y-intercept, read-y-for-x, match equation to graph) | `"x = 3, y = -2"` (coords) / signed int / `"A"`–`"D"` (MC) | sim-eq pair grader / signed integer / algebraic-path letter |
 | others | not implemented | — | returns [] → "Coming Soon" |
 
 ### Generator architecture (Milestone 26)
@@ -287,7 +288,17 @@ All generators use **bounded algorithmic random generation** — no more fixed 1
 
 ### Lesson cards
 
-`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. All 23 currently supported levels have lesson cards: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 9/2, 10/1, 10/2, 11/1, 11/2, 12/1.
+`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. All 24 currently supported levels have lesson cards: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 9/2, 10/1, 10/2, 11/1, 11/2, 12/1, 12/2.
+
+### Level 12.2 Graphing — SVG rendering pattern
+
+Level 12.2 is the first MathStep curriculum level with visual content (inline coordinate-plane SVGs) and the first with multiple-choice answers. The implementation adds these without touching the schema, the worksheet action, or the grading utility.
+
+- **Graph data persistence (no DB change):** the generator (`src/lib/math/generators/graphing.ts`) encodes a `GraphSpec` JSON payload into a suffix marker inside `problem_text`: `[GRAPH]{…}[/GRAPH]` for a single graph above the prompt, or `[CHOICES][{…},{…},{…},{…}][/CHOICES]` for the 4 MC mini graphs. `src/lib/math/graphPrompt.ts → parseGraphPrompt(text)` returns `{ displayText, graph?, choices? }`; it's defensive about malformed payloads (falls back to plain text). Both `WorksheetForm` and the results page call it so the JSON marker never reaches the rendered DOM.
+- **SVG component (`src/components/CoordinatePlane.tsx`):** dependency-free server React component. Two size variants: `full` (320 px, with tick labels) used above the prompt, `mini` (140 px, no labels) used in 4-up MC grids. Renders axes, gridlines, optional point + label, optional line (clipped to `[-6, 6]^2`), optional `highlightX` dotted indicator with hollow marker. `viewBox` + `width="100%"` so it scales cleanly to the 375 px mobile viewport without horizontal scroll.
+- **MC UI in `WorksheetForm.tsx`:** when `parseGraphPrompt(prompt).choices` is set, render a 4-radio `<fieldset>` (Tailwind `peer-checked:border-[#2d6a35] peer-checked:bg-[#e1f4e3]` for selection styling). Radio `name="answer_<problem.id>"`, values `A`/`B`/`C`/`D` — the existing `submitWorksheet` flow handles them as ordinary text answers.
+- **Grading reuse (`gradeAnswer.ts` untouched):** coordinate answers (`"x = 3, y = -2"`) grade via the simultaneous-equations pair path that Level 11.2 already relies on (order-independent, spacing-insensitive). MC letters grade via the algebraic path (`/[a-zA-Z]/`), which lowercases and strict-matches — `a` vs `A` is automatically case-insensitive. Slope / y-intercept / read-y answers grade via the existing signed-integer path.
+- **Results page (`src/app/worksheet/results/[sessionId]/page.tsx`):** review cards render the same `<CoordinatePlane>` above the answer grid for `.graph` problems, and the 4 mini graphs in a 2-up (mobile) / 4-up (≥ sm) grid for `.choices`, with subtle ring styling — green on the correct choice, soft red on the student's wrong pick.
 
 ---
 
