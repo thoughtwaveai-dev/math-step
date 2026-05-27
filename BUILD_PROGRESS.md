@@ -6,7 +6,90 @@
 
 ## Current Status
 
-**Phase:** Level 12.2 Graphing (2026-05-27). Joaquin finished 12.1 Functions and was blocked on Coming Soon. New curriculum level adds 5 interpretation-only problem types (read coordinates, slope, y-intercept, read-y-for-x, match equation to graph) with inline SVG via a new server-renderable `<CoordinatePlane>` component. First MathStep level to ship visual content and the first multiple-choice problem type — both done with no schema changes by encoding graph specs as `[GRAPH]…[/GRAPH]` / `[CHOICES]…[/CHOICES]` markers inside `problem_text`.
+**Phase:** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths.
+
+---
+
+### Level 13.1 Linear Equations & Graphs curriculum (2026-05-27)
+
+**Trigger:** Joaquin finished Level 12.2 and was about to hit another Coming Soon wall. The `levels` row for 13.1 did not exist yet and the generator stack stopped at 12.2.
+
+**Approach:** Algorithmic generation only, text-only worksheets (no graphs in v1). Every answer shape lands on a grading path that already exists:
+- equation strings (`y = 2x + 3`) → algebraic path (the sim-eq pair path needs literal `x =`; this string only has `y =` and `2x +` so it correctly falls through)
+- slope / y-intercept / evaluation answers → signed-integer path
+- point-on-line → algebraic path on canonical `yes` / `no` (case + whitespace insensitive)
+
+To keep the equation answers unambiguous under the existing algebraic-path normalization (lowercase + strip whitespace + strict compare), the generator excludes slope ∈ {-1, 0, 1} and intercept = 0 for any problem type that *displays* a `y = mx + b` string. This eliminates the `y = x + 3` vs `y = 1x + 3` ambiguity and the `y = 2x + 0` vs `y = 2x` ambiguity at the source — so `src/lib/math/gradeAnswer.ts` is untouched.
+
+**5 problem types (distribution 4/4/4/4/4 for a 20-problem worksheet):**
+- `equation_from_slope_intercept` → "Write the equation of the line with slope m and y-intercept b" → `y = mx + b` (algebraic)
+- `slope_from_two_points` → two distinct integer points constructed from a chosen integer slope → signed int
+- `y_intercept_from_slope_and_point` → slope + point with `x ≠ 0` → signed int
+- `point_on_line` → balanced 2 yes / 2 no via explicit `wantYes` argument in the plan; "no" cases use `|Δ| ≥ 1` so the point is unambiguously off the line → `yes`/`no`
+- `evaluate_linear_equation` → balanced 2 find-y / 2 find-x via explicit `findY` argument in the plan; find-x case constructs target from a chosen integer answer so it's guaranteed integer → signed int
+
+**Files added:**
+- `src/lib/math/generators/linear-equations-graphs.ts` — mirrors `functions.ts` shape: per-type makers, `buildPlan(count)`, prompt dedup with 50× per-slot retry, local id prefix `lin131_`. The two split types pass `(rand) => makePointOnLine(true, rand)` / `(false, rand)` etc. as separate maker entries in the weights table so the 2/2 split is automatic at count=20.
+
+**Files modified:**
+- `src/lib/math/generators/index.ts` — import + type re-export + `AnyProblemType` union + `13/1` branch.
+- `src/lib/levelKeys.ts` — appended `[13, 1]`, flipping the Coming Soon gate.
+- `src/lib/math/inputMode.ts` — `inputModeForType` cases (all five new types → `'text'`, since each answer can contain `-`, `x`, `y`, `=`, or `yes`/`no`; matches the stylus-bug feedback rule); `problemTypeLabel` cases with the friendly labels.
+- `src/lib/mistakeJournal.ts` — `PARENT_LABELS` entries with the same five friendly labels so the dashboard Mistake Journal renders identically.
+- `src/lib/lessons/index.ts` — `'13/1'` lesson card "Linear Equations" with `y = mx + b` explanation, worked find-y example, and a tip about reading the y-intercept directly from the equation.
+- `PROJECT_CONTEXT.md` — new row in the Curriculum Generators table; lesson-card list count bumped to 25; `SUPPORTED_LEVEL_KEYS` reference extended.
+
+**Files NOT touched (verified scope):**
+- `src/app/actions/worksheet.ts`, `src/lib/math/gradeAnswer.ts` — grading paths cover every answer shape natively given the generator constraints above.
+- `src/app/worksheet/page.tsx`, `src/app/worksheet/WorksheetForm.tsx`, `src/app/worksheet/results/[sessionId]/page.tsx` — no UI changes; no graphs in v1.
+- `src/components/CoordinatePlane.tsx`, `src/lib/math/graphPrompt.ts` — available for future polish but not used by 13.1.
+- `supabase/schema.sql` — no DDL; the `levels` row insert is a data row, applied via the SQL editor.
+- `vercel.json` — region pin `syd1` preserved.
+
+**DB seed (applied via Supabase SQL editor before code):**
+```sql
+insert into levels (
+  level_number, sublevel_number, topic, description,
+  speed_target_seconds, accuracy_threshold,
+  problems_per_session, consecutive_passes_required
+) values (
+  13, 1,
+  'Linear Equations & Graphs',
+  'Slope-intercept form, slope from two points, point checks',
+  720, 90, 20, 3
+);
+```
+Verified live: `id = 25`.
+
+**Validation (this session):**
+| Check | Result |
+|------|--------|
+| `npx tsc --noEmit` | PASS (clean) |
+| `npx eslint` on touched files | PASS (clean) |
+| Generator smoke (5 seeds × 20 problems): distribution 4/4/4/4/4, 0 dupes | PASS |
+| Math correctness per type (parsed every prompt, recomputed every answer) | PASS |
+| `gradeAnswer` self-round-trip on every produced answer | PASS |
+| `gradeAnswer` variant tests: equation answer with no spaces, uppercased equation answer, uppercased `YES`/`NO` | PASS |
+| `gradeAnswer` rejection tests: opposite yes/no, integer answer ±1, perturbed equation | PASS (none accepted) |
+| Playwright UI | Deferred to user manual testing (login credentials not available in session — matches recent milestones) |
+
+**Manual test plan (for user follow-up):**
+1. Pin a test student to Level 13.1 via Parent View → Set Level.
+2. `/worksheet?student=…` shows "Linear Equations & Graphs Worksheet · Level 13.1", lesson card renders, 20 problems load with the 5 chip labels (Writing line equations, Slope from two points, Finding y-intercepts, Checking points on lines, Using linear equations).
+3. Submit all canonically correct answers → 100%, ✓ Passed, mastery 1/3.
+4. Spacing variant test: type `y=2x+3` for a `y = 2x + 3` answer → accepted.
+5. Case variant test: type `YES` for a `yes` answer → accepted.
+6. Wrong yes/no rejected; wrong slope/intercept/eval integer rejected.
+7. Results page renders correctly with self-correction available for each miss.
+8. Mistake Journal labels show the friendly strings (no raw `point_on_line` etc.).
+9. Mobile 375×667 — chip + input width clean.
+10. Regression — `/worksheet` at Level 12.2 still renders 20 graph problems unchanged.
+
+**v1 limitations (intentional, deferred):**
+- Integer slopes only, magnitude ≤ 5; integer intercepts only, magnitude ≤ 9. No fractions. No slope ±1, no intercept 0 for any equation-displaying type.
+- `point_on_line` accepts only canonical `yes`/`no` (case + whitespace insensitive). Variants `y`/`n`/`true`/`false` are not accepted — lesson + prompt say "yes or no" explicitly.
+- No visual graphs (the lesson and worked example are text-only). Reusing `CoordinatePlane` for one type is a future polish.
+- Slope-intercept form only — no standard-form (`Ax + By = C`), no point-slope, no parallel/perpendicular reasoning in v1.
 
 ---
 

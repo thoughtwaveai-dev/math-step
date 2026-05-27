@@ -28,6 +28,15 @@ export function inputModeForType(type: AnyProblemType): InputMode {
     type === 'identify_y_intercept_from_graph' ||
     type === 'read_y_for_x'
   ) return 'numeric'
+  // Level 13.1: every answer here can contain '-', 'y', 'x', '=', or 'yes'/'no'.
+  // Keep all five on 'text' to avoid the mobile stylus "x → ." bug.
+  if (
+    type === 'equation_from_slope_intercept' ||
+    type === 'slope_from_two_points' ||
+    type === 'y_intercept_from_slope_and_point' ||
+    type === 'point_on_line' ||
+    type === 'evaluate_linear_equation'
+  ) return 'text'
   return 'numeric'
 }
 
@@ -82,5 +91,10 @@ export function problemTypeLabel(type: AnyProblemType): string {
     case 'identify_y_intercept_from_graph': return 'Y-intercept from graph'
     case 'read_y_for_x': return 'Reading values from a graph'
     case 'match_equation_to_graph': return 'Matching equations to graphs'
+    case 'equation_from_slope_intercept': return 'Writing line equations'
+    case 'slope_from_two_points': return 'Slope from two points'
+    case 'y_intercept_from_slope_and_point': return 'Finding y-intercepts'
+    case 'point_on_line': return 'Checking points on lines'
+    case 'evaluate_linear_equation': return 'Using linear equations'
   }
 }

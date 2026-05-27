@@ -357,6 +357,21 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Slope is how many squares the line goes up (or down) for every one square it moves to the right. Count the gridlines — if the line rises 2 squares per 1 across, the slope is 2. If it falls 2 squares per 1 across, the slope is -2.',
   },
+  '13/1': {
+    title: 'Linear Equations',
+    explanation: 'Every straight line can be written as y = mx + b. The number m is the slope — how many units y rises for every 1 unit x moves right. The number b is the y-intercept — the y-value where the line crosses the y-axis (this is also y when x = 0). To check whether a point is on a line, substitute its x and y into the equation: if both sides match, the point is on the line. To find a missing y when you know x, just substitute x and calculate. To find a missing x when you know y, substitute y and solve the one-step equation for x.',
+    example: {
+      problem: 'For y = 2x + 3, what is y when x = 4?',
+      steps: [
+        'Start with the equation: y = 2x + 3',
+        'Substitute x = 4: y = 2(4) + 3',
+        'Multiply first: y = 8 + 3',
+        'Add: y = 11',
+      ],
+      answer: '11',
+    },
+    tip: 'The y-intercept is just y when x = 0 — you can read it straight off the equation. For slope between two points, count "rise ÷ run": how much y changes, divided by how much x changes.',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

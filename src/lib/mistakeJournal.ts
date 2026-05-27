@@ -98,6 +98,11 @@ const PARENT_LABELS: Record<string, string> = {
   identify_y_intercept_from_graph: 'Y-intercept from graph',
   read_y_for_x: 'Reading values from a graph',
   match_equation_to_graph: 'Matching equations to graphs',
+  equation_from_slope_intercept: 'Writing line equations',
+  slope_from_two_points: 'Slope from two points',
+  y_intercept_from_slope_and_point: 'Finding y-intercepts',
+  point_on_line: 'Checking points on lines',
+  evaluate_linear_equation: 'Using linear equations',
 }
 
 export function parentLabelForType(type: string): string {

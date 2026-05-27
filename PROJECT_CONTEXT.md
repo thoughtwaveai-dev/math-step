@@ -264,6 +264,7 @@ Generators live in `src/lib/math/generators/`. The router is `generateProblems(l
 | 11/2 | simultaneous equations (3 shapes: x+y/x-y, 2x+y/x-y, x+2y/x+y) | `x = 3, y = 7` | sim-eq pair path (regex by name, normalizes spaces/case) |
 | 12/1 | functions (5 types: evaluate linear/quadratic/negative, compose simple, inverse-solve) | signed integer string: `"11"`, `"-8"`, `"3"` | signed integer path (`/^-?\d+$/`) |
 | 12/2 | graphing (5 types: read point coords, slope, y-intercept, read-y-for-x, match equation to graph) | `"x = 3, y = -2"` (coords) / signed int / `"A"`–`"D"` (MC) | sim-eq pair grader / signed integer / algebraic-path letter |
+| 13/1 | linear equations & graphs (5 types: equation from slope/intercept, slope from 2 points, y-intercept from slope+point, point on line yes/no, evaluate linear equation in either direction) | `"y = 2x + 3"` (equation) / signed int / `"yes"` / `"no"` | algebraic path (equation + yes/no) / signed integer. Generator avoids slope ∈ {-1, 0, 1} and intercept 0 for all types that *display* a `y = mx + b` string, eliminating the only formatting ambiguities so `gradeAnswer` is untouched. |
 | others | not implemented | — | returns [] → "Coming Soon" |
 
 ### Generator architecture (Milestone 26)
@@ -288,7 +289,7 @@ All generators use **bounded algorithmic random generation** — no more fixed 1
 
 ### Lesson cards
 
-`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. All 24 currently supported levels have lesson cards: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 9/2, 10/1, 10/2, 11/1, 11/2, 12/1, 12/2.
+`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. All 25 currently supported levels have lesson cards: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 9/2, 10/1, 10/2, 11/1, 11/2, 12/1, 12/2, 13/1.
 
 ### Level 12.2 Graphing — SVG rendering pattern
 
@@ -307,7 +308,7 @@ Level 12.2 is the first MathStep curriculum level with visual content (inline co
 Worksheets can include a small set of review problems from previously mastered levels to improve long-term retention.
 
 **Logic lives in `src/app/worksheet/page.tsx`:**
-- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support: `[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2],[6,1],[6,2],[7,1],[7,2],[8,1],[8,2],[9,1],[9,2],[10,1],[10,2],[11,1],[11,2],[12,1]`
+- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support: `[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2],[6,1],[6,2],[7,1],[7,2],[8,1],[8,2],[9,1],[9,2],[10,1],[10,2],[11,1],[11,2],[12,1],[12,2],[13,1]`
 - `REVIEW_PROBLEM_COUNT = 4` — number of review problems in a mixed worksheet
 - For a 20-problem worksheet: 16 current-level + 4 review, shuffled to interleave
 - Review eligibility: `student_level_progress` row must exist with `consecutive_passes > 0 OR last_result_passed = true`. This filters out placement-jumped levels.
