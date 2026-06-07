@@ -10,6 +10,52 @@
 
 ---
 
+### Level 13.1 mobile answer inputs (2026-06-07)
+
+**Trigger:** A student tested Level 13.1 on a phone and said typing full equation answers
+(`y = 2x - 3`) and yes/no words was painful. Requested easier input — better learning UX is
+structured inputs for equation-writing and buttons for yes/no, while keeping numeric answers
+typed.
+
+**Fix (UI only — grading, generation, schema, progression all unchanged):**
+- `src/app/worksheet/EquationAnswerInput.tsx` (new client component) — for
+  `equation_from_slope_intercept`, renders `y = [±][m]x [±][b]`: `+`/`−` sign-toggle buttons +
+  magnitude-only number inputs (`inputMode="numeric"`, digits stripped on change). A single
+  hidden `answer_${id}` input carries the canonical string built with spaces
+  (`y = -3x + 2`), so it reads identically to `correct_answer` on the results page and grades
+  via the existing algebraic path. Blank fields or slope magnitude 0 → `''` ("no answer").
+- `src/app/worksheet/WorksheetForm.tsx` — two new branches in the answer-control area:
+  `point_on_line` → Yes/No radio `<fieldset>` (clone of the 12.2 MC `peer-checked` pattern,
+  values `yes`/`no`); `equation_from_slope_intercept` → `<EquationAnswerInput>`. All other
+  13.1 types (slope from two points, y-intercept, evaluate) and every other level keep the
+  plain text input.
+
+**Why grading is untouched:** the hidden field still submits one `answer_${id}` string in the
+canonical format, so `submitWorksheet` and `gradeAnswer` are byte-for-byte unchanged. The
+equation string (`y =` but no `x =`) lands on the algebraic path exactly as before.
+
+**inputMode note:** the magnitude fields use `numeric` (not the level-wide `text`). They are
+digit-only — no `x`/`y`/`=`/`-` to mis-stroke — so the stylus "x → ." bug cannot occur, and a
+number pad directly answers the painful-typing complaint.
+
+**Scope (deliberate):** `/worksheet` only. Targeted practice (`PracticeForm`) and the
+results-page self-correction box (`CorrectionInput`) for 13.1 still use plain text — a known
+v1 limitation, not changed. Generator prompts, `gradeAnswer`, `worksheet.ts`, the results
+page, schema, streaks, points, mastery, and `vercel.json` (`syd1`) untouched.
+
+**Validation:**
+| Check | Result |
+|------|--------|
+| No-auth node gate: all 144 combos (mSign,bSign × m∈{2..5} × b∈{1..9}) → `gradeAnswer(built, formatEquation) === true` | PASS (144/0) |
+| Blank field + slope magnitude 0 → `''` → graded wrong | PASS |
+| Yes/No: `yes`/`no` accepted, opposites rejected | PASS |
+| Built string equals canonical for display (e.g. `y = -3x + 2`, `y = 2x - 7`) | PASS |
+| `npx tsc --noEmit` | PASS (clean) |
+| `npx eslint` on the 2 touched/new files | PASS (clean) |
+| Playwright UI | Skipped per user (auth-gated, no test credentials) — code-level gate used instead |
+
+---
+
 ### Level 13.1 answer-format polish (2026-05-27)
 
 **Trigger:** Prompts said *"Use the form y = mx + b."* — mathematically correct but invited students to literally type `y = mx + b` instead of substituting values.
