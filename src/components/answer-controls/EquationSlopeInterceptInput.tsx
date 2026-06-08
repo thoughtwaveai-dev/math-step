@@ -1,14 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { SignToggle, magInputClass, onlyDigits, type Sign } from './signToggle'
 
 interface Props {
   // The form field name, e.g. "answer_lin131_1". A single hidden input carries the
   // canonical answer string so submitWorksheet / gradeAnswer stay untouched.
   name: string
+  // Optional callback for controlled surfaces (PracticeForm) that grade client-side
+  // and need the canonical string in their own state.
+  onValueChange?: (canonical: string) => void
 }
-
-type Sign = '+' | '-'
 
 // Build the canonical "y = mx + b" string exactly as the generator's formatEquation does
 // (with spaces) so the stored answer matches the correct answer on the results page and
@@ -25,38 +27,7 @@ function buildCanonical(mSign: Sign, mMag: string, bSign: Sign, bMag: string): s
   return `y = ${m}x ${b < 0 ? '-' : '+'} ${Math.abs(b)}`
 }
 
-const magInputClass =
-  'w-14 rounded-lg border border-[#bae0bd] px-2 py-2.5 text-center text-base text-[#1a2e1c] placeholder-[#a0b8a3] focus:border-[#2d6a35] focus:outline-none focus:ring-2 focus:ring-[#bae0bd]'
-
-function SignToggle({
-  value,
-  onChange,
-  label,
-}: {
-  value: Sign
-  onChange: (s: Sign) => void
-  label: string
-}) {
-  return (
-    <span className="inline-flex overflow-hidden rounded-lg border border-[#bae0bd]" role="group" aria-label={label}>
-      {(['+', '-'] as Sign[]).map((s) => (
-        <button
-          key={s}
-          type="button"
-          aria-pressed={value === s}
-          onClick={() => onChange(s)}
-          className={`w-9 py-2.5 text-base font-bold transition-colors ${
-            value === s ? 'bg-[#2d6a35] text-white' : 'bg-white text-[#2d6a35] hover:bg-[#f2faf3]'
-          }`}
-        >
-          {s === '-' ? '−' : '+'}
-        </button>
-      ))}
-    </span>
-  )
-}
-
-export default function EquationAnswerInput({ name }: Props) {
+export default function EquationSlopeInterceptInput({ name, onValueChange }: Props) {
   const [mSign, setMSign] = useState<Sign>('+')
   const [mMag, setMMag] = useState('')
   const [bSign, setBSign] = useState<Sign>('+')
@@ -64,8 +35,15 @@ export default function EquationAnswerInput({ name }: Props) {
 
   const canonical = buildCanonical(mSign, mMag, bSign, bMag)
 
-  // Digits only — strip anything else so the numeric pad can never inject a stray char.
-  const onlyDigits = (v: string) => v.replace(/[^0-9]/g, '')
+  // Fire onValueChange only when the canonical string actually changes — use a ref so a
+  // changing parent-callback identity (inline arrow) can't retrigger and cause a loop.
+  const cb = useRef(onValueChange)
+  useEffect(() => {
+    cb.current = onValueChange
+  }, [onValueChange])
+  useEffect(() => {
+    cb.current?.(canonical)
+  }, [canonical])
 
   return (
     <div>

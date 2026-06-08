@@ -4,7 +4,10 @@ import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import type { AnyProblemType } from '@/lib/math/generators'
 import { gradeAnswer } from '@/lib/math/gradeAnswer'
-import { inputModeForType, problemTypeLabel } from '@/lib/math/inputMode'
+import { problemTypeLabel } from '@/lib/math/inputMode'
+import { parseGraphPrompt } from '@/lib/math/graphPrompt'
+import CoordinatePlane from '@/components/CoordinatePlane'
+import AnswerInput from '@/components/answer-controls/AnswerInput'
 import { recordPracticeSession } from '@/app/actions/practiceSessions'
 
 interface PracticeProblem {
@@ -26,6 +29,8 @@ interface GradedProblem {
   studentAnswer: string
   isCorrect: boolean
 }
+
+const CHOICE_LETTERS = ['A', 'B', 'C', 'D'] as const
 
 export default function PracticeForm({ problems, studentId, levelId, problemType }: Props) {
   const [answers, setAnswers] = useState<Record<string, string>>({})
@@ -89,7 +94,9 @@ export default function PracticeForm({ problems, studentId, levelId, problemType
         </div>
 
         <div className="space-y-3">
-          {graded.map((g, i) => (
+          {graded.map((g, i) => {
+            const parsed = parseGraphPrompt(g.problem.prompt)
+            return (
             <div
               key={g.problem.id}
               className={`rounded-xl border bg-white p-5 ${
@@ -106,7 +113,35 @@ export default function PracticeForm({ problems, studentId, levelId, problemType
                 </span>
                 <div className="flex-1 space-y-2">
                   <p className="text-xs font-medium text-[#4a6b4e]">Problem {i + 1}</p>
-                  <p className="text-base font-semibold text-[#1a2e1c]">{g.problem.prompt}</p>
+                  <p className="text-base font-semibold text-[#1a2e1c] whitespace-pre-line">{parsed.displayText}</p>
+
+                  {parsed.graph && (
+                    <div className="flex justify-center py-2">
+                      <CoordinatePlane spec={parsed.graph} size="full" />
+                    </div>
+                  )}
+
+                  {parsed.choices && (
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 py-2">
+                      {parsed.choices.map((choiceSpec, idx) => {
+                        const letter = CHOICE_LETTERS[idx]
+                        const isCorrectChoice = letter === g.problem.answer.trim().toUpperCase()
+                        const isStudentChoice = letter === g.studentAnswer.trim().toUpperCase()
+                        const ring = isCorrectChoice
+                          ? 'border-[#2d6a35] bg-[#e1f4e3]'
+                          : isStudentChoice
+                            ? 'border-red-300 bg-red-50'
+                            : 'border-[#bae0bd] bg-white'
+                        return (
+                          <div key={letter} className={`flex flex-col items-center gap-1 rounded-lg border-2 p-2 ${ring}`}>
+                            <CoordinatePlane spec={choiceSpec} size="mini" />
+                            <span className="text-sm font-bold text-[#1a2e1c]">{letter}</span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div>
                       <p className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">Your answer</p>
@@ -124,7 +159,8 @@ export default function PracticeForm({ problems, studentId, levelId, problemType
                 </div>
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -152,7 +188,9 @@ export default function PracticeForm({ problems, studentId, levelId, problemType
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {problems.map((problem, index) => (
+      {problems.map((problem, index) => {
+        const parsed = parseGraphPrompt(problem.prompt)
+        return (
         <div key={problem.id} className="rounded-xl border border-[#bae0bd] bg-white p-5">
           <div className="flex items-start gap-4">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#e1f4e3] text-sm font-bold text-[#2d6a35]">
@@ -163,21 +201,55 @@ export default function PracticeForm({ problems, studentId, levelId, problemType
                 <span className="text-xs font-medium uppercase tracking-wide text-[#4a6b4e]">
                   {problemTypeLabel(problem.type)}
                 </span>
-                <p className="mt-1 text-lg font-semibold text-[#1a2e1c]">{problem.prompt}</p>
+                <p className="mt-1 text-lg font-semibold text-[#1a2e1c] whitespace-pre-line">{parsed.displayText}</p>
               </div>
-              <input
-                type="text"
-                value={answers[problem.id] ?? ''}
-                onChange={(e) => setAnswers(a => ({ ...a, [problem.id]: e.target.value }))}
-                placeholder="Your answer"
-                autoComplete="off"
-                inputMode={inputModeForType(problem.type)}
-                className="w-full rounded-lg border border-[#bae0bd] px-3.5 py-3 text-base text-[#1a2e1c] placeholder-[#a0b8a3] focus:border-[#2d6a35] focus:outline-none focus:ring-2 focus:ring-[#bae0bd]"
-              />
+
+              {parsed.graph && (
+                <div className="flex justify-center">
+                  <CoordinatePlane spec={parsed.graph} size="full" />
+                </div>
+              )}
+
+              {parsed.choices ? (
+                <fieldset>
+                  <legend className="sr-only">Choose the matching graph</legend>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                    {parsed.choices.map((choiceSpec, choiceIdx) => {
+                      const letter = CHOICE_LETTERS[choiceIdx]
+                      const inputId = `${problem.id}_${letter}`
+                      return (
+                        <label key={letter} htmlFor={inputId} className="cursor-pointer">
+                          <input
+                            id={inputId}
+                            type="radio"
+                            name={`answer_${problem.id}`}
+                            value={letter}
+                            checked={answers[problem.id] === letter}
+                            onChange={() => setAnswers(a => ({ ...a, [problem.id]: letter }))}
+                            className="peer sr-only"
+                          />
+                          <div className="flex flex-col items-center gap-2 rounded-lg border-2 border-[#bae0bd] bg-white p-2 transition-colors peer-checked:border-[#2d6a35] peer-checked:bg-[#e1f4e3] peer-focus-visible:ring-2 peer-focus-visible:ring-[#2d6a35]">
+                            <CoordinatePlane spec={choiceSpec} size="mini" />
+                            <span className="text-sm font-bold text-[#1a2e1c]">{letter}</span>
+                          </div>
+                        </label>
+                      )
+                    })}
+                  </div>
+                </fieldset>
+              ) : (
+                <AnswerInput
+                  name={`answer_${problem.id}`}
+                  type={problem.type}
+                  value={answers[problem.id] ?? ''}
+                  onValueChange={(v) => setAnswers(a => ({ ...a, [problem.id]: v }))}
+                />
+              )}
             </div>
           </div>
         </div>
-      ))}
+        )
+      })}
 
       <button
         type="submit"

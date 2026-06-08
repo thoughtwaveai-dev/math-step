@@ -7,6 +7,7 @@ import CorrectionInput from './CorrectionInput'
 import BackToTop from './BackToTop'
 import CoordinatePlane from '@/components/CoordinatePlane'
 import { parseGraphPrompt } from '@/lib/math/graphPrompt'
+import type { AnyProblemType } from '@/lib/math/generators'
 import { isStudentStuck } from '@/lib/stuckDetector'
 import { detectSessionMilestones } from '@/lib/achievements'
 import {
@@ -31,6 +32,7 @@ interface Problem {
   student_answer: string | null
   is_correct: boolean | null
   self_corrected: boolean | null
+  problem_type: string | null
 }
 
 interface Session {
@@ -443,6 +445,7 @@ export default async function ResultsPage({
                         problemId={problem.id}
                         sessionId={typedSession.id}
                         correctAnswer={problem.correct_answer}
+                        problemType={problem.problem_type as AnyProblemType | null}
                       />
                     )
                   )}

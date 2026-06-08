@@ -10,6 +10,70 @@
 
 ---
 
+### Reusable mobile-friendly answer-control system (2026-06-08)
+
+**Trigger:** The Level 13.1 mobile-input fix (structured equation control + Yes/No buttons) was
+inline in `WorksheetForm` and 13.1-only. Generalise it into one reusable system that future levels
+opt into by `problem_type`, and apply it across all three answer surfaces.
+
+**Hard guarantee:** `gradeAnswer` and `submitWorksheet` are byte-for-byte unchanged. Every
+structured control emits a single field carrying the exact canonical string the grader already
+expects, so generation, grading, progression, streaks, points, mastery, achievements, auth/PIN,
+schema, and `vercel.json` (`syd1`) are all untouched.
+
+**Audit (Phase 1):** the structured-input opportunity is exactly 3 control families —
+`equation_slope_intercept` (`equation_from_slope_intercept`, 13.1), `yes_no` (`point_on_line`,
+13.1), `coordinate_pair` (`sim_eq` 11.2 + `read_point_coordinates` 12.2). Everything else (~60
+types) stays plain text. MC graph (`match_equation_to_graph`) + graph display stay prompt-driven.
+
+**Files added:**
+- `src/lib/math/answerControl.ts` — `getAnswerControlType(type)` mapping.
+- `src/components/answer-controls/` — `AnswerInput.tsx` (dispatcher), `EquationSlopeInterceptInput.tsx`
+  (moved from `worksheet/EquationAnswerInput.tsx`), `CoordinatePairInput.tsx` (new), `YesNoAnswerInput.tsx`
+  (extracted), `signToggle.tsx` (shared `SignToggle` + digit-only helper).
+- `scripts/answer-control-gate.ts` — no-auth grading-safety gate.
+
+**Files modified:**
+- `src/app/worksheet/WorksheetForm.tsx` — three inline answer branches collapsed into `<AnswerInput>`
+  (graph display + MC choices kept inline, prompt-driven).
+- `src/app/practice/weak-spots/PracticeForm.tsx` — now calls `parseGraphPrompt` + renders
+  `CoordinatePlane` + MC choices (fixes a pre-existing bug where 12.2 practice leaked raw
+  `[GRAPH]`/`[CHOICES]` markers), and uses `<AnswerInput>` (controlled via `onValueChange`).
+- `src/app/worksheet/results/[sessionId]/page.tsx` + `CorrectionInput.tsx` — `problem_type` wired
+  through so self-correction on a wrong equation/coordinate/yes-no answer uses the structured control.
+- Deleted `src/app/worksheet/EquationAnswerInput.tsx` (moved).
+
+**Dual form-pattern:** each control renders a hidden `<input name>` (read by the uncontrolled
+`<form action>` surfaces — worksheet, self-correction) **and** calls `onValueChange` (used by the
+controlled client-graded surface — practice). Effect-based controls use a ref so an inline parent
+callback can't cause a render loop. `CoordinatePairInput` allows magnitude 0 (axis points), only a
+blank field = "no answer", never emits `-0`.
+
+**Validation (this session):**
+| Check | Result |
+|------|--------|
+| `npx tsc --noEmit` | PASS (clean) |
+| `npx eslint` on touched/new files | PASS (clean) |
+| `npx tsx scripts/answer-control-gate.ts` — equation (144 combos), coordinate (x,y ∈ -6..6 incl. 0/neg), yes/no | PASS (494/0) |
+| Playwright 13.1 worksheet — equation + Yes/No render, correct→pass, wrong→fail, canonical displays byte-identical | PASS |
+| Playwright 13.1 self-correction — fix wrong Yes/No via structured control → "✓ Corrected" | PASS |
+| Playwright 12.2 worksheet — coordinate control + graphs + MC render, no raw markers, sign toggle flows `x = 3, y = -2` through submit | PASS |
+| Playwright 11.2 worksheet — coordinate `x = 7, y = 1` graded correct | PASS |
+| Playwright 12.2 + 13.1 targeted practice — structured controls + graphs render, **no raw `[GRAPH]`/`[CHOICES]` leak** | PASS |
+| Playwright 1.1 worksheet — plain text/numeric input, `18` graded correct (regression) | PASS |
+| Playwright mobile 375×667 on 13.1 — no horizontal scroll (scrollWidth 360 ≤ 375) | PASS |
+| 0 console errors on every page after the `useId` hydration fix | PASS |
+
+**E2E account (temporary, please delete if desired):** parent `answer-ui-test-20260608@example.com`,
+student `UITestKid` (id `86d9377e-1b80-4b03-a0dc-83386b36691f`). Created on localhost during testing.
+Cleanup is optional — it writes only to the dev DB and touches no real users.
+
+**v1 limitations (intentional):** MC graph self-correction stays plain text (type the letter);
+legacy `problem_type = null` rows fall back to plain text in self-correction; 9.1/12.1 regression
+covered by the shared default branch (same code path as 1.1, not separately driven).
+
+---
+
 ### Level 13.1 mobile answer inputs (2026-06-07)
 
 **Trigger:** A student tested Level 13.1 on a phone and said typing full equation answers

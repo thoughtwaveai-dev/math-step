@@ -3,10 +3,10 @@
 import { useActionState, useEffect, useState } from 'react'
 import { submitWorksheet } from '@/app/actions/worksheet'
 import type { AnyProblemType } from '@/lib/math/generators'
-import { inputModeForType, placeholderForType, problemTypeLabel } from '@/lib/math/inputMode'
+import { problemTypeLabel } from '@/lib/math/inputMode'
 import { parseGraphPrompt } from '@/lib/math/graphPrompt'
 import CoordinatePlane from '@/components/CoordinatePlane'
-import EquationAnswerInput from './EquationAnswerInput'
+import AnswerInput from '@/components/answer-controls/AnswerInput'
 
 interface PersistedProblem {
   id: string
@@ -123,40 +123,8 @@ export default function WorksheetForm({ sessionId, problems, reviewProblemIds }:
                       })}
                     </div>
                   </fieldset>
-                ) : problem.type === 'point_on_line' ? (
-                  <fieldset>
-                    <legend className="sr-only">Is the point on the line?</legend>
-                    <div className="grid grid-cols-2 gap-3">
-                      {(['yes', 'no'] as const).map((value) => {
-                        const inputId = `${problem.id}_${value}`
-                        return (
-                          <label key={value} htmlFor={inputId} className="cursor-pointer">
-                            <input
-                              id={inputId}
-                              type="radio"
-                              name={`answer_${problem.id}`}
-                              value={value}
-                              className="peer sr-only"
-                            />
-                            <div className="flex items-center justify-center rounded-lg border-2 border-[#bae0bd] bg-white px-4 py-3 text-base font-semibold text-[#1a2e1c] transition-colors peer-checked:border-[#2d6a35] peer-checked:bg-[#e1f4e3] peer-focus-visible:ring-2 peer-focus-visible:ring-[#2d6a35]">
-                              {value === 'yes' ? 'Yes' : 'No'}
-                            </div>
-                          </label>
-                        )
-                      })}
-                    </div>
-                  </fieldset>
-                ) : problem.type === 'equation_from_slope_intercept' ? (
-                  <EquationAnswerInput name={`answer_${problem.id}`} />
                 ) : (
-                  <input
-                    type="text"
-                    name={`answer_${problem.id}`}
-                    placeholder={placeholderForType(problem.type)}
-                    autoComplete="off"
-                    inputMode={inputModeForType(problem.type)}
-                    className="w-full rounded-lg border border-[#bae0bd] px-3.5 py-3 text-base text-[#1a2e1c] placeholder-[#a0b8a3] focus:border-[#2d6a35] focus:outline-none focus:ring-2 focus:ring-[#bae0bd]"
-                  />
+                  <AnswerInput name={`answer_${problem.id}`} type={problem.type} />
                 )}
               </div>
             </div>

@@ -303,6 +303,44 @@ Level 12.2 is the first MathStep curriculum level with visual content (inline co
 
 ---
 
+## Reusable Answer-Control System (2026-06-08)
+
+One shared system gives mobile-friendly structured inputs across the worksheet, targeted
+practice, and self-correction surfaces. Future levels opt in automatically by `problem_type` —
+no per-surface wiring. **No grading change:** every control submits the exact canonical string
+`gradeAnswer` already expects, so `gradeAnswer.ts` / `worksheet.ts` / `selfCorrection.ts` are
+untouched.
+
+- **Mapping:** `src/lib/math/answerControl.ts → getAnswerControlType(type)` returns one of
+  `equation_slope_intercept` | `yes_no` | `coordinate_pair` | `default`.
+  - `equation_from_slope_intercept` → equation control (`y = [±]m x [±]b`, canonical `y = 2x + 3`)
+  - `point_on_line` → Yes/No buttons (canonical `yes`/`no`)
+  - `sim_eq`, `read_point_coordinates` → coordinate control (`x = [±]n, y = [±]n`, canonical `x = 3, y = -2`)
+  - everything else (~60 types) → plain text input (with `inputModeForType` + `placeholderForType`)
+- **Components:** `src/components/answer-controls/` — `AnswerInput.tsx` (dispatcher),
+  `EquationSlopeInterceptInput.tsx`, `CoordinatePairInput.tsx`, `YesNoAnswerInput.tsx`, and shared
+  `signToggle.tsx` (`SignToggle` + digit-only helper).
+- **Dual form-pattern:** every control renders one hidden `<input name>` **and** calls an optional
+  `onValueChange(canonical)`. Uncontrolled `<form action>` surfaces (`WorksheetForm`,
+  `CorrectionInput`) read the hidden field by name; the controlled client-graded surface
+  (`PracticeForm`) uses `onValueChange` to update its `answers` state. Effect-based controls update
+  the callback via a ref so an inline parent callback can't trigger a render loop. Yes/No radios use
+  `useId()` for stable server/client ids (avoids hydration mismatch).
+- **Coordinate control rules:** magnitude 0 is allowed (axis points like `x = 0, y = 3`); only a
+  blank field counts as "no answer"; never emits `-0`. Format matches the generators
+  (`simultaneous-equations.ts` / `graphing.ts`) byte-for-byte so the results page displays
+  identically, not just grades equal.
+- **MC graph + graph display stay prompt-driven** (`parseGraphPrompt` + `CoordinatePlane`) in each
+  parent — they need server-rendered SVGs + choice specs, so they are NOT in the type dispatcher.
+  As part of this work, `PracticeForm` was given the same `parseGraphPrompt`/`CoordinatePlane`/MC
+  rendering as `WorksheetForm`, fixing a pre-existing bug where 12.2 targeted practice leaked raw
+  `[GRAPH]`/`[CHOICES]` markers and showed no graph.
+- **Self-correction:** the results page passes `problem_type` into `CorrectionInput`, which uses the
+  structured control for the 3 families and falls back to the bespoke inline text input for
+  `default`/legacy-null types. MC self-correction stays plain text (type the letter A–D).
+- **Grading-safety gate:** `scripts/answer-control-gate.ts` (`npx tsx`) asserts every buildable
+  canonical grades `=== true` against the generator format across the full value set (494 checks).
+
 ## Worksheet Interleaving (Milestone 28)
 
 Worksheets can include a small set of review problems from previously mastered levels to improve long-term retention.
