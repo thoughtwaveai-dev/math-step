@@ -61,10 +61,12 @@ target). No `vercel.json` change.
 | Horizontal scroll @ 375px on every page | none (`scrollWidth` 360 ≤ 375) |
 | Console errors across whole session | 0 |
 
-**Temp E2E account (please delete when convenient):** parent `worksheet-ux-test-20260608@example.com`
-(password `MathStepUX!2026`), student `UXTestKid` (id `ad5f397f-0913-4498-afdb-a54dd5af2946`).
-Created on localhost during testing — writes only to the dev DB, touches no real users. Two completed
-worksheet sessions exist under it (one 1.1 pass, one 13.1 fail) plus normal streak/session rows.
+**Temp E2E account — DELETED 2026-06-08.** Parent `worksheet-ux-test-20260608@example.com`,
+student `UXTestKid` (id `ad5f397f-0913-4498-afdb-a54dd5af2946`) were created on localhost during
+testing and have since been fully removed from the Supabase project (`Math-Step` /
+`wuwmqbeazgsolsrxbhsh`): auth user, profile, student, streak, 7 sessions, 140 problems, and 2
+student_level_progress rows — all scoped strictly to that parent/student. Verified 0 rows remain.
+No real users touched.
 
 **v1 limitations (intentional):** self-correction on **default** (non-structured) types keeps its
 existing amber content-based placeholder and has no `inputMode` — pre-existing, out of scope, not a
