@@ -10,6 +10,69 @@
 
 ---
 
+### Global worksheet answer UX polish (2026-06-08)
+
+**Trigger:** After generalizing the reusable answer-control system, extend the mobile-friendly,
+engaging feel across **all** levels — without forcing structured/MC inputs and without weakening
+learning. Audit confirmed the real gap was placeholders: only 2 of ~37 default types had a
+format-specific placeholder; the rest fell back to generic `"Your answer"`.
+
+**Hard guarantee:** grading is byte-for-byte unchanged. The change is placeholder text + a 4px
+height bump on two control classes. `gradeAnswer`, `submitWorksheet`, generation, progression,
+streaks, points, mastery, achievements, auth/PIN, schema, and `vercel.json` (`syd1`) all untouched.
+
+**Audit (Phase 1):** 41 problem types. Structured controls (4 types: equation / yes-no /
+coordinate×2) and MC graph stay as-is. ~37 default text types flow centrally through `AnswerInput`
+→ `placeholderForType()` + `inputModeForType()`. No recommendation required a grading change —
+every placeholder was verified against `gradeAnswer.ts` (esp. list/factor types grade by digit-set
+with separators stripped; percent types grade as bare integers — **no `%` in placeholders**).
+
+**Changes (2 source files):**
+- `src/lib/math/inputMode.ts` — rewrote `placeholderForType()` from 2 cases to a full `switch`
+  returning verified, format-accurate examples for every default type (integers `e.g. 12`; signed
+  `e.g. -5`; decimals `e.g. 3.5` / `e.g. 0.25`; fractions `e.g. 3/4`; expressions `e.g. 5x` /
+  `e.g. 3x + 2`; inequality `e.g. x > 4`; lists `e.g. 1, 2, 3, 6`; prime factorization `e.g. 2, 3, 5`;
+  factor pairs `e.g. 1×12, 2×6, 3×4`). Reaches WorksheetForm + PracticeForm automatically.
+- `src/components/answer-controls/signToggle.tsx` — bumped the shared magnitude-input class and the
+  `SignToggle` buttons from `py-2.5` to `py-3` so the slope/x/y boxes (now 50px / 48px) match the
+  default text input (50px) and Yes/No buttons. Single edit point — propagates to both the equation
+  and coordinate controls. No behavior change.
+
+**Deliberately NOT done:** no per-type helper lines (the accurate placeholder already shows the
+format); CorrectionInput's amber default-type fallback left untouched (it routes structured types
+through `AnswerInput` and keeps its own content-based placeholder for default types — out of scope,
+no regression); no default-input class change (measured 50px at 375px — already above the tap
+target). No `vercel.json` change.
+
+**Validation (this session):**
+| Check | Result |
+|------|--------|
+| `npx tsx scripts/answer-control-gate.ts` (494 grading-safety checks) | PASS (494/0) — grading untouched |
+| `npx tsc --noEmit` | PASS (clean) |
+| `npx eslint` on the 2 touched files | PASS (clean) |
+| Playwright @ 375×667 — **1.1** integer | placeholder `e.g. 12`, input 50px, **20/20 correct → 100% Passed**, no scroll |
+| Playwright **9.1** | `list_factors` `e.g. 1, 2, 3, 6`, `prime_factorization` `e.g. 2, 3, 5`, GCF/LCM `e.g. 12`; review-interleaved Addition also got `e.g. 12` |
+| Playwright **9.2** | `factor_pairs` `e.g. 1×12, 2×6, 3×4`, `common_factors` `e.g. 1, 2, 3, 6` |
+| Playwright **11.2** | coordinate control mags now 50px (height aligned), no marker leak |
+| Playwright **12.1** | `functions with negatives` `e.g. -5` (text), numeric functions `e.g. 12` |
+| Playwright **12.2** | 25 graph SVGs + 12 MC radios + coordinate inputs render, signed `e.g. -5`, **no `[GRAPH]`/`[CHOICES]` leak** |
+| Playwright **13.1** | equation control + Yes/No render at 50px; **wrong submission → 10%, not passed** (wrong→fail); self-correction structured controls render |
+| Playwright targeted practice **12.2** | graphs + MC + coordinate render, signed placeholder, no marker leak |
+| Horizontal scroll @ 375px on every page | none (`scrollWidth` 360 ≤ 375) |
+| Console errors across whole session | 0 |
+
+**Temp E2E account (please delete when convenient):** parent `worksheet-ux-test-20260608@example.com`
+(password `MathStepUX!2026`), student `UXTestKid` (id `ad5f397f-0913-4498-afdb-a54dd5af2946`).
+Created on localhost during testing — writes only to the dev DB, touches no real users. Two completed
+worksheet sessions exist under it (one 1.1 pass, one 13.1 fail) plus normal streak/session rows.
+
+**v1 limitations (intentional):** self-correction on **default** (non-structured) types keeps its
+existing amber content-based placeholder and has no `inputMode` — pre-existing, out of scope, not a
+regression. Placeholders are static format hints (not per-problem). MC and coordinate types keep the
+generic `"Your answer"` fallback since their text input is never shown.
+
+---
+
 ### Reusable mobile-friendly answer-control system (2026-06-08)
 
 **Trigger:** The Level 13.1 mobile-input fix (structured equation control + Yes/No buttons) was

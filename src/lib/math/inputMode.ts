@@ -40,10 +40,101 @@ export function inputModeForType(type: AnyProblemType): InputMode {
   return 'numeric'
 }
 
+// Format-accurate example placeholders. Every example matches what `gradeAnswer`
+// actually accepts — no `%` on percent answers (they grade as bare integers), and
+// list/factor examples use the same separators the generators emit (the grader
+// strips separators and compares the digit set, so these can't mislead).
+// Types rendered by a structured control (sim_eq / read_point_coordinates →
+// coordinate control) or as multiple-choice (match_equation_to_graph) keep the
+// generic fallback — their text input is never shown.
 export function placeholderForType(type: AnyProblemType): string {
-  if (type === 'equation_from_slope_intercept') return 'e.g. y = 2x + 3'
-  if (type === 'point_on_line') return 'yes or no'
-  return 'Your answer'
+  switch (type) {
+    // Signed integers — leading '-' signals negatives are allowed
+    case 'neg_addition':
+    case 'neg_subtraction':
+    case 'neg_multiplication':
+    case 'neg_division':
+    case 'function_evaluate_negative':
+    case 'slope_from_two_points':
+    case 'y_intercept_from_slope_and_point':
+    case 'evaluate_linear_equation':
+    case 'identify_slope_from_graph':
+    case 'identify_y_intercept_from_graph':
+    case 'read_y_for_x':
+      return 'e.g. -5'
+
+    // Decimals
+    case 'decimal_addition':
+    case 'decimal_subtraction':
+    case 'decimal_multiplication':
+      return 'e.g. 3.5'
+    case 'percent_to_decimal':
+      return 'e.g. 0.25'
+
+    // Fractions
+    case 'fraction_addition':
+    case 'fraction_subtraction':
+    case 'fraction_multiplication':
+    case 'fraction_division':
+      return 'e.g. 3/4'
+
+    // Algebraic expressions
+    case 'expr_combine_like':
+    case 'expr_multi_terms':
+      return 'e.g. 5x'
+    case 'expr_with_constant':
+      return 'e.g. 3x + 2'
+
+    // Inequalities
+    case 'inequality':
+      return 'e.g. x > 4'
+
+    // Lists / factor pairs — grader compares digit set, separators ignored
+    case 'list_factors':
+    case 'common_factors':
+      return 'e.g. 1, 2, 3, 6'
+    case 'prime_factorization':
+      return 'e.g. 2, 3, 5'
+    case 'factor_pairs':
+      return 'e.g. 1×12, 2×6, 3×4'
+
+    // Structured-control families (kept for fallback safety)
+    case 'equation_from_slope_intercept':
+      return 'e.g. y = 2x + 3'
+    case 'point_on_line':
+      return 'yes or no'
+
+    // Plain non-negative integers (addition, subtraction, multiplication,
+    // division, order_*, eq_*, linear_equation, gcf, lcm, percent_of_number,
+    // decimal_to_percent, fraction_to_percent, function_* numeric) — no '%'
+    case 'addition':
+    case 'subtraction':
+    case 'multiplication':
+    case 'division':
+    case 'order_add_mul':
+    case 'order_sub_mul':
+    case 'order_div_add':
+    case 'order_paren':
+    case 'eq_add':
+    case 'eq_sub':
+    case 'eq_mul':
+    case 'eq_div':
+    case 'linear_equation':
+    case 'gcf':
+    case 'lcm':
+    case 'percent_of_number':
+    case 'decimal_to_percent':
+    case 'fraction_to_percent':
+    case 'function_evaluate_linear':
+    case 'function_evaluate_quadratic':
+    case 'function_compose_simple':
+    case 'function_inverse_solve':
+      return 'e.g. 12'
+
+    // sim_eq, read_point_coordinates (coordinate control), match_equation_to_graph (MC)
+    default:
+      return 'Your answer'
+  }
 }
 
 export function problemTypeLabel(type: AnyProblemType): string {

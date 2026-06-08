@@ -317,6 +317,12 @@ untouched.
   - `point_on_line` → Yes/No buttons (canonical `yes`/`no`)
   - `sim_eq`, `read_point_coordinates` → coordinate control (`x = [±]n, y = [±]n`, canonical `x = 3, y = -2`)
   - everything else (~60 types) → plain text input (with `inputModeForType` + `placeholderForType`)
+  - **Placeholder polish (2026-06-08):** `placeholderForType()` now returns a verified,
+    format-accurate example for every default type (e.g. `e.g. 12`, `e.g. -5`, `e.g. 3/4`,
+    `e.g. 1, 2, 3, 6`) — flowing to WorksheetForm + PracticeForm via `AnswerInput`. Examples match
+    what `gradeAnswer` accepts (no `%` on percent types, which grade as bare integers; list/factor
+    types grade by digit-set). The shared magnitude-input/sign-toggle height was bumped `py-2.5`→`py-3`
+    so structured-control boxes match the default input. Grading is byte-for-byte unchanged.
 - **Components:** `src/components/answer-controls/` — `AnswerInput.tsx` (dispatcher),
   `EquationSlopeInterceptInput.tsx`, `CoordinatePairInput.tsx`, `YesNoAnswerInput.tsx`, and shared
   `signToggle.tsx` (`SignToggle` + digit-only helper).
