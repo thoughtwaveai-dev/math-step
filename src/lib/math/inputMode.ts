@@ -37,6 +37,16 @@ export function inputModeForType(type: AnyProblemType): InputMode {
     type === 'point_on_line' ||
     type === 'evaluate_linear_equation'
   ) return 'text'
+  // Level 13.2: coordinate-pair and yes/no types ride structured controls (the
+  // text input is a fallback only) → 'text'. find-missing answers are
+  // non-negative integers → 'numeric' for a clean number pad.
+  if (
+    type === 'system_substitution_simple' ||
+    type === 'system_elimination_simple' ||
+    type === 'system_word_problem_simple' ||
+    type === 'system_check_solution'
+  ) return 'text'
+  if (type === 'system_find_missing_value') return 'numeric'
   return 'numeric'
 }
 
@@ -131,7 +141,12 @@ export function placeholderForType(type: AnyProblemType): string {
     case 'function_inverse_solve':
       return 'e.g. 12'
 
-    // sim_eq, read_point_coordinates (coordinate control), match_equation_to_graph (MC)
+    // Level 13.2 find-missing — non-negative integer answer
+    case 'system_find_missing_value':
+      return 'e.g. 6'
+
+    // sim_eq, read_point_coordinates, system_* coordinate/yes-no types (structured
+    // controls), match_equation_to_graph (MC) — text input never shown
     default:
       return 'Your answer'
   }
@@ -193,5 +208,10 @@ export function problemTypeLabel(type: AnyProblemType): string {
     case 'y_intercept_from_slope_and_point': return 'Finding y-intercepts'
     case 'point_on_line': return 'Checking points on lines'
     case 'evaluate_linear_equation': return 'Using linear equations'
+    case 'system_substitution_simple': return 'Solving by substitution'
+    case 'system_elimination_simple': return 'Solving by elimination'
+    case 'system_find_missing_value': return 'Finding missing values'
+    case 'system_check_solution': return 'Checking solutions'
+    case 'system_word_problem_simple': return 'System word problems'
   }
 }

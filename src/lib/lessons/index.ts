@@ -372,6 +372,22 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'The y-intercept is just y when x = 0 — you can read it straight off the equation. For slope between two points, count "rise ÷ run": how much y changes, divided by how much x changes.',
   },
+  '13/2': {
+    title: 'Systems of Equations',
+    explanation: 'A system of equations is two equations that must both be true at the same time. The solution is the one pair of values (x and y) that works in both equations. There are two main ways to solve a system. Substitution: when one equation already tells you what a variable equals (like y = x + 2), put that into the other equation so only one variable is left, solve it, then find the other. Elimination: when the equations line up nicely, add or subtract them so one variable cancels out. To check a solution, substitute the x and y into both equations — if both balance, it is the solution.',
+    example: {
+      problem: 'x + y = 8\nx - y = 2',
+      steps: [
+        'The y terms are +y and -y — add the equations to eliminate y:',
+        '(x + y) + (x - y) = 8 + 2',
+        '2x = 10, so x = 5',
+        'Substitute x = 5 into the first equation: 5 + y = 8, so y = 3',
+        'Check: 5 + 3 = 8 ✓ and 5 - 3 = 2 ✓',
+      ],
+      answer: 'x = 5, y = 3',
+    },
+    tip: 'Give your answer with x first, then y — like this: x = 5, y = 3. Always put both values back into both equations to check. If both balance, you have the solution!',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

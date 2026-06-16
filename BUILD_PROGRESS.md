@@ -6,7 +6,82 @@
 
 ## Current Status
 
-**Phase:** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
+**Phase:** Level 13.2 Systems of Equations (2026-06-16). Students finishing 13.1 were hitting Coming Soon at 13.2. New curriculum level adds 5 problem types: solve by substitution, solve by elimination, find a missing value, check a solution (yes/no), and a simple sum/difference word problem. Integer-only, text-only (no graphs in v1). `levels` row inserted (id=26); no `gradeAnswer`/`worksheet.ts`/schema changes. Reuses the shared answer-control system (coordinate_pair + yes_no) so worksheet, targeted practice, and self-correction wire up automatically. See entry below.
+
+**Phase (preceding):** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
+
+---
+
+### Level 13.2 Systems of Equations curriculum (2026-06-16)
+
+**Trigger:** Students finishing Level 13.1 (Linear Equations & Graphs) hit a Coming Soon wall at
+13.2. New curriculum level keeps advanced students progressing with systems of equations
+(substitution + elimination explicit), distinct from 11.2 Simultaneous Equations.
+
+**Audit:** The `levels` row for `(13, 2)` did not exist. Schema confirmed via `supabase/schema.sql`
+(no `levels` seed — levels live in the SQL editor). `gradeAnswer` re-traced against all four answer
+shapes — no change needed. SQL applied by user before code (verified `id = 26`).
+
+**Approach:** Algorithmic generation only, text-only (no graphs in v1), integer-only and
+beginner-friendly. Every answer lands on an existing grading path; **`gradeAnswer` /
+`worksheet.ts` / schema untouched** beyond the one `levels` data row. Reuses the shared
+answer-control system entirely by adding the new `problem_type` strings to `answerControl.ts`,
+so worksheet + targeted practice + self-correction wire up automatically.
+
+**5 problem types (distribution 4/4/4/4/4 for a 20-problem worksheet):**
+- `system_substitution_simple` → one equation solved for a variable + a sum equation → `x = 4, y = 6` (coordinate_pair)
+- `system_elimination_simple` → matching unit coefficients (`x + y` / `x - y`) → `x = 5, y = 3` (coordinate_pair)
+- `system_find_missing_value` → x given, solve for y → non-negative integer (default numeric input, `e.g. 6`)
+- `system_check_solution` → does (x, y) satisfy both? → `yes`/`no` (yes_no buttons), balanced 2 yes / 2 no via a `wantYes` flag
+- `system_word_problem_simple` → sum + difference of two positive numbers, x = smaller / y = larger → `x = 4, y = 8` (coordinate_pair)
+
+**Files added:**
+- `src/lib/math/generators/systems-of-equations.ts` — per-type makers, `buildPlan(count)` weights, prompt dedup (50× retry), id prefix `sys132_`. Ranges sized to clear dedup at counts up to 40.
+- `scripts/systems-of-equations-smoke.ts` — generator + grading smoke test.
+
+**Files modified:**
+- `src/lib/math/generators/index.ts` — import + type re-export + `AnyProblemType` union + `13/2` branch.
+- `src/lib/levelKeys.ts` — appended `[13, 2]` (flips the Coming Soon gate).
+- `src/lib/math/answerControl.ts` — `coordinate_pair` (3 system solve types) + `yes_no` (system_check_solution).
+- `src/lib/math/inputMode.ts` — `inputModeForType` (coordinate/yes-no → text fallback, find-missing → numeric), `placeholderForType` (find-missing → `e.g. 6`), `problemTypeLabel` (5 friendly labels).
+- `src/lib/mistakeJournal.ts` — `PARENT_LABELS` for the 5 types.
+- `src/lib/lessons/index.ts` — `'13/2'` lesson "Systems of Equations" with substitution/elimination/checking explanation + a worked elimination example.
+- `PROJECT_CONTEXT.md`, `BUILD_PROGRESS.md`.
+
+**DB seed (applied by user via Supabase SQL editor, idempotent insert, verified `id = 26`):**
+```sql
+insert into levels (level_number, sublevel_number, topic, description,
+  speed_target_seconds, accuracy_threshold, problems_per_session, consecutive_passes_required)
+select 13, 2, 'Systems of Equations', 'Solving pairs of linear equations', 780, 90, 20, 3
+where not exists (select 1 from levels where level_number = 13 and sublevel_number = 2);
+```
+
+**Validation (this session):**
+| Check | Result |
+|------|--------|
+| `npx tsx scripts/systems-of-equations-smoke.ts` (counts 16/20/40 × 5 seeds: distribution by type, 2 yes / 2 no balance, integer + non-negative invariants, no dupes, grade-true + grade-false + spacing variant) | PASS |
+| `npx tsc --noEmit` | PASS (clean) |
+| `npx eslint` on touched files | PASS (clean) |
+| Playwright 13.2 worksheet — title "Systems of Equations Worksheet · Level 13.2", lesson card, 20 problems 4/4/4/4/4, coordinate controls + Yes/No + numeric `e.g. 6` | PASS |
+| Playwright 13.2 — all correct → **20/20, 100%, ✓ Passed, mastery 1/3**, canonical answers on results | PASS |
+| Playwright 13.2 — 4 deliberate wrong → **16/20, 80%, ✗ Not passed, mastery reset 0/3**, wrong problems show correct answers | PASS |
+| Playwright 13.2 self-correction — fixed wrong Yes/No (structured) + wrong coordinate (structured) → "✓ Corrected" | PASS |
+| Playwright 13.2 targeted practice — coordinate controls (elimination) + Yes/No (check-solution), over-generate-and-filter top-up works | PASS |
+| Playwright mobile 375×667 — no horizontal scroll (scrollWidth 360 ≤ 375) | PASS |
+| Regression — 13.1 (equation control + Yes/No), 12.2 (32 graph SVGs + MC + coordinate, no visible marker leak), 1.1 (numeric input) all render | PASS |
+| Console errors across the whole session | 0 |
+
+**Temp E2E account — DELETED 2026-06-16.** Parent `level-132-test-20260616@example.com`
+(id `23f6d41a-a5f3-4a00-8594-7db6945db5d6`), student `SysKid`
+(id `351c82ad-4a81-4ff2-b33f-60eba020c6df`). Created on localhost during testing, then removed
+from the Supabase project (`wuwmqbeazgsolsrxbhsh`) by deleting the auth user — FK cascade cleared
+profile, student, streak, 6 sessions, 120 problems, 1 student_level_progress row. Verified 0 rows
+remain; the `levels` 13.2 row is intact. No real users touched.
+
+**v1 limitations (intentional):** integer-only; `system_find_missing_value` answer is always a
+non-negative integer (numeric keypad has no minus key); fixed equation shapes per type
+(`x + y` / `x - y`, `2x - y`); no graphing; no 3-variable systems; word problems use 2 simple
+sum/difference templates.
 
 ---
 

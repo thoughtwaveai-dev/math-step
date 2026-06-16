@@ -16,6 +16,7 @@ import { generateSimultaneousEquations } from './simultaneous-equations'
 import { generateFunctionsProblems } from './functions'
 import { generateGraphingProblems } from './graphing'
 import { generateLinearEquationsGraphsProblems } from './linear-equations-graphs'
+import { generateSystemsOfEquationsProblems } from './systems-of-equations'
 
 export type { MathProblem, ProblemType } from './factorization'
 export type { AdditionProblem, AdditionProblemType } from './addition'
@@ -38,6 +39,10 @@ export type {
   LinearEquationsGraphsProblem,
   LinearEquationsGraphsProblemType,
 } from './linear-equations-graphs'
+export type {
+  SystemsOfEquationsProblem,
+  SystemsOfEquationsProblemType,
+} from './systems-of-equations'
 
 // Unified problem type covering all generators
 export type AnyProblemType =
@@ -59,6 +64,7 @@ export type AnyProblemType =
   | import('./functions').FunctionsProblemType
   | import('./graphing').GraphingProblemType
   | import('./linear-equations-graphs').LinearEquationsGraphsProblemType
+  | import('./systems-of-equations').SystemsOfEquationsProblemType
 
 export function generateProblems(levelNumber: number, sublevelNumber: number, count: number) {
   if (levelNumber === 1 && sublevelNumber === 1) {
@@ -135,6 +141,9 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 13 && sublevelNumber === 1) {
     return generateLinearEquationsGraphsProblems(count)
+  }
+  if (levelNumber === 13 && sublevelNumber === 2) {
+    return generateSystemsOfEquationsProblems(count)
   }
   return []
 }

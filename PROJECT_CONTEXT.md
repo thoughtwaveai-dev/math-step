@@ -265,6 +265,7 @@ Generators live in `src/lib/math/generators/`. The router is `generateProblems(l
 | 12/1 | functions (5 types: evaluate linear/quadratic/negative, compose simple, inverse-solve) | signed integer string: `"11"`, `"-8"`, `"3"` | signed integer path (`/^-?\d+$/`) |
 | 12/2 | graphing (5 types: read point coords, slope, y-intercept, read-y-for-x, match equation to graph) | `"x = 3, y = -2"` (coords) / signed int / `"A"`–`"D"` (MC) | sim-eq pair grader / signed integer / algebraic-path letter |
 | 13/1 | linear equations & graphs (5 types: equation from slope/intercept, slope from 2 points, y-intercept from slope+point, point on line yes/no, evaluate linear equation in either direction) | `"y = 2x + 3"` (equation) / signed int / `"yes"` / `"no"` | algebraic path (equation + yes/no) / signed integer. Generator avoids slope ∈ {-1, 0, 1} and intercept 0 for all types that *display* a `y = mx + b` string, eliminating the only formatting ambiguities so `gradeAnswer` is untouched. **Mobile input UX (2026-06-07):** on `/worksheet`, `equation_from_slope_intercept` renders a structured `y = [±][m]x [±][b]` control (`src/app/worksheet/EquationAnswerInput.tsx` — sign toggles + numeric magnitude fields, single hidden `answer_${id}` carrying the canonical string) and `point_on_line` renders Yes/No radio buttons (reusing the 12.2 MC `peer-checked` pattern). Hidden canonical = the same string the grader already expects, so `submitWorksheet`/`gradeAnswer`/results page are unchanged. Targeted practice + self-correction box for 13.1 stay plain text. |
+| 13/2 | systems of equations (5 types: `system_substitution_simple`, `system_elimination_simple`, `system_find_missing_value`, `system_check_solution`, `system_word_problem_simple`) | `"x = 4, y = 6"` (coordinate pair) / non-negative int / `"yes"` / `"no"` | sim-eq pair path (3 coordinate types) / signed integer (find-missing) / algebraic path (yes/no). Integer-only, beginner-friendly; substitution + elimination explicit. **No `gradeAnswer` change.** Reuses the shared answer-control system: substitution/elimination/word-problem → `coordinate_pair` control, check-solution → `yes_no` buttons, find-missing → default numeric input (`e.g. 6`). Generator `src/lib/math/generators/systems-of-equations.ts`, id prefix `sys132_`. No graphing in v1. |
 | others | not implemented | — | returns [] → "Coming Soon" |
 
 ### Generator architecture (Milestone 26)
@@ -289,7 +290,7 @@ All generators use **bounded algorithmic random generation** — no more fixed 1
 
 ### Lesson cards
 
-`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. All 25 currently supported levels have lesson cards: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 9/2, 10/1, 10/2, 11/1, 11/2, 12/1, 12/2, 13/1.
+`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. All 26 currently supported levels have lesson cards: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 9/2, 10/1, 10/2, 11/1, 11/2, 12/1, 12/2, 13/1, 13/2.
 
 ### Level 12.2 Graphing — SVG rendering pattern
 
@@ -314,8 +315,8 @@ untouched.
 - **Mapping:** `src/lib/math/answerControl.ts → getAnswerControlType(type)` returns one of
   `equation_slope_intercept` | `yes_no` | `coordinate_pair` | `default`.
   - `equation_from_slope_intercept` → equation control (`y = [±]m x [±]b`, canonical `y = 2x + 3`)
-  - `point_on_line` → Yes/No buttons (canonical `yes`/`no`)
-  - `sim_eq`, `read_point_coordinates` → coordinate control (`x = [±]n, y = [±]n`, canonical `x = 3, y = -2`)
+  - `point_on_line`, `system_check_solution` → Yes/No buttons (canonical `yes`/`no`)
+  - `sim_eq`, `read_point_coordinates`, `system_substitution_simple`, `system_elimination_simple`, `system_word_problem_simple` → coordinate control (`x = [±]n, y = [±]n`, canonical `x = 3, y = -2`). (`system_find_missing_value` uses the default numeric input, not a structured control.)
   - everything else (~60 types) → plain text input (with `inputModeForType` + `placeholderForType`)
   - **Placeholder polish (2026-06-08):** `placeholderForType()` now returns a verified,
     format-accurate example for every default type (e.g. `e.g. 12`, `e.g. -5`, `e.g. 3/4`,
@@ -352,7 +353,7 @@ untouched.
 Worksheets can include a small set of review problems from previously mastered levels to improve long-term retention.
 
 **Logic lives in `src/app/worksheet/page.tsx`:**
-- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support: `[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2],[6,1],[6,2],[7,1],[7,2],[8,1],[8,2],[9,1],[9,2],[10,1],[10,2],[11,1],[11,2],[12,1],[12,2],[13,1]`
+- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support: `[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2],[6,1],[6,2],[7,1],[7,2],[8,1],[8,2],[9,1],[9,2],[10,1],[10,2],[11,1],[11,2],[12,1],[12,2],[13,1],[13,2]`
 - `REVIEW_PROBLEM_COUNT = 4` — number of review problems in a mixed worksheet
 - For a 20-problem worksheet: 16 current-level + 4 review, shuffled to interleave
 - Review eligibility: `student_level_progress` row must exist with `consecutive_passes > 0 OR last_result_passed = true`. This filters out placement-jumped levels.

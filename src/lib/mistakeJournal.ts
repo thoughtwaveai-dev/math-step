@@ -103,6 +103,11 @@ const PARENT_LABELS: Record<string, string> = {
   y_intercept_from_slope_and_point: 'Finding y-intercepts',
   point_on_line: 'Checking points on lines',
   evaluate_linear_equation: 'Using linear equations',
+  system_substitution_simple: 'Solving by substitution',
+  system_elimination_simple: 'Solving by elimination',
+  system_find_missing_value: 'Finding missing values',
+  system_check_solution: 'Checking solutions',
+  system_word_problem_simple: 'System word problems',
 }
 
 export function parentLabelForType(type: string): string {
