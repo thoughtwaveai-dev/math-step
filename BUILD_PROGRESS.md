@@ -6,9 +6,89 @@
 
 ## Current Status
 
-**Phase:** Level 13.2 Systems of Equations (2026-06-16). Students finishing 13.1 were hitting Coming Soon at 13.2. New curriculum level adds 5 problem types: solve by substitution, solve by elimination, find a missing value, check a solution (yes/no), and a simple sum/difference word problem. Integer-only, text-only (no graphs in v1). `levels` row inserted (id=26); no `gradeAnswer`/`worksheet.ts`/schema changes. Reuses the shared answer-control system (coordinate_pair + yes_no) so worksheet, targeted practice, and self-correction wire up automatically. See entry below.
+**Phase:** Level 14.1 Inequalities (2026-06-17). Students finishing 13.2 Systems of Equations were hitting Coming Soon at 14.1. New curriculum level adds 5 problem types: one-step inequalities, two-step inequalities, flipping the sign with a negative coefficient, checking whether a value satisfies an inequality (yes/no), and writing an inequality from words. One-variable, integer-only, text-only (no inequality graphing in v1). `levels` row inserted by user (id=27); no `gradeAnswer`/`worksheet.ts`/schema changes. Extends the existing `inequalities.ts` (11.1) with a 6-member type union + new `generateInequalitiesLevel141`. Reuses the shared answer-control system (yes_no for check, default text for the rest) so worksheet, targeted practice, and self-correction wire up automatically. See entry below.
+
+**Phase (preceding):** Level 13.2 Systems of Equations (2026-06-16). Students finishing 13.1 were hitting Coming Soon at 13.2. New curriculum level adds 5 problem types: solve by substitution, solve by elimination, find a missing value, check a solution (yes/no), and a simple sum/difference word problem. Integer-only, text-only (no graphs in v1). `levels` row inserted (id=26); no `gradeAnswer`/`worksheet.ts`/schema changes. Reuses the shared answer-control system (coordinate_pair + yes_no) so worksheet, targeted practice, and self-correction wire up automatically.
 
 **Phase (preceding):** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
+
+---
+
+### Level 14.1 Inequalities curriculum (2026-06-17)
+
+**Trigger:** Students finishing Level 13.2 (Systems of Equations) hit a Coming Soon wall at 14.1.
+New curriculum level teaches solving and interpreting one-variable linear inequalities. Distinct
+from 11.1 (basic one-variable inequalities) — 14.1 broadens to two-step, the negative-coefficient
+sign flip, checking a value, and writing inequalities from words.
+
+**Audit:** The `levels` row for `(14, 1)` did not exist (DB topped out at id 26 = 13.2). `gradeAnswer`
+re-traced against all five answer shapes — **no change needed**: `x < 6` / `x <= 4` / `x < -4` /
+`x + 5 <= 12` all ride the `/[<>]/` inequality path (normalizes `≤`/`≥` ↔ `<=`/`>=`, spacing/case);
+`yes`/`no` ride the algebraic path (same as `system_check_solution`). SQL applied by user before code
+(verified `id = 27`).
+
+**Approach:** Algorithmic generation only, one-variable + integer-only, no inequality graphing in v1.
+Every answer lands on an existing grading path; **`gradeAnswer` / `worksheet.ts` / schema untouched**
+beyond the one `levels` data row. Extends the existing `inequalities.ts` rather than adding a new file
+(keeps all inequality logic together). Solve/words prompts append a generic format hint (number ≠ the
+real answer, mirroring 11.1) so kids type `x <op> n`, not bare numbers or words.
+
+**5 problem types (distribution 4/4/4/4/4 for a 20-problem worksheet):**
+- `inequality_one_step` → `x ± a {op} b` → `x < 6` (default text, `e.g. x < 6`)
+- `inequality_two_step` → `ax ± c {op} b`, positive coeff → `x <= 4` (default text)
+- `inequality_negative_coefficient` → `-ax {op} b`, flips the sign → `x < -4` (threshold magnitude ≥ 2, never `-0`)
+- `inequality_check_value` → does `x = v` satisfy `ax + c {op} rhs`? → `yes`/`no` (yes_no buttons), balanced 2 yes / 2 no
+- `inequality_from_words` → "A number ± k is {less than/greater than/at most/at least} v. Using x…" → `x + 5 <= 12` (default text, `e.g. x + 5 <= 12`)
+
+**Files modified:**
+- `src/lib/math/generators/inequalities.ts` — extended `InequalityProblemType` to a 6-member union; added per-type makers, `buildPlan141`, and `generateInequalitiesLevel141` (prompt dedup 50× retry, id prefix `ineq141_`). 11.1's `generateInequalities` untouched.
+- `src/lib/math/generators/index.ts` — import + `14/1` branch (the `InequalityProblemType` alias is already re-exported into `AnyProblemType`, so the 5 new members propagate for free).
+- `src/lib/levelKeys.ts` — appended `[14, 1]` (flips the Coming Soon gate; single source for worksheet + practice).
+- `src/lib/math/answerControl.ts` — `inequality_check_value` → `yes_no`.
+- `src/lib/math/inputMode.ts` — `inputModeForType` (all 5 → `text`), `placeholderForType` (`e.g. x < 6` / `e.g. x + 5 <= 12`), `problemTypeLabel` (5 friendly labels).
+- `src/lib/mistakeJournal.ts` — `PARENT_LABELS` for the 5 types.
+- `src/lib/lessons/index.ts` — `'14/1'` lesson "Inequalities" with the `<`/`>`/`<=`/`>=` meanings, the negative-coefficient flip rule, and a worked `-3x > 12 → x < -4` example.
+- `PROJECT_CONTEXT.md`, `BUILD_PROGRESS.md`.
+
+**Files added:**
+- `scripts/ineq141-smoke.ts` — generator + grading smoke test.
+
+**DB seed (applied by user via Supabase SQL editor, idempotent insert, verified `id = 27`):**
+```sql
+insert into levels (level_number, sublevel_number, topic, description,
+  speed_target_seconds, accuracy_threshold, problems_per_session, consecutive_passes_required)
+select 14, 1, 'Inequalities', 'Solving and interpreting one-variable inequalities', 780, 90, 20, 3
+where not exists (select 1 from levels where level_number = 14 and sublevel_number = 1);
+```
+
+**Validation (this session):**
+| Check | Result |
+|------|--------|
+| `npx tsx scripts/ineq141-smoke.ts` (20 problems × 5 seeds: distribution 4/4/4/4/4, 2 yes / 2 no balance, integer-only, no dupes, grade-true + spacing/Unicode variants, flipped-op rejects, sign-flip correctness, bare-number/word rejects) — 637 checks | PASS |
+| `npx tsc --noEmit` | PASS (clean) |
+| `npx eslint` on touched files | PASS (clean) |
+| Playwright 14.1 worksheet — title "Inequalities Worksheet · Level 14.1", lesson card with `-3x > 12` example, 20 problems 4/4/4/4/4, Yes/No on check type, `e.g. x < 6` / `e.g. x + 5 <= 12` placeholders | PASS |
+| Playwright 14.1 — 18 correct + 2 deliberate wrong (#1 text, #16 yes/no) → **18/20, 90%, ✓ Passed, mastery 1/3**; both wrong flagged with correct answers; canonical answers render on results | PASS |
+| Playwright 14.1 self-correction — fixed wrong text inequality (#1) via text control → "✓ Corrected"; wrong check (#16) shows Yes/No structured control | PASS |
+| Playwright 14.1 targeted practice — "Inequalities Practice", 10 problems, Yes/No controls render | PASS |
+| Playwright mobile 375×667 — no horizontal scroll (scrollWidth 360 = clientWidth 360) | PASS |
+| Regression — 13.2 (coordinate + Yes/No), 13.1 (equation control + Yes/No), 12.2 (32 graph SVGs + MC, no marker leak), 1.1 (numeric input) all render, no Coming Soon | PASS |
+| Console errors across the whole session | 0 |
+
+**Temp E2E account — DELETED 2026-06-17.** Parent `level-141-test-20260616@example.com`
+(id `8a8af9b5-2879-4792-9b0d-32d13b4f5ec8`), student `IneqTester`
+(id `12a3c3dd-cffc-4776-8a0f-d41f25151483`). Created on localhost during testing, then removed from
+the Supabase project (`wuwmqbeazgsolsrxbhsh`) by deleting the auth user — FK cascade cleared profile,
+student, streak, 6 sessions (one submitted + five abandoned from regression page loads), 120 problems,
+1 `student_level_progress` row. Verified 0 rows remain; the `levels` 14.1 row (id 27) is intact. No
+real users touched.
+
+**Known limitations / v1 scope:** one-variable only; integer solutions only; no inequality graphing;
+no compound inequalities; `inequality_from_words` grades by exact string so commutative variants
+(`5 + x <= 12` vs canonical `x + 5 <= 12`) won't match — prompts map directly to `x ± k` to minimise
+this. The reused `yes_no` control's `sr-only` legend still reads "Is the point on the line?" (shared
+with 11.1's `point_on_line` / 13.2's `system_check_solution`) — pre-existing, screen-reader-only, left
+unchanged to keep the change surgical.
 
 ---
 

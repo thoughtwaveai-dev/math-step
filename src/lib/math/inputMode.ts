@@ -5,6 +5,16 @@ export type InputMode = HTMLAttributes<HTMLInputElement>['inputMode']
 
 export function inputModeForType(type: AnyProblemType): InputMode {
   if (type === 'inequality') return 'text'
+  // Level 14.1: answers contain x, <, >, =, '-'. Keep on 'text' to avoid the
+  // mobile stylus "x → ." bug. check_value rides the yes/no control (text is a
+  // fallback only).
+  if (
+    type === 'inequality_one_step' ||
+    type === 'inequality_two_step' ||
+    type === 'inequality_negative_coefficient' ||
+    type === 'inequality_check_value' ||
+    type === 'inequality_from_words'
+  ) return 'text'
   if (type === 'fraction_addition' || type === 'fraction_subtraction') return 'text'
   if (type === 'fraction_multiplication' || type === 'fraction_division') return 'text'
   if (type === 'decimal_addition' || type === 'decimal_subtraction' || type === 'decimal_multiplication') return 'decimal'
@@ -99,6 +109,14 @@ export function placeholderForType(type: AnyProblemType): string {
     case 'inequality':
       return 'e.g. x > 4'
 
+    // Level 14.1 inequalities
+    case 'inequality_one_step':
+    case 'inequality_two_step':
+    case 'inequality_negative_coefficient':
+      return 'e.g. x < 6'
+    case 'inequality_from_words':
+      return 'e.g. x + 5 <= 12'
+
     // Lists / factor pairs — grader compares digit set, separators ignored
     case 'list_factors':
     case 'common_factors':
@@ -192,6 +210,11 @@ export function problemTypeLabel(type: AnyProblemType): string {
     case 'eq_div': return 'One-step Equation'
     case 'linear_equation': return 'Linear Equation'
     case 'inequality': return 'Inequality'
+    case 'inequality_one_step': return 'One-step inequalities'
+    case 'inequality_two_step': return 'Two-step inequalities'
+    case 'inequality_negative_coefficient': return 'Flipping inequality signs'
+    case 'inequality_check_value': return 'Checking inequalities'
+    case 'inequality_from_words': return 'Writing inequalities'
     case 'sim_eq': return 'Simultaneous Equations'
     case 'function_evaluate_linear': return 'Function evaluation'
     case 'function_evaluate_quadratic': return 'Quadratic function evaluation'

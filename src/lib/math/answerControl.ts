@@ -15,7 +15,13 @@ export type AnswerControlType =
 
 export function getAnswerControlType(type: AnyProblemType): AnswerControlType {
   if (type === 'equation_from_slope_intercept') return 'equation_slope_intercept'
-  if (type === 'point_on_line' || type === 'system_check_solution') return 'yes_no'
+  if (
+    type === 'point_on_line' ||
+    type === 'system_check_solution' ||
+    type === 'inequality_check_value'
+  ) {
+    return 'yes_no'
+  }
   if (
     type === 'sim_eq' ||
     type === 'read_point_coordinates' ||

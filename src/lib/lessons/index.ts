@@ -388,6 +388,21 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Give your answer with x first, then y — like this: x = 5, y = 3. Always put both values back into both equations to check. If both balance, you have the solution!',
   },
+  '14/1': {
+    title: 'Inequalities',
+    explanation: 'An inequality compares two sides instead of saying they are equal. < means less than, > means greater than, <= means at most (less than or equal), and >= means at least (greater than or equal). You solve an inequality almost exactly like an equation — do the same thing to both sides to get x by itself. There is one special rule: when you multiply or divide both sides by a negative number, flip the inequality sign around.',
+    example: {
+      problem: '-3x > 12',
+      steps: [
+        'We want x on its own, so divide both sides by -3',
+        'Dividing by a negative means we flip the > sign to <',
+        '-3x ÷ -3 = x, and 12 ÷ -3 = -4',
+        'x < -4',
+      ],
+      answer: 'x < -4',
+    },
+    tip: 'Type <= for ≤ and >= for ≥ — no special symbols needed. Only flip the sign when you multiply or divide by a negative number; adding or subtracting never flips it.',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

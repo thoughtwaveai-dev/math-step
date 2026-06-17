@@ -5,7 +5,7 @@ import { generateBasicMultiplication, generateMultiDigitMultiplication } from '.
 import { generateDivisionFacts, generateLongDivision } from './division'
 import { generateFractionProblems, generateFractionMultDivProblems } from './fractions'
 import { generateLinearEquations, generateVariablesBothSides } from './linear-equations'
-import { generateInequalities } from './inequalities'
+import { generateInequalities, generateInequalitiesLevel141 } from './inequalities'
 import { generateDecimalProblems } from './decimals'
 import { generatePercentageProblems } from './percentages'
 import { generateNegativeProblems } from './negatives'
@@ -144,6 +144,9 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 13 && sublevelNumber === 2) {
     return generateSystemsOfEquationsProblems(count)
+  }
+  if (levelNumber === 14 && sublevelNumber === 1) {
+    return generateInequalitiesLevel141(count)
   }
   return []
 }
