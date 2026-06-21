@@ -2,7 +2,18 @@
 
 import { useRef, useEffect, useCallback } from 'react'
 
-export default function WorksheetScratchpad() {
+interface Props {
+  // When this becomes true (drawer opened) the canvas re-sizes to its box.
+  // Safety net so the drawing always survives open/close. The canvas is never
+  // unmounted and is never hidden with display:none/`hidden`, so the bitmap is
+  // preserved across toggles.
+  active?: boolean
+  // When provided, the scratchpad is in drawer mode: renders a Close button
+  // and the "rough working" helper line.
+  onClose?: () => void
+}
+
+export default function WorksheetScratchpad({ active, onClose }: Props = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const drawing = useRef(false)
   const lastPoint = useRef<{ x: number; y: number } | null>(null)
@@ -32,6 +43,12 @@ export default function WorksheetScratchpad() {
     window.addEventListener('resize', resizeCanvas)
     return () => window.removeEventListener('resize', resizeCanvas)
   }, [resizeCanvas])
+
+  // Re-size when the drawer opens. Lossless (resizeCanvas saves/restores the
+  // drawing); also corrects the size if the device rotated while closed.
+  useEffect(() => {
+    if (active) resizeCanvas()
+  }, [active, resizeCanvas])
 
   // Convert a pointer event to canvas-local coordinates
   function getPoint(e: React.PointerEvent<HTMLCanvasElement>) {
@@ -106,15 +123,33 @@ export default function WorksheetScratchpad() {
     <div className="rounded-2xl border border-[#bae0bd] bg-white overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-[#bae0bd] px-5 py-3">
-        <span className="text-sm font-semibold text-[#1a2e1c]">Working Area</span>
-        <button
-          type="button"
-          onClick={clearCanvas}
-          className="rounded-lg border border-[#bae0bd] px-3.5 py-1.5 text-xs font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
-        >
-          Clear
-        </button>
+        <span className="text-sm font-semibold text-[#1a2e1c]">Working area</span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={clearCanvas}
+            className="rounded-lg border border-[#bae0bd] px-3.5 py-1.5 text-xs font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
+          >
+            Clear
+          </button>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close working area"
+              className="rounded-lg border border-[#bae0bd] px-3 py-1.5 text-xs font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
+            >
+              ✕
+            </button>
+          )}
+        </div>
       </div>
+
+      {onClose && (
+        <p className="px-5 pt-3 text-xs text-[#4a6b4e]">
+          Use this space for rough working. It won&apos;t be submitted.
+        </p>
+      )}
 
       {/* Canvas */}
       <canvas

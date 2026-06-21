@@ -6,11 +6,66 @@
 
 ## Current Status
 
-**Phase:** Level 14.1 Inequalities (2026-06-17). Students finishing 13.2 Systems of Equations were hitting Coming Soon at 14.1. New curriculum level adds 5 problem types: one-step inequalities, two-step inequalities, flipping the sign with a negative coefficient, checking whether a value satisfies an inequality (yes/no), and writing an inequality from words. One-variable, integer-only, text-only (no inequality graphing in v1). `levels` row inserted by user (id=27); no `gradeAnswer`/`worksheet.ts`/schema changes. Extends the existing `inequalities.ts` (11.1) with a 6-member type union + new `generateInequalitiesLevel141`. Reuses the shared answer-control system (yes_no for check, default text for the rest) so worksheet, targeted practice, and self-correction wire up automatically. See entry below.
+**Phase:** Floating Working Area (2026-06-21). Parent feedback: the worksheet drawing scratchpad sat at the page bottom, forcing scroll-down-to-work then scroll-up-to-answer on mobile/tablet. Replaced the inline bottom scratchpad with a fixed bottom-right "Working area" button that opens a drawer (mobile bottom-sheet / desktop bottom-right card) reachable from anywhere on the page. Reuses the existing canvas component unchanged except for two small props. No DB, generation, grading, progression, answer-control, or auth changes. See entry below.
+
+**Phase (preceding):** Level 14.1 Inequalities (2026-06-17). Students finishing 13.2 Systems of Equations were hitting Coming Soon at 14.1. New curriculum level adds 5 problem types: one-step inequalities, two-step inequalities, flipping the sign with a negative coefficient, checking whether a value satisfies an inequality (yes/no), and writing an inequality from words. One-variable, integer-only, text-only (no inequality graphing in v1). `levels` row inserted by user (id=27); no `gradeAnswer`/`worksheet.ts`/schema changes. Extends the existing `inequalities.ts` (11.1) with a 6-member type union + new `generateInequalitiesLevel141`. Reuses the shared answer-control system (yes_no for check, default text for the rest) so worksheet, targeted practice, and self-correction wire up automatically. See entry below.
 
 **Phase (preceding):** Level 13.2 Systems of Equations (2026-06-16). Students finishing 13.1 were hitting Coming Soon at 13.2. New curriculum level adds 5 problem types: solve by substitution, solve by elimination, find a missing value, check a solution (yes/no), and a simple sum/difference word problem. Integer-only, text-only (no graphs in v1). `levels` row inserted (id=26); no `gradeAnswer`/`worksheet.ts`/schema changes. Reuses the shared answer-control system (coordinate_pair + yes_no) so worksheet, targeted practice, and self-correction wire up automatically.
 
 **Phase (preceding):** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
+
+---
+
+### Floating Working Area (2026-06-21)
+
+**Trigger:** Parent feedback — the worksheet "Working area" (freehand drawing scratchpad) lived at
+the very bottom of `/worksheet`. On mobile/tablet a student had to scroll all the way down to work
+something out, then scroll back up to type the answer.
+
+**Approach:** The scratchpad is now a floating drawer reachable from anywhere on the page. A new
+`FloatingWorkingArea` client component owns open/close state and renders a fixed bottom-right
+"✏️ Working area" button plus the drawer; it wraps the existing `WorksheetScratchpad` unchanged
+except for two small props. Mobile = slide-up bottom sheet; desktop/tablet = bottom-right card.
+**No DB persistence** (the drawing is browser-only and resets on reload, same as before), and no
+changes to generation, grading, progression, streaks, points, mastery, achievements, answer
+controls, or auth/PIN. `vercel.json` untouched.
+
+**Key invariant (drawing must survive open/close):** the canvas is **never unmounted** and is
+**never hidden with `display:none`/`hidden`** (which would zero `getBoundingClientRect()` and resize
+the canvas to 0). The drawer animates with transform + `pointer-events`/`aria-hidden` only, and the
+scratchpad re-runs its resize when the drawer opens as a safety net. Playwright confirmed the painted
+pixel count is identical (2848 → 2848) across a close/reopen cycle.
+
+**Files modified:**
+- `src/app/worksheet/WorksheetScratchpad.tsx` — added optional `active` (resize-on-open safety net)
+  and `onClose` (renders a Close ✕ button + the "rough working" helper line in drawer mode). All
+  canvas/pointer/clear logic unchanged. Title cased "Working Area" → "Working area".
+- `src/app/worksheet/page.tsx` — replaced the bottom `<WorksheetScratchpad />` with
+  `<FloatingWorkingArea />`; `<main>` bottom padding `py-8` → `pt-8 pb-28` so the fixed button never
+  covers the full-width Submit button.
+- `src/app/worksheet/WorksheetForm.tsx` — hint copy updated to point at the floating button instead
+  of "a drawing area at the bottom of this page".
+
+**Files added:**
+- `src/app/worksheet/FloatingWorkingArea.tsx` — drawer shell: FAB (hidden while open), bottom-sheet/
+  card panel (`role="dialog"`, `aria-label`, `aria-hidden` when closed), Escape-to-close, and light
+  focus handling (focus panel on open, return focus to the FAB on close).
+
+**Validation (Playwright, temp account, cleaned up):**
+- Desktop + mobile 375×667: FAB visible bottom-right; opens the drawer; FAB hides while open.
+- Drawing persists across close → reopen (2848 px identical); Clear wipes to 0; Escape closes,
+  restores the FAB, returns focus to it, sets `aria-hidden`/`pointer-events:none`.
+- No duplicate scratchpad at the page bottom; exactly one canvas on the page.
+- Mobile: no horizontal scroll; canvas 334×320 fits; bottom sheet anchored to the viewport bottom
+  (top ~35% of context stays visible); FAB does not block Submit.
+- 1.1 worksheet submits end-to-end (20/20 → results page).
+- Regression — all render correctly with the floating area present, answer controls unchanged:
+  Level 1.1 (Addition), 12.2 (graph SVGs + MC), 13.1 (structured equation/yes-no), 14.1 (inequalities,
+  `inputMode=text` preserved).
+- `npx tsc --noEmit` clean; ESLint clean on the 4 touched files.
+
+**v1 limitations:** no persistence (resets on reload/navigation); no drag-to-move or resize;
+worksheet page only (results/practice unchanged); single canvas, no undo.
 
 ---
 

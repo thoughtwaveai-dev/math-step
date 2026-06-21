@@ -10,7 +10,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import WorksheetForm from './WorksheetForm'
 import LessonCard from './LessonCard'
-import WorksheetScratchpad from './WorksheetScratchpad'
+import FloatingWorkingArea from './FloatingWorkingArea'
 import StuckSupportCard from './StuckSupportCard'
 import {
   getLockedStudentId,
@@ -323,7 +323,7 @@ export default async function WorksheetPage({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl px-5 py-8 space-y-5">
+      <main className="mx-auto w-full max-w-3xl px-5 pt-8 pb-28 space-y-5">
         <div>
           <h1 className="text-2xl font-bold text-[#1a2e1c]">{topic} Worksheet</h1>
           <p className="mt-0.5 text-sm text-[#4a6b4e]">
@@ -347,7 +347,7 @@ export default async function WorksheetPage({
           reviewProblemIds={persistedProblems.filter(p => p.isReview).map(p => p.id)}
         />
 
-        <WorksheetScratchpad />
+        <FloatingWorkingArea />
       </main>
     </div>
   )

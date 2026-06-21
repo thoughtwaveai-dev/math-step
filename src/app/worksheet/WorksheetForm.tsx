@@ -51,7 +51,7 @@ export default function WorksheetForm({ sessionId, problems, reviewProblemIds }:
       </div>
 
       <p className="text-xs text-center text-[#4a6b4e]">
-        Need space to work things out? There&apos;s a drawing area at the bottom of this page.
+        Need space to work things out? Tap the Working area button at the bottom-right.
       </p>
 
       {/* Review explanation */}

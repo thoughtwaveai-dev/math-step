@@ -365,6 +365,10 @@ Worksheets can include a small set of review problems from previously mastered l
 
 **Grading/progression:** Review problems count toward the session total and accuracy. The session `level_id` stays as the current level — only current-level mastery progress is tracked.
 
+### Worksheet Working Area (floating, 2026-06-21)
+
+The freehand drawing scratchpad (`WorksheetScratchpad`, HTML5 canvas) is now a floating drawer instead of an inline block at the page bottom. `src/app/worksheet/FloatingWorkingArea.tsx` (client) owns open/close state and renders a fixed bottom-right "Working area" button + the drawer (mobile bottom-sheet, desktop bottom-right card), wrapping the unchanged `WorksheetScratchpad`. Worksheet page only — not results/practice. **No DB persistence** — drawing is browser-only and resets on reload. The canvas is never unmounted and never hidden with `display:none`/`hidden` (which would zero its size), so work survives open/close; the scratchpad re-runs its resize on open as a safety net (`active` prop).
+
 ---
 
 ## Self-Correction Flow (Milestone 30)
