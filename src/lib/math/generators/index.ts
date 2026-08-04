@@ -17,6 +17,8 @@ import { generateFunctionsProblems } from './functions'
 import { generateGraphingProblems } from './graphing'
 import { generateLinearEquationsGraphsProblems } from './linear-equations-graphs'
 import { generateSystemsOfEquationsProblems } from './systems-of-equations'
+import { generateExponentProblems } from './exponents'
+import { generateExpandingBracketsProblems } from './expanding-brackets'
 
 export type { MathProblem, ProblemType } from './factorization'
 export type { AdditionProblem, AdditionProblemType } from './addition'
@@ -43,6 +45,11 @@ export type {
   SystemsOfEquationsProblem,
   SystemsOfEquationsProblemType,
 } from './systems-of-equations'
+export type { ExponentProblem, ExponentProblemType } from './exponents'
+export type {
+  ExpandingBracketsProblem,
+  ExpandingBracketsProblemType,
+} from './expanding-brackets'
 
 // Unified problem type covering all generators
 export type AnyProblemType =
@@ -65,6 +72,8 @@ export type AnyProblemType =
   | import('./graphing').GraphingProblemType
   | import('./linear-equations-graphs').LinearEquationsGraphsProblemType
   | import('./systems-of-equations').SystemsOfEquationsProblemType
+  | import('./exponents').ExponentProblemType
+  | import('./expanding-brackets').ExpandingBracketsProblemType
 
 export function generateProblems(levelNumber: number, sublevelNumber: number, count: number) {
   if (levelNumber === 1 && sublevelNumber === 1) {
@@ -147,6 +156,12 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 14 && sublevelNumber === 1) {
     return generateInequalitiesLevel141(count)
+  }
+  if (levelNumber === 14 && sublevelNumber === 2) {
+    return generateExponentProblems(count)
+  }
+  if (levelNumber === 15 && sublevelNumber === 1) {
+    return generateExpandingBracketsProblems(count)
   }
   return []
 }

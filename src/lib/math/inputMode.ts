@@ -57,6 +57,16 @@ export function inputModeForType(type: AnyProblemType): InputMode {
     type === 'system_check_solution'
   ) return 'text'
   if (type === 'system_find_missing_value') return 'numeric'
+  // Level 15.1: every answer is an algebraic expression containing 'x', signs,
+  // and brackets. Keep them on 'text' to avoid the mobile stylus "x → ." bug.
+  if (
+    type === 'expand_single_bracket' ||
+    type === 'expand_bracket_subtraction' ||
+    type === 'expand_negative_multiplier' ||
+    type === 'expand_and_simplify' ||
+    type === 'factorise_single_bracket'
+  ) return 'text'
+  // Level 14.2 answers are all plain non-negative integers → numeric keypad.
   return 'numeric'
 }
 
@@ -163,6 +173,27 @@ export function placeholderForType(type: AnyProblemType): string {
     case 'system_find_missing_value':
       return 'e.g. 6'
 
+    // Level 14.2 exponents — every answer is a plain integer
+    case 'exponent_evaluate':
+    case 'exponent_zero_and_one':
+      return 'e.g. 64'
+    case 'exponent_multiply_same_base':
+    case 'exponent_divide_same_base':
+    case 'exponent_power_of_power':
+      return 'e.g. 6'
+
+    // Level 15.1 expanding brackets — algebraic expressions
+    case 'expand_single_bracket':
+      return 'e.g. 4x + 20'
+    case 'expand_bracket_subtraction':
+      return 'e.g. 4x - 20'
+    case 'expand_negative_multiplier':
+      return 'e.g. -4x - 20'
+    case 'expand_and_simplify':
+      return 'e.g. 9x + 20'
+    case 'factorise_single_bracket':
+      return 'e.g. 4(2x + 7)'
+
     // sim_eq, read_point_coordinates, system_* coordinate/yes-no types (structured
     // controls), match_equation_to_graph (MC) — text input never shown
     default:
@@ -236,5 +267,15 @@ export function problemTypeLabel(type: AnyProblemType): string {
     case 'system_find_missing_value': return 'Finding missing values'
     case 'system_check_solution': return 'Checking solutions'
     case 'system_word_problem_simple': return 'System word problems'
+    case 'exponent_evaluate': return 'Working out powers'
+    case 'exponent_multiply_same_base': return 'Multiplying powers'
+    case 'exponent_divide_same_base': return 'Dividing powers'
+    case 'exponent_power_of_power': return 'Power of a power'
+    case 'exponent_zero_and_one': return 'Zero and first index'
+    case 'expand_single_bracket': return 'Expanding brackets'
+    case 'expand_bracket_subtraction': return 'Expanding brackets'
+    case 'expand_negative_multiplier': return 'Expanding with a negative'
+    case 'expand_and_simplify': return 'Expanding and simplifying'
+    case 'factorise_single_bracket': return 'Factorising into brackets'
   }
 }

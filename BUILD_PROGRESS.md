@@ -6,7 +6,9 @@
 
 ## Current Status
 
-**Phase:** Floating Working Area (2026-06-21). Parent feedback: the worksheet drawing scratchpad sat at the page bottom, forcing scroll-down-to-work then scroll-up-to-answer on mobile/tablet. Replaced the inline bottom scratchpad with a fixed bottom-right "Working area" button that opens a drawer (mobile bottom-sheet / desktop bottom-right card) reachable from anywhere on the page. Reuses the existing canvas component unchanged except for two small props. No DB, generation, grading, progression, answer-control, or auth changes. See entry below.
+**Phase:** Levels 14.2 Exponents + 15.1 Expanding Brackets (2026-08-04). Joaquin had run out of assignments — he was sitting on Level 14.1 with **10 consecutive passes** (3 required) because 14.1 was the last row in `levels`, so there was nothing to advance into and he had been re-doing the same level since late June. Added two new curriculum levels, each with 5 problem types. 14.2 Exponents: evaluate a power, multiply/divide powers of the same base, power of a power, and the zero/first index — every answer is a plain integer on the numeric keypad. 15.1 Expanding Brackets: expand a single bracket, expand with subtraction, expand with a negative multiplier, expand and simplify, and factorise back out by the HCF — every answer is an algebraic expression on `inputMode="text"`. `levels` rows inserted (id=28, id=29); no `gradeAnswer` / `worksheet.ts` / `answerControl.ts` / schema changes. See entry below.
+
+**Phase (preceding):** Floating Working Area (2026-06-21). Parent feedback: the worksheet drawing scratchpad sat at the page bottom, forcing scroll-down-to-work then scroll-up-to-answer on mobile/tablet. Replaced the inline bottom scratchpad with a fixed bottom-right "Working area" button that opens a drawer (mobile bottom-sheet / desktop bottom-right card) reachable from anywhere on the page. Reuses the existing canvas component unchanged except for two small props. No DB, generation, grading, progression, answer-control, or auth changes. See entry below.
 
 **Phase (preceding):** Level 14.1 Inequalities (2026-06-17). Students finishing 13.2 Systems of Equations were hitting Coming Soon at 14.1. New curriculum level adds 5 problem types: one-step inequalities, two-step inequalities, flipping the sign with a negative coefficient, checking whether a value satisfies an inequality (yes/no), and writing an inequality from words. One-variable, integer-only, text-only (no inequality graphing in v1). `levels` row inserted by user (id=27); no `gradeAnswer`/`worksheet.ts`/schema changes. Extends the existing `inequalities.ts` (11.1) with a 6-member type union + new `generateInequalitiesLevel141`. Reuses the shared answer-control system (yes_no for check, default text for the rest) so worksheet, targeted practice, and self-correction wire up automatically. See entry below.
 
@@ -15,6 +17,125 @@
 **Phase (preceding):** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
 
 ---
+
+### Levels 14.2 Exponents + 15.1 Expanding Brackets (2026-08-04)
+
+**Trigger:** Parent report — "no more new assignments". Root cause was not a bug: Joaquin's
+`student_level_progress` row for level 27 (14.1) showed `consecutive_passes = 10` against a
+`consecutive_passes_required` of 3, with `last_result_passed = true`. The advancement query in
+`src/app/actions/worksheet.ts` looks for the next row in `(level_number, sublevel_number)` order and
+found none, because 14.1 was the highest row in `levels`. He had been repeating 14.1 worksheets
+since 2026-06-29.
+
+**Approach:** Two new levels rather than one, so there is real runway before the ceiling returns.
+Topic choice confirmed with the parent: exponents first (needed before quadratics and standard form),
+then expanding brackets. Both levels were designed so that **every answer rides an existing
+`gradeAnswer` path** — no grading changes, which is what has kept previous level additions low-risk.
+
+**Level 14.2 — Exponents** (`src/lib/math/generators/exponents.ts`, id prefix `exp142_`):
+- 5 types at 4 each for a 20-problem worksheet: `exponent_evaluate`, `exponent_multiply_same_base`,
+  `exponent_divide_same_base`, `exponent_power_of_power`, `exponent_zero_and_one`.
+- Prompts render powers as **Unicode superscripts** (`Work out 9³.`, `Simplify: m⁵ × m⁶.`) via a
+  `sup()` digit map, so they read like a textbook rather than caret notation.
+- The three index-law types ask for the resulting **power as a number**, not the expression `x⁷`.
+  This keeps the law itself as the thing being tested while avoiding caret/superscript typing on a
+  tablet keyboard. Every answer is therefore a plain integer → signed-integer grading path,
+  `inputMode="numeric"`.
+- `maxExponentFor()` bounds `base^exp ≤ 1000` so evaluation stays mentally checkable (9³ = 729 is the
+  practical ceiling, not 9⁹). The divide type forces `a > b`, so zero and negative indices — which
+  are not taught at this level — can never be generated.
+
+**Level 15.1 — Expanding Brackets** (`src/lib/math/generators/expanding-brackets.ts`, prefix `exb151_`):
+- 5 types at 4 each: `expand_single_bracket`, `expand_bracket_subtraction`,
+  `expand_negative_multiplier`, `expand_and_simplify`, `factorise_single_bracket`.
+- Answers are algebraic expressions (`3x + 12`, `-2x - 10`, `7x + 6`, `3(2x + 5)`) → the algebraic
+  path Level 8/1 already uses (lowercase + strip whitespace + strict match). `inputMode="text"` on
+  all five, per the standing stylus "x → ." rule.
+- Coefficients ≥ 2 and constants ≥ 2, so `1x` and `+ 0` can never be emitted.
+- `factorise_single_bracket` enforces `gcd(p, q) = 1`, which guarantees the pulled-out factor really
+  is the HCF and the fully-factorised answer is unique (otherwise `12x + 18` would accept both
+  `2(6x + 9)` and `6(2x + 3)`).
+- Because the algebraic path does **not** reorder terms, every prompt carries a format hint with a
+  fixed example, and the build loop rejects any problem whose prompt contains its own answer — so a
+  hint can never accidentally hand over the answer.
+
+**Files modified:** `src/lib/math/generators/index.ts` (imports, type exports, `AnyProblemType`
+union, router), `src/lib/levelKeys.ts` (`[14,2]`, `[15,1]`), `src/lib/lessons/index.ts` (lesson cards
+for both), `src/lib/math/inputMode.ts` (input modes, placeholders, `problemTypeLabel`),
+`src/lib/mistakeJournal.ts` (10 new `PARENT_LABELS` entries).
+**Files added:** the two generators plus `scripts/level-14-2-15-1-smoke.ts`.
+**Not touched:** `gradeAnswer.ts`, `worksheet.ts`, `answerControl.ts` (both levels use the default
+control), schema, `vercel.json`, auth/PIN.
+
+**Database:** two rows inserted into `levels` —
+`(28, 14, 2, 'Exponents', 'Powers, index laws, and the zero index', 780, 90, 20, 3)` and
+`(29, 15, 1, 'Expanding Brackets', 'Expanding and factorising single brackets', 840, 90, 20, 3)`.
+
+**Note for the next session:** Joaquin advances into 14.2 the next time he passes a 14.1 worksheet
+(his 10 banked passes are against 14.1 and are not carried forward). He was not manually advanced.
+
+### Suite 26 — Levels 14.2 + 15.1 (2026-08-04)
+
+Generator-level: `npx tsx scripts/level-14-2-15-1-smoke.ts` — **2268 checks passed, 0 failed** across
+6 seeds. Every check re-derives the expected answer by parsing the rendered prompt rather than
+trusting the generator's own arithmetic.
+
+| Test | Result |
+|------|--------|
+| 14.2: 20 problems, 4 of each of the 5 types, no duplicate prompts (6 seeds) | PASS |
+| 14.2: every answer matches `/^\d+$/`; off-by-one and blank rejected | PASS |
+| 14.2: `base^exp` recomputed from the prompt matches the stored answer | PASS |
+| 14.2: evaluate results ≤ 1000; index ≥ 2 | PASS |
+| 14.2: multiply adds indices, divide subtracts (result ≥ 1), power-of-power multiplies | PASS |
+| 15.1: 20 problems, 4 of each of the 5 types, no duplicate prompts (6 seeds) | PASS |
+| 15.1: correct answer grades true with no spaces and in uppercase | PASS |
+| 15.1: format hint never contains the answer; no `1x` term; no `+ 0` term | PASS |
+| 15.1: expansion recomputed from the prompt matches; un-multiplied constant rejected | PASS |
+| 15.1: undistributed negative sign rejected | PASS |
+| 15.1: factorised answer multiplies back to the prompt AND `g` equals `gcd(coeff, constant)` | PASS |
+| Both: no answer contains `<`/`>`, an `x=`/`y=` pair, or `/` (no grading-path collisions) | PASS |
+| Existing `scripts/answer-control-gate.ts` still passes (494 checks) | PASS |
+| Existing `scripts/ineq141-smoke.ts` still passes (637 checks) | PASS |
+| Existing `scripts/systems-of-equations-smoke.ts` still passes | PASS |
+| `npx tsc --noEmit`: no type errors | PASS |
+| `npx eslint` on the 8 touched/added files: clean | PASS |
+
+Browser (Playwright, temp account, dev server on :3000):
+
+| Test | Result |
+|------|--------|
+| Placement picker shows 29 options; 14.2 and 15.1 appear at the end with correct labels | PASS |
+| 14.2 worksheet heading "Exponents Worksheet"; lesson card "Learn: Exponents (Powers)" renders | PASS |
+| 14.2: 20 inputs, all `inputMode="numeric"`, placeholders `e.g. 64` / `e.g. 6` | PASS |
+| 14.2: superscripts render correctly in prompts (`Work out 9³.`, `Simplify: m⁸ ÷ m².`) | PASS |
+| 14.2 session 1 — 19 correct + 1 deliberately wrong: 19/20, 95%, Passed, mastery 1/3 | PASS |
+| 14.2: the wrong answer (99 for 8) marked incorrect; self-correction box offered | PASS |
+| 14.2 sessions 2 and 3 — 20/20, 100% each | PASS |
+| Advancement after 3 passes: redirect `?advanced=1&nl=15&ns=1&nt=Expanding+Brackets` | PASS |
+| Level Up banner: "Advanced to Level 15.1 — Expanding Brackets." | PASS |
+| 15.1 worksheet heading "Expanding Brackets Worksheet"; lesson card renders | PASS |
+| 15.1: 16 current-level + 4 interleaved 14.2 review problems, correctly badged | PASS |
+| 15.1: mixed input modes — `text` for the algebraic types, `numeric` for the 14.2 review problems | PASS |
+| 15.1: placeholders `e.g. 4x + 20`, `e.g. 4x - 20`, `e.g. -4x - 20`, `e.g. 9x + 20`, `e.g. 4(2x + 7)` | PASS |
+| 15.1 grading — `-5x+35` (no spaces) accepted for `-5x + 35` | PASS |
+| 15.1 grading — `11X - 15` (uppercase) accepted for `11x - 15` | PASS |
+| 15.1 grading — `5(6x+7)` accepted for `5(6x + 7)`; HCF of 30x + 35 correctly 5 | PASS |
+| 15.1 grading — `3x + 3` (classic un-multiplied constant) correctly rejected for `3x + 9` | PASS |
+| 15.1 session: 19/20, 95%, Passed | PASS |
+| Dashboard Current Focus shows "Expanding Brackets / Expanding and factorising single brackets" | PASS |
+| Dashboard + results: no raw type identifiers, no `[GRAPH]`/`[CHOICES]` leaks, no `undefined`/`NaN` | PASS |
+| Console errors across every page visited | 0 |
+
+**Temp test data: created and cleaned up.**
+- Temp parent: `curriculum-test-20260804@example.com` (auth user `25c37a87-…`)
+- Temp student: `CurriculumTestKid` (`64daed42-…`)
+- Deleted via `delete from auth.users` (FK cascade). Re-queried after: auth user 0, profile 0,
+  student 0, sessions 0, problems 0, streaks 0, student_level_progress 0, practice_sessions 0,
+  orphaned problems 0, any student matching `%test%` 0.
+- Separately, an **approved** pre-existing leftover from a prior session was removed: student
+  `UITestKid` (`86d9377e-…`, Level 13.1, created 2026-06-08) plus its 9 sessions, 180 problems,
+  1 streak row, and 4 progress rows. Verified 0 remaining, no orphans.
+- `git status --short` confirmed no test artifacts staged.
 
 ### Floating Working Area (2026-06-21)
 

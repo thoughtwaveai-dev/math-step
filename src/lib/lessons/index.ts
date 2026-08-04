@@ -403,6 +403,36 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Type <= for ≤ and >= for ≥ — no special symbols needed. Only flip the sign when you multiply or divide by a negative number; adding or subtracting never flips it.',
   },
+  '14/2': {
+    title: 'Exponents (Powers)',
+    explanation: 'A power is a short way of writing repeated multiplication. In 3⁴ the small raised number (4) is the index or power, and it tells you how many 3s to multiply together: 3 × 3 × 3 × 3 = 81. Three index laws let you simplify powers of the same base without working them out. Multiplying: keep the base and ADD the indices, because x³ × x⁴ is just seven xs multiplied together. Dividing: keep the base and SUBTRACT the indices, because the ones on the bottom cancel the ones on top. Power of a power: MULTIPLY the indices, because (x²)³ means x² three times over. Two special cases: anything to the power of 1 is itself, and anything to the power of 0 is 1.',
+    example: {
+      problem: 'Simplify: x³ × x⁴',
+      steps: [
+        'Both parts have the same base, x',
+        'x³ means x × x × x, and x⁴ means x × x × x × x',
+        'Altogether that is seven xs multiplied together',
+        'So add the indices: 3 + 4 = 7, giving x⁷',
+      ],
+      answer: '7 (the power)',
+    },
+    tip: 'The index laws only work when the bases match — x³ × y⁴ cannot be combined. When a question asks for the missing power, type just that number, not the whole x-to-a-power expression.',
+  },
+  '15/1': {
+    title: 'Expanding Brackets',
+    explanation: 'Expanding means multiplying everything inside the brackets by the number outside. In 3(x + 4), the 3 multiplies BOTH the x and the 4, giving 3x + 12. A common mistake is multiplying only the first term, so always check that every term inside got multiplied. If the number outside is negative, it flips the sign of every term inside: -2(x + 5) becomes -2x - 10, and -2(x - 5) becomes -2x + 10. Sometimes you expand and then collect like terms, for example 3(x + 2) + 4x expands to 3x + 6 + 4x, and the two x terms combine to give 7x + 6. Factorising is the reverse: find the highest common factor of both terms and pull it out the front, so 6x + 15 becomes 3(2x + 5).',
+    example: {
+      problem: 'Expand: 3(x + 4)',
+      steps: [
+        'Multiply the 3 by the first term: 3 × x = 3x',
+        'Multiply the 3 by the second term: 3 × 4 = 12',
+        'The + sign between them stays the same',
+        '3(x + 4) = 3x + 12',
+      ],
+      answer: '3x + 12',
+    },
+    tip: 'Write the x term first, then the number — like 3x + 12, not 12 + 3x. To check a factorised answer, expand it back out: if you get the original expression, you factorised correctly.',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

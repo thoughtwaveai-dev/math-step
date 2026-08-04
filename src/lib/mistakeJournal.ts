@@ -113,6 +113,16 @@ const PARENT_LABELS: Record<string, string> = {
   system_find_missing_value: 'Finding missing values',
   system_check_solution: 'Checking solutions',
   system_word_problem_simple: 'System word problems',
+  exponent_evaluate: 'Working out powers',
+  exponent_multiply_same_base: 'Multiplying powers',
+  exponent_divide_same_base: 'Dividing powers',
+  exponent_power_of_power: 'Power of a power',
+  exponent_zero_and_one: 'Zero and first index',
+  expand_single_bracket: 'Expanding brackets',
+  expand_bracket_subtraction: 'Expanding brackets with subtraction',
+  expand_negative_multiplier: 'Expanding with a negative outside',
+  expand_and_simplify: 'Expanding and simplifying',
+  factorise_single_bracket: 'Factorising into brackets',
 }
 
 export function parentLabelForType(type: string): string {
