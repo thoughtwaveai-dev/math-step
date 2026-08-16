@@ -14,6 +14,7 @@ export interface WeeklyStudentBlock {
   currentTopic: string | null
   newMilestoneLabels: string[]  // formatTierBadge() outputs; empty array if none
   weakAreaLabel: string | null  // parentLabelForType / level fallback; null if none
+  atCurriculumEnd: boolean      // no level exists after this student's current one
 }
 
 export interface BuildWeeklyReviewArgs {
@@ -34,6 +35,14 @@ export interface BuiltEmail {
 function focusLabel(s: WeeklyStudentBlock): string | null {
   if (!s.currentTopic) return null
   return `Level ${s.currentLevel}.${s.currentSublevel} — ${s.currentTopic}`
+}
+
+// Heads-up for the parent when a student has run out of curriculum. Fires on
+// reaching the final level, not on clearing it, so there is lead time to add
+// the next one. Without this the app goes silent at the ceiling and the student
+// just repeats the same level.
+function curriculumEndLine(s: WeeklyStudentBlock): string {
+  return `${s.name} is on the last level available. Add the next level soon so there is somewhere to advance to.`
 }
 
 function insightLine(s: WeeklyStudentBlock): string {
@@ -78,6 +87,7 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
       textBlocks.push("No worksheets this week — that's okay, every week is a fresh start.")
       const focus = focusLabel(s)
       if (focus) textBlocks.push(`🎯 Ready to continue: ${focus}`)
+      if (s.atCurriculumEnd) textBlocks.push(`🧭 ${curriculumEndLine(s)}`)
     } else {
       const acc = s.accuracy ?? 0
       textBlocks.push(
@@ -92,6 +102,7 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
       if (s.weakAreaLabel) {
         textBlocks.push(`⚠️ Needs practice: ${s.weakAreaLabel}`)
       }
+      if (s.atCurriculumEnd) textBlocks.push(`🧭 ${curriculumEndLine(s)}`)
       textBlocks.push('')
       textBlocks.push(`So what does this mean for ${s.name}?`)
       textBlocks.push(insightLine(s))
@@ -117,10 +128,14 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
         const focusHtml = focus
           ? `<p style="margin:4px 0 0 0;font-size:14px;line-height:1.5;color:#1a2e1c;">🎯 Ready to continue: ${escapeHtml(focus)}</p>`
           : ''
+        const endHtml = s.atCurriculumEnd
+          ? `<p style="margin:6px 0 0 0;font-size:14px;line-height:1.5;color:#a85630;">🧭 ${escapeHtml(curriculumEndLine(s))}</p>`
+          : ''
         return `<div style="margin:0 0 20px 0;padding:14px 16px;background:#f7faf7;border:1px solid #e1f4e3;border-radius:10px;">
           ${headingHtml}
           <p style="margin:0;font-size:14px;line-height:1.5;color:#4a6b4e;">${escapeHtml("No worksheets this week — that's okay, every week is a fresh start.")}</p>
           ${focusHtml}
+          ${endHtml}
         </div>`
       }
 
@@ -143,6 +158,10 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
         ? `<p style="margin:6px 0 0 0;font-size:14px;line-height:1.5;color:#a85630;">⚠️ Needs practice: ${escapeHtml(s.weakAreaLabel)}</p>`
         : ''
 
+      const endHtml = s.atCurriculumEnd
+        ? `<p style="margin:6px 0 0 0;font-size:14px;line-height:1.5;color:#a85630;">🧭 ${escapeHtml(curriculumEndLine(s))}</p>`
+        : ''
+
       const insightHtml = `<p style="margin:14px 0 2px 0;font-size:13px;font-weight:600;color:#1a2e1c;">${escapeHtml(`So what does this mean for ${s.name}?`)}</p>
         <p style="margin:0;font-size:14px;line-height:1.5;color:#4a6b4e;">${escapeHtml(insightLine(s))}</p>`
 
@@ -152,6 +171,7 @@ export function buildWeeklyReview(args: BuildWeeklyReviewArgs): BuiltEmail {
         ${focusHtml}
         ${milestonesHtml}
         ${weakHtml}
+        ${endHtml}
         ${insightHtml}
       </div>`
     })

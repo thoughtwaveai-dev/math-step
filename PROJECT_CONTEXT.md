@@ -687,6 +687,36 @@ email per parent account — no new login, no new student ownership changes.
   confirmed or unsubscribed; email body does not mention the cc recipient;
   daily reminders not sent to cc address.
 
+## Curriculum ceiling signal (2026-08-16)
+
+Before this, reaching the end of the curriculum was completely silent. `submitWorksheet`'s
+advancement block looked for the next `levels` row in `(level_number, sublevel_number)` order and,
+finding none, did nothing at all. The student kept passing the same level forever with no
+indication anything was wrong. This is how Joaquin ended up on Level 14.1 with **10 consecutive
+passes** against 3 required, discovered only because he mentioned it. "Coming Soon" does not cover
+this case: it fires only when a `levels` row exists but has no generator, so a final level that
+works correctly never triggers it.
+
+Three surfaces now report it. The shared condition is "no level exists ordered after the student's
+current `(level_number, sublevel_number)`".
+
+- **Student, results page.** `submitWorksheet` sets `reachedCurriculumEnd` in the `else` branch of
+  the next-level lookup and appends `done=1` to the results redirect. `results/[sessionId]/page.tsx`
+  reads `sp.done === '1'` and renders a "You've finished every level! 🎉" banner. Mutually exclusive
+  with the Level Up banner in practice, since `advanced=1` is only set when a next level was found.
+- **Parent, dashboard.** `atCurriculumEnd` is derived in `dashboard/page.tsx` from the already
+  fetched `allLevels`, so there is no extra query. Renders an amber notice inside Current Focus,
+  matching the existing `isStuck` notice pattern.
+- **Parent, weekly email.** `WeeklyStudentBlock` gained a required `atCurriculumEnd: boolean`,
+  computed in the weekly-review cron from the `levels` it already fetches. Appears in both the
+  active-week and empty-week variants, text and HTML. Deliberately fires on *reaching* the final
+  level rather than on clearing it, so there is lead time to add the next one, which matters because
+  the email is weekly.
+
+No schema change, no new query, no new cron, no new email stream. Making `atCurriculumEnd` a
+required field is intentional: it forces a compile error rather than a silently missing line if
+another caller of `buildWeeklyReview` is ever added.
+
 ## Delete Student admin control (Milestone 61)
 
 Parent-only destructive action inside the dashboard's Admin controls. Server action: `deleteStudent` in `src/app/actions/students.ts`. UI: `src/app/dashboard/DeleteStudentSection.tsx`, mounted at the bottom of the Admin controls `<details>` block.

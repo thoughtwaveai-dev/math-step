@@ -52,11 +52,12 @@ export default async function ResultsPage({
   searchParams,
 }: {
   params: Promise<{ sessionId: string }>
-  searchParams: Promise<{ advanced?: string; nl?: string; ns?: string; nt?: string; clc?: string; clt?: string }>
+  searchParams: Promise<{ advanced?: string; nl?: string; ns?: string; nt?: string; clc?: string; clt?: string; done?: string }>
 }) {
   const { sessionId } = await params
   const sp = await searchParams
   const didAdvance = sp.advanced === '1'
+  const finishedCurriculum = sp.done === '1'
   const newLevel = sp.nl ? parseInt(sp.nl, 10) : null
   const newSublevel = sp.ns ? parseInt(sp.ns, 10) : null
   const newTopic = sp.nt ?? null
@@ -280,6 +281,18 @@ export default async function ResultsPage({
             <p className="text-base font-bold text-[#1a2e1c]">Level Up!</p>
             <p className="mt-1 text-sm text-[#2d6a35]">
               Advanced to Level {newLevel}.{newSublevel}{newTopic ? ` — ${newTopic}` : ''}.
+            </p>
+          </div>
+        )}
+
+        {/* Curriculum finished. Without this the app goes quiet at the ceiling
+            and the student keeps re-doing the same level with no explanation. */}
+        {finishedCurriculum && (
+          <div className="rounded-xl border border-[#bae0bd] bg-[#e1f4e3] p-5">
+            <p className="text-base font-bold text-[#1a2e1c]">You&apos;ve finished every level! 🎉</p>
+            <p className="mt-1 text-sm text-[#2d6a35]">
+              That&apos;s everything we have right now, and new topics are being added.
+              Keep practising this level to stay sharp while you wait.
             </p>
           </div>
         )}

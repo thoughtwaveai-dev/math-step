@@ -317,6 +317,13 @@ export async function GET(request: Request) {
       // Current focus.
       const focusLevel = levelByPair.get(`${stu.current_level}.${stu.current_sublevel}`) ?? null
 
+      // No level ordered after the student's current one means they have run out
+      // of curriculum. Reuses the already-fetched `levels`, so no extra query.
+      const atCurriculumEnd = !levels.some(l =>
+        l.level_number > stu.current_level ||
+        (l.level_number === stu.current_level && l.sublevel_number > stu.current_sublevel)
+      )
+
       studentBlocks.push({
         name: stu.name,
         practiceDays: practiceDays.size,
@@ -327,6 +334,7 @@ export async function GET(request: Request) {
         currentTopic: focusLevel?.topic ?? null,
         newMilestoneLabels: newMilestones,
         weakAreaLabel,
+        atCurriculumEnd,
       })
     }
 

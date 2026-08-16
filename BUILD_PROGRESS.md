@@ -6,7 +6,9 @@
 
 ## Current Status
 
-**Phase:** Password reset send-failure visibility (2026-08-16). Follow-up to the cross-device fix below. `requestPasswordReset` caught every Supabase error, wrote it to `console.error`, and always returned `{ sent: true }`, so a genuinely failed send looked exactly like a successful one. That is why the cross-device bug went unnoticed for roughly a month. The always-succeed behaviour was deliberate anti-enumeration design, so the fix keeps it as the default and only reports failures whose cause is provably unrelated to the account asked for, via a closed allowlist of Supabase error codes. Only `src/app/actions/auth.ts` and `ForgotPasswordForm.tsx` changed. See entry below.
+**Phase:** Curriculum ceiling signal (2026-08-16). Reaching the end of the curriculum was silent: `submitWorksheet` looked for the next `levels` row, found none, and did nothing, so the student kept re-passing the same level indefinitely. That is how Joaquin reached 10 consecutive passes on 14.1 against 3 required. "Coming Soon" never covered this, because it only fires for a level row with no generator, not for a final level that works. Three surfaces now report it off one shared condition: a banner on the student's results page, an amber notice on the parent dashboard, and a line in the weekly review email. Fires on *reaching* the last level, not on clearing it, so there is lead time to add the next one. No schema change, no new query, no new cron. See entry below.
+
+**Phase (preceding):** Password reset send-failure visibility (2026-08-16). Follow-up to the cross-device fix below. `requestPasswordReset` caught every Supabase error, wrote it to `console.error`, and always returned `{ sent: true }`, so a genuinely failed send looked exactly like a successful one. That is why the cross-device bug went unnoticed for roughly a month. The always-succeed behaviour was deliberate anti-enumeration design, so the fix keeps it as the default and only reports failures whose cause is provably unrelated to the account asked for, via a closed allowlist of Supabase error codes. Only `src/app/actions/auth.ts` and `ForgotPasswordForm.tsx` changed. See entry below.
 
 **Phase (preceding):** Password reset cross-device fix (2026-08-16). Reported by a parent: clicking reset password gave no usable way forward. Root cause was not the UI, which is clear and well built. Recovery emails carry a PKCE token and `/auth/callback` only handled `?code=` via `exchangeCodeForSession`, which needs the code-verifier cookie from the browser that requested the reset. Opening the email on any other device always failed to `?error=expired`, and requesting a new link did the same thing every time, so an affected parent could never get back in. `/auth/callback` now also accepts `token_hash` + `type` and verifies via `verifyOtp`, which is not browser-bound. Paired with a customised Recovery email template. Only `src/app/auth/callback/route.ts` changed. See entry below.
 
@@ -19,6 +21,64 @@
 **Phase (preceding):** Level 13.2 Systems of Equations (2026-06-16). Students finishing 13.1 were hitting Coming Soon at 13.2. New curriculum level adds 5 problem types: solve by substitution, solve by elimination, find a missing value, check a solution (yes/no), and a simple sum/difference word problem. Integer-only, text-only (no graphs in v1). `levels` row inserted (id=26); no `gradeAnswer`/`worksheet.ts`/schema changes. Reuses the shared answer-control system (coordinate_pair + yes_no) so worksheet, targeted practice, and self-correction wire up automatically.
 
 **Phase (preceding):** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
+
+---
+
+### Curriculum ceiling signal (2026-08-16)
+
+**Trigger:** Quentin asked for a reminder when Joaquin nears the end of the curriculum. Checking
+first showed his assumption that "Coming Soon" would appear was wrong, and that Joaquin was
+already sitting on 15.1, the final level, with 0 of 3 passes and nothing after it.
+
+**The actual defect.** `src/app/actions/worksheet.ts` had a comment saying that if no next level
+exists the student stays put and no action is needed. Nothing was recorded, nothing was shown.
+"Coming Soon"
+(`worksheet/page.tsx`) only fires when a `levels` row exists with no generator, so a working final
+level never triggers it. Same silent-success shape as the password reset bug fixed earlier the
+same day.
+
+**What was built.** One shared condition, "no level ordered after the student's current
+`(level_number, sublevel_number)`", surfaced three ways:
+
+| Surface | Mechanism |
+|---|---|
+| Student, results page | `submitWorksheet` sets `reachedCurriculumEnd` in the new `else` branch and appends `done=1`; results page renders a finished banner |
+| Parent, dashboard | `atCurriculumEnd` derived from the already-fetched `allLevels`, amber notice in Current Focus matching the `isStuck` pattern |
+| Parent, weekly email | required `atCurriculumEnd` on `WeeklyStudentBlock`, computed in the cron from `levels` it already fetches, in both week variants and both text and HTML |
+
+Fires on reaching the final level rather than clearing it, which is what buys lead time given the
+email is weekly. No schema change, no new query, no new cron, no new email stream.
+
+**Why not a dedicated reminder email:** it would need a new dedup column (manual SQL), a template,
+and its own unsubscribe stream, to deliver what the existing Sunday email carries for free. The
+weekly email was verified live first (8 recipients, `last_weekly_sent_date` max 2026-08-09).
+
+**Testing (2026-08-16).**
+
+| Test | Result |
+|------|--------|
+| Email template: at ceiling, active week, line present in text and HTML | PASS |
+| Email template: not at ceiling, active week, line absent | PASS |
+| Email template: at ceiling, empty week, line present | PASS |
+| Email template: not at ceiling, empty week, line absent | PASS |
+| Dashboard notice renders for a student on the last level (shows "2/3 passes") | PASS |
+| Worksheet passed at 15.1 → redirect carried `done=1`, no `advanced=1` | PASS |
+| Results page rendered the finished banner | PASS |
+| DB after: still 15.1, `consecutive_passes` 3, session 20/20 recorded | PASS |
+| Regression, advancement still works: passed at 14.2 → `advanced=1&nl=15&ns=1`, ceiling banner absent | PASS |
+| `tsc --noEmit`, `eslint`, `npm run build` | PASS |
+
+The weekly-review cron was deliberately **not** executed as a test: a real run sends to all 8
+opted-in parents and writes `last_weekly_sent_date`, which would suppress the genuine Sunday send.
+The added code is a pure boolean over an already-fetched array, covered by the type system and the
+template tests. First live run is the normal Sunday cron.
+
+**Temp test data:** created and cleaned up. Temp parent `mathstep-ceiling-test-20260816@agentmail.to`
+(auth id `43f13ec8-dc0a-4c2a-a96b-3fa7c8ad9b1c`) and student `CeilingTestKid`
+(`d6449a40-7d69-43a2-ae87-4d52ee303861`), 2 sessions, 40 problems, 1 streak, 2 level-progress rows.
+Students deleted first to exercise the FK cascades, then profile, then auth user. Re-queried: 0
+across users, profiles, students, sessions, streaks, level progress, and 0 orphaned problems.
+Row counts back to baseline (10 auth users, 8 students).
 
 ---
 

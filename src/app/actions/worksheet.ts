@@ -114,6 +114,7 @@ export async function submitWorksheet(
   let advancedToLevel: number | null = null
   let advancedToSublevel: number | null = null
   let advancedToTopic: string | null = null
+  let reachedCurriculumEnd = false
 
   if (sessionRow?.student_id) {
     const studentId = sessionRow.student_id
@@ -239,8 +240,13 @@ export async function submitWorksheet(
           } else {
             console.error('Student advancement failed:', advanceErr.message)
           }
+        } else {
+          // Nothing left to advance into: the student has cleared the whole
+          // curriculum. Flag it so the results page says so. Previously this
+          // branch did nothing, so a student who had finished everything just
+          // kept re-passing the same level with no indication anything was up.
+          reachedCurriculumEnd = true
         }
-        // If no next level, student stays at current level — no action needed
       }
     }
   }
@@ -253,6 +259,7 @@ export async function submitWorksheet(
     params.set('ns', String(advancedToSublevel))
     if (advancedToTopic) params.set('nt', advancedToTopic)
   }
+  if (reachedCurriculumEnd) params.set('done', '1')
   // Pass current-level-only counts so the results page can show a review breakdown
   params.set('clc', String(currentLevelCorrect))
   params.set('clt', String(currentLevelTotal))
