@@ -35,9 +35,9 @@ the account exists". Only failures whose cause is independent of *which* account
 may be reported.
 
 **Approach, a closed allowlist rather than a denylist.** `SEND_INFRASTRUCTURE_ERROR_CODES` in
-`src/app/actions/auth.ts` lists the five Supabase Auth codes that mean the send failed for a
-system reason: `unexpected_failure`, `request_timeout`, `over_email_send_rate_limit`,
-`over_request_rate_limit`, `email_address_not_authorized`. Anything else stays silent, including
+`src/app/actions/auth.ts` lists the four Supabase Auth codes that mean the send failed for a
+system reason: `unexpected_failure`, `request_timeout`, `over_request_rate_limit`,
+`email_address_not_authorized`. Anything else stays silent, including
 `user_not_found`, `user_banned`, `email_not_confirmed`, and any code a future Supabase release
 adds. An allowlist fails safe; a denylist would leak the first time a new account-specific code
 shipped. Errors raised before a response comes back carry neither code nor status (confirmed in
@@ -76,11 +76,37 @@ Verifying the raw endpoint mattered: the Next dev logger serialised the original
 to `{}`, which hid the code and status. The log line was changed to a flat interpolated string so
 the cause survives any serialiser.
 
-**Residual tradeoff (accepted).** `over_email_send_rate_limit` is partly keyed to the address, so
-in theory repeated probing of one address could distinguish an existing account from an absent
-one. In practice Supabase also applies a project-wide email limit that returns the same code, and
-the task brief explicitly listed rate limit as an infrastructure failure worth surfacing. Noted
-rather than silently resolved.
+**Same-day audit reversal: `over_email_send_rate_limit` removed from the allowlist.** It shipped
+on the allowlist in `3ffa320` because the brief listed rate limit as an infrastructure failure,
+and the enumeration risk was written up as theoretical and mitigated by Supabase's project-wide
+email quota returning the same code. The audit tested that assumption against the live project
+instead of reasoning about it, and it was wrong on both counts:
+
+| Probe | Result |
+|-------|--------|
+| Real account, 2nd request inside 60s | HTTP 429 `over_email_send_rate_limit` |
+| Address with no account, 3 rapid requests | HTTP 200 every time, never rate limited |
+| Project-wide quota under rapid sends | never fired |
+
+So on this project the code means the per-address cooldown and nothing else, and reporting it
+answers "does this account exist?" for anyone who submits an address twice. That is precisely the
+oracle the whole design exists to prevent, so the labelled hard constraint (never reveal whether
+an email matches an account) beats the brief's illustrative parenthetical listing rate limit.
+Removing it also costs nothing real: the cooldown only fires when a reset email was successfully
+sent seconds earlier, so "Check your inbox" is the truthful response. The 429 is still logged for
+ops, just not shown. New accepted residual: project-wide quota exhaustion goes silent, tolerable
+because genuine SMTP failures surface as `unexpected_failure`.
+
+**Audit results (2026-08-16, production).**
+
+| Check | Result |
+|-------|--------|
+| `npm run build` production build | PASS (exit 0) |
+| Production endpoints: `/`, `/login`, `/account/forgot-password` | PASS (200) |
+| Production `/auth/callback` with no params | PASS (307 to expired) |
+| Production signup → onboarding | PASS |
+| `3ffa320` confirmed live in production (banner reproduced there) | PASS |
+| After fix: rapid resubmit shows success UI, 429 still logged | PASS |
 
 **Temp test data:** created and cleaned up. Temp account
 `mathstep-pwreset-test-20260804@agentmail.to` (name `PwResetErrTest20260816`, auth id

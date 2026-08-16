@@ -63,10 +63,15 @@ export async function signOut() {
 // Anything else (user_not_found, user_banned, email_not_confirmed, or any code
 // added by a future Supabase release) stays silent, so this page can never be
 // used to test which families have a MathStep account.
+// `over_email_send_rate_limit` must never be added here. Audit 2026-08-16 tested
+// it against the live project: a real account 429s on a second request inside
+// 60s, while an address with no account returns 200 every time. Reporting it
+// therefore answers "does this account exist?". It also has nothing to report,
+// because that cooldown only fires when a reset email went out seconds earlier,
+// which makes "Check your inbox" the truthful response.
 const SEND_INFRASTRUCTURE_ERROR_CODES = new Set([
   'unexpected_failure',
   'request_timeout',
-  'over_email_send_rate_limit',
   'over_request_rate_limit',
   'email_address_not_authorized',
 ])
