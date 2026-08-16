@@ -6,7 +6,9 @@
 
 ## Current Status
 
-**Phase:** Levels 14.2 Exponents + 15.1 Expanding Brackets (2026-08-04). Joaquin had run out of assignments — he was sitting on Level 14.1 with **10 consecutive passes** (3 required) because 14.1 was the last row in `levels`, so there was nothing to advance into and he had been re-doing the same level since late June. Added two new curriculum levels, each with 5 problem types. 14.2 Exponents: evaluate a power, multiply/divide powers of the same base, power of a power, and the zero/first index — every answer is a plain integer on the numeric keypad. 15.1 Expanding Brackets: expand a single bracket, expand with subtraction, expand with a negative multiplier, expand and simplify, and factorise back out by the HCF — every answer is an algebraic expression on `inputMode="text"`. `levels` rows inserted (id=28, id=29); no `gradeAnswer` / `worksheet.ts` / `answerControl.ts` / schema changes. See entry below.
+**Phase:** Password reset cross-device fix (2026-08-16). Reported by a parent: clicking reset password gave no usable way forward. Root cause was not the UI, which is clear and well built. Recovery emails carry a PKCE token and `/auth/callback` only handled `?code=` via `exchangeCodeForSession`, which needs the code-verifier cookie from the browser that requested the reset. Opening the email on any other device always failed to `?error=expired`, and requesting a new link did the same thing every time, so an affected parent could never get back in. `/auth/callback` now also accepts `token_hash` + `type` and verifies via `verifyOtp`, which is not browser-bound. Paired with a customised Recovery email template. Only `src/app/auth/callback/route.ts` changed. See entry below.
+
+**Phase (preceding):** Levels 14.2 Exponents + 15.1 Expanding Brackets (2026-08-04). Joaquin had run out of assignments — he was sitting on Level 14.1 with **10 consecutive passes** (3 required) because 14.1 was the last row in `levels`, so there was nothing to advance into and he had been re-doing the same level since late June. Added two new curriculum levels, each with 5 problem types. 14.2 Exponents: evaluate a power, multiply/divide powers of the same base, power of a power, and the zero/first index — every answer is a plain integer on the numeric keypad. 15.1 Expanding Brackets: expand a single bracket, expand with subtraction, expand with a negative multiplier, expand and simplify, and factorise back out by the HCF — every answer is an algebraic expression on `inputMode="text"`. `levels` rows inserted (id=28, id=29); no `gradeAnswer` / `worksheet.ts` / `answerControl.ts` / schema changes. See entry below.
 
 **Phase (preceding):** Floating Working Area (2026-06-21). Parent feedback: the worksheet drawing scratchpad sat at the page bottom, forcing scroll-down-to-work then scroll-up-to-answer on mobile/tablet. Replaced the inline bottom scratchpad with a fixed bottom-right "Working area" button that opens a drawer (mobile bottom-sheet / desktop bottom-right card) reachable from anywhere on the page. Reuses the existing canvas component unchanged except for two small props. No DB, generation, grading, progression, answer-control, or auth changes. See entry below.
 
@@ -17,6 +19,95 @@
 **Phase (preceding):** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
 
 ---
+
+### Password reset cross-device fix (2026-08-16)
+
+**Trigger:** A parent using MathStep forgot her password, clicked reset, and got no usable
+way forward.
+
+**Investigation.** The in-app pages turned out to be fine: `/account/forgot-password` has a
+heading, instructions, and a "Check your inbox" confirmation, and the expired state has its own
+amber message. Two candidate causes were tested rather than assumed.
+
+1. *Delivery.* Supabase docs state the built-in email service "will refuse to deliver messages
+   to addresses that are not part of the project's team". This turned out **not** to apply to
+   this project: a temp inbox on an unrelated domain received the email in under 10 seconds.
+   Diagnosing from the docs alone would have produced the wrong fix.
+2. *The link.* This was the real cause. `auth.users` showed exactly one account with
+   `recovery_sent_at` set (2026-07-19) whose `last_sign_in_at` was still 2026-06-02, i.e. a
+   reset was requested and the user never got back in.
+
+**Root cause.** Recovery links are PKCE tokens. `exchangeCodeForSession` requires the
+`sb-<ref>-auth-token-code-verifier` cookie written into the browser that requested the reset,
+so the link only works in that same browser. Reproduced against production with a cookie-less
+client:
+
+```
+303  →  https://mathstep.nz/auth/callback?code=…&next=/account/update-password
+307  →  https://mathstep.nz/account/forgot-password?error=expired
+```
+
+while the identical link in the originating browser reached `/account/update-password`. A
+parent who requests on a laptop and opens the email on a phone is therefore locked out
+permanently, and retrying produces the same loop.
+
+**Fix.** `/auth/callback` now accepts Supabase's `token_hash` + `type` and verifies with
+`verifyOtp`, which carries no browser-bound state and works from any device. The `code` path is
+kept so links already in inboxes still resolve. `type` arrives from the URL, so it is matched
+against the six known email OTP types instead of being cast through. Shipped **before** the
+template change so no link could hit a route unable to verify it.
+
+**Dashboard change (required, not in code):** Authentication → Emails → Reset password body is
+now
+`<a href="https://mathstep.nz/auth/callback?token_hash={{ .TokenHash }}&type=recovery&next=/account/update-password">`,
+replacing stock `{{ .ConfirmationURL }}`. This also fixed the copy, which was Supabase's bare
+default ("Follow this link to reset the password for your user") with no expiry note and no
+"ignore this if it wasn't you". Domain hardcoded rather than `{{ .SiteURL }}`. **Reverting this
+template reintroduces the bug.**
+
+**Files modified:** `src/app/auth/callback/route.ts` only (plus these docs). No change to
+`auth.ts`, the forgot-password or update-password pages, schema, or anything outside the reset
+flow, per the request to change nothing else.
+
+### Suite 27 — Password reset end-to-end (2026-08-16)
+
+Run against **production** (mathstep.nz), not local, using a temp account and a real receivable
+inbox.
+
+| Test | Result |
+|------|--------|
+| Request reset via the real `/account/forgot-password` page | PASS |
+| Real email delivered to an external inbox (~10s) | PASS |
+| Email uses `token_hash=…&type=recovery&next=/account/update-password` | PASS |
+| Email copy shows expiry and a "you can ignore this" line | PASS |
+| Browser cookies cleared to 0, verified via `context.cookies()` | PASS |
+| Cold device (0 cookies) opens emailed link → `/account/update-password` | PASS |
+| Page renders "Set a new password" with 2 password fields | PASS |
+| Submit new password → `/login?reset=1` with "Password updated" banner | PASS |
+| Sign in with the new password from a cold browser → authenticated | PASS |
+| **Before the fix**, same cookie-less link → `?error=expired` | REPRODUCED |
+| Reusing an already-consumed token → `?error=expired` (single-use holds) | PASS |
+| Garbage `token_hash` → `?error=expired` | PASS |
+| `type=evil` rejected by the allowlist → `?error=expired` | PASS |
+| Open-redirect attempt `next=//evil.example.com` → not followed | PASS |
+| `/auth/callback` with no params → `?error=expired` | PASS |
+| Expired page shows "That reset link has expired. Enter your email to send a new one." | PASS |
+| `npx tsc --noEmit` | PASS |
+| `npx eslint` on the changed file | PASS |
+
+**Temp test data: created and cleaned up.**
+- Temp parent: `mathstep-pwreset-test-20260804@agentmail.to` (auth user `c25aa405-…`), created
+  directly via the admin API so no student or session rows were ever generated.
+- Deleted via admin API (HTTP 200). Re-queried after: temp auth users 0, temp profiles 0,
+  students matching `%test%` 0, total users back to 10.
+- Outstanding: the temp receiving inbox `mathstep-pwreset-test-20260804@agentmail.to` could not
+  be deleted, blocked by the standing `email-guard.ps1` policy ("Quentin deletes mail himself").
+  Left for manual removal.
+
+**Known limitation, deliberately not changed:** `requestPasswordReset` swallows Supabase errors
+and always returns `{ sent: true }`, so a genuine send failure is indistinguishable from success
+in the UI. That is intentional anti-enumeration behaviour and was not the cause here, but it is
+why this went unnoticed for roughly a month.
 
 ### Levels 14.2 Exponents + 15.1 Expanding Brackets (2026-08-04)
 
