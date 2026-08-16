@@ -35,6 +35,19 @@ export default function ForgotPasswordForm({ expired = false }: { expired?: bool
                 If an account exists for that email, a reset link has been sent. Please check your
                 inbox (and spam folder).
               </p>
+              {/* Deliberately does not confirm whether the address matched an account — that
+                  would let anyone test which families have a MathStep account. This points a
+                  parent who used a different address at the next step instead. */}
+              <p className="text-[#4a6b4e]">
+                Nothing after a few minutes? You may have signed up with a different email
+                address.
+              </p>
+              <a
+                href="/account/forgot-password"
+                className="rounded-xl border border-[#bae0bd] bg-white px-4 py-3 text-center text-sm font-medium text-[#2d6a35] hover:bg-[#f2faf3] transition-colors"
+              >
+                Try another email address
+              </a>
             </div>
           ) : (
             <form action={action} className="flex flex-col gap-4">
