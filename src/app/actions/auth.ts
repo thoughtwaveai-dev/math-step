@@ -58,19 +58,49 @@ export async function signOut() {
   redirect('/login')
 }
 
+// Supabase Auth error codes that mean the send failed for a reason unrelated to
+// which account was asked for. Only these get reported back to the parent.
+// Anything else (user_not_found, user_banned, email_not_confirmed, or any code
+// added by a future Supabase release) stays silent, so this page can never be
+// used to test which families have a MathStep account.
+const SEND_INFRASTRUCTURE_ERROR_CODES = new Set([
+  'unexpected_failure',
+  'request_timeout',
+  'over_email_send_rate_limit',
+  'over_request_rate_limit',
+  'email_address_not_authorized',
+])
+
+const SEND_FAILED_MESSAGE = 'Something went wrong on our end. Please try again in a few minutes.'
+
+function isSendInfrastructureFailure(error: { code?: string; status?: number }): boolean {
+  // An error raised before a response came back has neither code nor status
+  // (or status 0), which means the request never reached Supabase.
+  if (!error.code) return !error.status || error.status >= 500
+  return SEND_INFRASTRUCTURE_ERROR_CODES.has(error.code)
+}
+
 export async function requestPasswordReset(
-  _prevState: { sent: boolean } | null,
+  _prevState: { sent: boolean; error?: string } | null,
   formData: FormData
-): Promise<{ sent: boolean }> {
+): Promise<{ sent: boolean; error?: string }> {
   const email = ((formData.get('email') as string) ?? '').trim()
   const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://mathstep.nz').replace(/\/$/, '')
   const redirectTo = `${appUrl}/auth/callback?next=/account/update-password`
 
-  if (email) {
-    const supabase = await createClient()
-    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
-    if (error) {
-      console.error('[requestPasswordReset] supabase error', error.message)
+  if (!email) return { sent: true }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
+
+  if (error) {
+    // Flat string, not an object: the dev logger serialises extra args to `{}`.
+    console.error(
+      `[requestPasswordReset] supabase error code=${error.code ?? 'none'} ` +
+        `status=${error.status ?? 'none'} message=${error.message}`
+    )
+    if (isSendInfrastructureFailure(error)) {
+      return { sent: false, error: SEND_FAILED_MESSAGE }
     }
   }
 

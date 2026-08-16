@@ -6,7 +6,9 @@
 
 ## Current Status
 
-**Phase:** Password reset cross-device fix (2026-08-16). Reported by a parent: clicking reset password gave no usable way forward. Root cause was not the UI, which is clear and well built. Recovery emails carry a PKCE token and `/auth/callback` only handled `?code=` via `exchangeCodeForSession`, which needs the code-verifier cookie from the browser that requested the reset. Opening the email on any other device always failed to `?error=expired`, and requesting a new link did the same thing every time, so an affected parent could never get back in. `/auth/callback` now also accepts `token_hash` + `type` and verifies via `verifyOtp`, which is not browser-bound. Paired with a customised Recovery email template. Only `src/app/auth/callback/route.ts` changed. See entry below.
+**Phase:** Password reset send-failure visibility (2026-08-16). Follow-up to the cross-device fix below. `requestPasswordReset` caught every Supabase error, wrote it to `console.error`, and always returned `{ sent: true }`, so a genuinely failed send looked exactly like a successful one. That is why the cross-device bug went unnoticed for roughly a month. The always-succeed behaviour was deliberate anti-enumeration design, so the fix keeps it as the default and only reports failures whose cause is provably unrelated to the account asked for, via a closed allowlist of Supabase error codes. Only `src/app/actions/auth.ts` and `ForgotPasswordForm.tsx` changed. See entry below.
+
+**Phase (preceding):** Password reset cross-device fix (2026-08-16). Reported by a parent: clicking reset password gave no usable way forward. Root cause was not the UI, which is clear and well built. Recovery emails carry a PKCE token and `/auth/callback` only handled `?code=` via `exchangeCodeForSession`, which needs the code-verifier cookie from the browser that requested the reset. Opening the email on any other device always failed to `?error=expired`, and requesting a new link did the same thing every time, so an affected parent could never get back in. `/auth/callback` now also accepts `token_hash` + `type` and verifies via `verifyOtp`, which is not browser-bound. Paired with a customised Recovery email template. Only `src/app/auth/callback/route.ts` changed. See entry below.
 
 **Phase (preceding):** Levels 14.2 Exponents + 15.1 Expanding Brackets (2026-08-04). Joaquin had run out of assignments — he was sitting on Level 14.1 with **10 consecutive passes** (3 required) because 14.1 was the last row in `levels`, so there was nothing to advance into and he had been re-doing the same level since late June. Added two new curriculum levels, each with 5 problem types. 14.2 Exponents: evaluate a power, multiply/divide powers of the same base, power of a power, and the zero/first index — every answer is a plain integer on the numeric keypad. 15.1 Expanding Brackets: expand a single bracket, expand with subtraction, expand with a negative multiplier, expand and simplify, and factorise back out by the HCF — every answer is an algebraic expression on `inputMode="text"`. `levels` rows inserted (id=28, id=29); no `gradeAnswer` / `worksheet.ts` / `answerControl.ts` / schema changes. See entry below.
 
@@ -17,6 +19,73 @@
 **Phase (preceding):** Level 13.2 Systems of Equations (2026-06-16). Students finishing 13.1 were hitting Coming Soon at 13.2. New curriculum level adds 5 problem types: solve by substitution, solve by elimination, find a missing value, check a solution (yes/no), and a simple sum/difference word problem. Integer-only, text-only (no graphs in v1). `levels` row inserted (id=26); no `gradeAnswer`/`worksheet.ts`/schema changes. Reuses the shared answer-control system (coordinate_pair + yes_no) so worksheet, targeted practice, and self-correction wire up automatically.
 
 **Phase (preceding):** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
+
+---
+
+### Password reset send-failure visibility (2026-08-16)
+
+**Trigger:** Deferred follow-up agreed during the cross-device fix. `requestPasswordReset`
+swallowed every Supabase error, so "Check your inbox" was shown even when nothing was sent.
+That silence is why the cross-device bug survived roughly a month without being reported as
+a send failure.
+
+**The constraint.** Always returning success is deliberate: it stops anyone using the page to
+test which families have a MathStep account. So the fix could not become "tell the user whether
+the account exists". Only failures whose cause is independent of *which* account was asked for
+may be reported.
+
+**Approach, a closed allowlist rather than a denylist.** `SEND_INFRASTRUCTURE_ERROR_CODES` in
+`src/app/actions/auth.ts` lists the five Supabase Auth codes that mean the send failed for a
+system reason: `unexpected_failure`, `request_timeout`, `over_email_send_rate_limit`,
+`over_request_rate_limit`, `email_address_not_authorized`. Anything else stays silent, including
+`user_not_found`, `user_banned`, `email_not_confirmed`, and any code a future Supabase release
+adds. An allowlist fails safe; a denylist would leak the first time a new account-specific code
+shipped. Errors raised before a response comes back carry neither code nor status (confirmed in
+`@supabase/auth-js` `errors.d.ts`), so a missing code plus a missing or `0` status is treated as
+an outage and reported; a present code is decided by the allowlist alone.
+
+**One message for every reported failure:** *"Something went wrong on our end. Please try again
+in a few minutes."* Per-cause wording would sharpen the very oracle the design is protecting, and
+"a few minutes" covers the rate-limit case without naming it. The banner renders inside the form
+branch, in the same slot as the amber expired notice, so the form stays visible for a retry.
+Every error is still logged with its code and status, including the silent ones.
+
+**Return shape** widened from `{ sent: boolean }` to `{ sent: boolean; error?: string }`.
+`state?.sent` already routed a falsy `sent` to the form branch, so the success branch is
+untouched.
+
+**Cron routes checked, no change needed.** `daily-reminders` and `weekly-review` do not have this
+pattern: both count send failures, return them in the response JSON as `errorDetails`, and skip
+the dedup write so the next run retries. (Both do return HTTP 200 even when `errors > 0`, so a
+partly failed run reads as green in Vercel's cron dashboard. Left alone as out of scope, flagged
+as an optional follow-up.)
+
+**Testing (Playwright + live Supabase, 2026-08-16).**
+
+| Test | Result |
+|------|--------|
+| Silent path: submit an address with no account → normal "Check your inbox" UI | PASS |
+| Silent path: no error reached the app at all (Supabase enumeration protection already on) | PASS |
+| Happy path: real account → success UI, email delivered to temp inbox at 00:54:07 | PASS |
+| Surfaced path: resubmit within the cooldown → red banner, form still available | PASS |
+| Surfaced path logged `code=over_email_send_rate_limit status=429` | PASS |
+| Ground truth via direct `POST /auth/v1/recover`: 1st call HTTP 200, 2nd HTTP 429 `over_email_send_rate_limit` | PASS |
+| `npx tsc --noEmit` clean; `eslint` clean on both touched files | PASS |
+
+Verifying the raw endpoint mattered: the Next dev logger serialised the original object argument
+to `{}`, which hid the code and status. The log line was changed to a flat interpolated string so
+the cause survives any serialiser.
+
+**Residual tradeoff (accepted).** `over_email_send_rate_limit` is partly keyed to the address, so
+in theory repeated probing of one address could distinguish an existing account from an absent
+one. In practice Supabase also applies a project-wide email limit that returns the same code, and
+the task brief explicitly listed rate limit as an infrastructure failure worth surfacing. Noted
+rather than silently resolved.
+
+**Temp test data:** created and cleaned up. Temp account
+`mathstep-pwreset-test-20260804@agentmail.to` (name `PwResetErrTest20260816`, auth id
+`8bdf0d92-6302-4bf1-b585-d5b5ee0d59b4`), 1 profile row, 0 students. Profile deleted then auth user
+deleted; re-queried and confirmed 0 auth users, 0 profiles, 0 students remaining.
 
 ---
 

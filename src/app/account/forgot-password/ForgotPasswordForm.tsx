@@ -51,6 +51,12 @@ export default function ForgotPasswordForm({ expired = false }: { expired?: bool
             </div>
           ) : (
             <form action={action} className="flex flex-col gap-4">
+              {state?.error && (
+                <div className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-2.5 text-sm text-red-700">
+                  {state.error}
+                </div>
+              )}
+
               {expired && (
                 <div className="rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-sm text-amber-800">
                   That reset link has expired. Enter your email to send a new one.
