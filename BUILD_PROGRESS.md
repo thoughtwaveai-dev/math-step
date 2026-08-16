@@ -107,6 +107,17 @@ because genuine SMTP failures surface as `unexpected_failure`.
 | Production signup → onboarding | PASS |
 | `3ffa320` confirmed live in production (banner reproduced there) | PASS |
 | After fix: rapid resubmit shows success UI, 429 still logged | PASS |
+| `7d70146` confirmed live in production (banner gone, success UI on both submits) | PASS |
+| Production full journey: token_hash link (cold, no cookies) → `/account/update-password` | PASS |
+| Production full journey: set new password → `/login?reset=1` → UI sign-in succeeds | PASS |
+| New password accepted (HTTP 200) and old password rejected (HTTP 400) | PASS |
+| Callback negatives: reused token, garbage token, `type=evil`, `next=//evil.example.com`, no params | PASS (all → `?error=expired`) |
+
+Enumeration parity after the fix: an address with an account and an address without one now
+produce byte-identical UI on every submit, including repeat submits inside the cooldown.
+
+Pre-existing observation, not touched: `auth.users` = 10 but `profiles` = 9, so one auth user has
+no profile row. Predates this work and is unrelated to it.
 
 **Temp test data:** created and cleaned up. Temp account
 `mathstep-pwreset-test-20260804@agentmail.to` (name `PwResetErrTest20260816`, auth id
