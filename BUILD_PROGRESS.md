@@ -6,7 +6,9 @@
 
 ## Current Status
 
-**Phase:** Curriculum ceiling signal (2026-08-16). Reaching the end of the curriculum was silent: `submitWorksheet` looked for the next `levels` row, found none, and did nothing, so the student kept re-passing the same level indefinitely. That is how Joaquin reached 10 consecutive passes on 14.1 against 3 required. "Coming Soon" never covered this, because it only fires for a level row with no generator, not for a final level that works. Three surfaces now report it off one shared condition: a banner on the student's results page, an amber notice on the parent dashboard, and a line in the weekly review email. Fires on *reaching* the last level, not on clearing it, so there is lead time to add the next one. No schema change, no new query, no new cron. See entry below.
+**Phase:** Level 15.2 Equations with Brackets (2026-08-17). Joaquin was on 15.1 with nothing after it, which the ceiling work built the day before had just started warning about. New curriculum level adds 5 problem types: solve `a(x + b) = c`, solve with subtraction inside, solve with a negative outside the bracket, brackets on both sides, and expand-then-collect before solving. Every answer is a single positive integer, so it rides the existing signed-integer path with no `gradeAnswer` change and stays on the numeric keypad. `levels` row inserted (id=30) and the `levels_id_seq` sequence resynced, since earlier rows were added with explicit ids. See entry below.
+
+**Phase (preceding):** Curriculum ceiling signal (2026-08-16). Reaching the end of the curriculum was silent: `submitWorksheet` looked for the next `levels` row, found none, and did nothing, so the student kept re-passing the same level indefinitely. That is how Joaquin reached 10 consecutive passes on 14.1 against 3 required. "Coming Soon" never covered this, because it only fires for a level row with no generator, not for a final level that works. Three surfaces now report it off one shared condition: a banner on the student's results page, an amber notice on the parent dashboard, and a line in the weekly review email. Fires on *reaching* the last level, not on clearing it, so there is lead time to add the next one. No schema change, no new query, no new cron. See entry below.
 
 **Phase (preceding):** Password reset send-failure visibility (2026-08-16). Follow-up to the cross-device fix below. `requestPasswordReset` caught every Supabase error, wrote it to `console.error`, and always returned `{ sent: true }`, so a genuinely failed send looked exactly like a successful one. That is why the cross-device bug went unnoticed for roughly a month. The always-succeed behaviour was deliberate anti-enumeration design, so the fix keeps it as the default and only reports failures whose cause is provably unrelated to the account asked for, via a closed allowlist of Supabase error codes. Only `src/app/actions/auth.ts` and `ForgotPasswordForm.tsx` changed. See entry below.
 
@@ -21,6 +23,63 @@
 **Phase (preceding):** Level 13.2 Systems of Equations (2026-06-16). Students finishing 13.1 were hitting Coming Soon at 13.2. New curriculum level adds 5 problem types: solve by substitution, solve by elimination, find a missing value, check a solution (yes/no), and a simple sum/difference word problem. Integer-only, text-only (no graphs in v1). `levels` row inserted (id=26); no `gradeAnswer`/`worksheet.ts`/schema changes. Reuses the shared answer-control system (coordinate_pair + yes_no) so worksheet, targeted practice, and self-correction wire up automatically.
 
 **Phase (preceding):** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
+
+---
+
+### Level 15.2 Equations with Brackets (2026-08-17)
+
+**Trigger:** Joaquin sat on 15.1 as the final level. The ceiling work from the day before was
+already warning about it on the dashboard, which is exactly what it was built to do.
+
+**Why this topic over expanding double brackets.** Double brackets is the other obvious next step,
+but its answers are quadratics like `x² + 8x + 15`. That needs either caret typing, a superscript
+the student cannot type, or a new structured answer control, all of which are worse on a tablet
+and none of which the grader handles today. Solving equations with brackets is the same
+curriculum step forward (15.1 taught the tool, 15.2 uses it), and every answer is a plain integer,
+so it rides the existing signed-integer path untouched. Double brackets stays available as a
+future 16.1 if a quadratic answer control is ever built.
+
+**Five types** (`src/lib/math/generators/bracket-equations.ts`, id prefix `beq152_`):
+`bracket_equation_simple` `a(x + b) = c`, `bracket_equation_subtraction` `a(x - b) = c`,
+`bracket_equation_negative` `-a(x + b) = c` with both sides negative,
+`bracket_equation_both_sides` `a(x + b) = c(x + d)`, and `bracket_equation_expand_collect`
+`a(x + b) + cx = d`.
+
+**Design decisions.** Each maker picks the **solution first** and derives the constants from it, so
+whole-number answers are guaranteed by construction rather than by generate-and-filter. The
+both-sides type is the exception: `b` is derived from the other four values and the maker retries
+up to 60 times until it lands on a usable integer, with a fixed fallback so it can never return
+nothing. Solutions are always positive in v1, because the skill being trained is bracket
+manipulation and negative arithmetic is already Level 7.1. That keeps `inputMode` on `numeric`,
+which is safe here since no letters or brackets are typed (the stylus bug only affects algebraic
+answers). Every prompt ends with "Answer with just the number." because the grader would reject
+`x = 5`.
+
+**Testing (2026-08-17).**
+
+| Test | Result |
+|------|--------|
+| `scripts/level-15-2-smoke.ts`: 300 seeds x 20 problems, 72,307 checks | PASS (0 failures) |
+| Every prompt independently re-solved from its own text and matched against the stated answer | PASS |
+| Every answer a bare positive integer; grader accepts it and rejects answer+1 | PASS |
+| Even type distribution (1200 each across 5 types) | PASS |
+| No duplicate prompts within a worksheet | PASS |
+| Wiring: numeric input mode, `e.g. 6` placeholder, parent label, router serves 15/2 | PASS |
+| Existing `scripts/answer-control-gate.ts` still green | PASS (494 passed) |
+| Ceiling notice disappears for a 15.1 student now that 15.2 exists | PASS |
+| Passing 15.1 advances into 15.2 (`advanced=1&nl=15&ns=2&nt=Equations+with+Brackets`) | PASS |
+| 15.2 worksheet renders 20 problems, lesson card shows, no "Coming Soon" | PASS |
+| Review interleaving works: 16 new 15.2 problems + 4 review from 15.1, mixed input modes | PASS |
+| Full 15.2 worksheet submitted: 20/20, 100%, passed, 1/3 passes recorded on level 30 | PASS |
+| `tsc --noEmit`, `eslint` on all touched files | PASS |
+
+**Temp test data:** created and cleaned up. Temp parent
+`mathstep-level152-test-20260817@agentmail.to` (auth id `ca940b29-0385-4674-803e-0693a458e430`)
+and student `L152TestKid` (`5f41fa5a-494b-4c76-adb7-e2049b7d9270`), 2 sessions, 40 problems,
+streak and level-progress rows. Students deleted first to exercise FK cascades, then profile, then
+auth user. Re-queried: 0 leftovers and 0 orphaned problems, streaks, or progress rows. Counts back
+to baseline (10 auth users, 8 students, 30 levels). Session count moved 203 to 204 from Joaquin
+completing a real 15.1 worksheet during the session, confirmed as genuine user activity.
 
 ---
 

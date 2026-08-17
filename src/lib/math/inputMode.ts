@@ -66,6 +66,8 @@ export function inputModeForType(type: AnyProblemType): InputMode {
     type === 'expand_and_simplify' ||
     type === 'factorise_single_bracket'
   ) return 'text'
+  // Level 15.2 answers are the solved value of x, always a plain positive
+  // integer, so the numeric keypad is safe: no letters or brackets are typed.
   // Level 14.2 answers are all plain non-negative integers → numeric keypad.
   return 'numeric'
 }
@@ -194,6 +196,14 @@ export function placeholderForType(type: AnyProblemType): string {
     case 'factorise_single_bracket':
       return 'e.g. 4(2x + 7)'
 
+    // Level 15.2 equations with brackets: the solved value of x
+    case 'bracket_equation_simple':
+    case 'bracket_equation_subtraction':
+    case 'bracket_equation_negative':
+    case 'bracket_equation_both_sides':
+    case 'bracket_equation_expand_collect':
+      return 'e.g. 6'
+
     // sim_eq, read_point_coordinates, system_* coordinate/yes-no types (structured
     // controls), match_equation_to_graph (MC) — text input never shown
     default:
@@ -277,5 +287,10 @@ export function problemTypeLabel(type: AnyProblemType): string {
     case 'expand_negative_multiplier': return 'Expanding with a negative'
     case 'expand_and_simplify': return 'Expanding and simplifying'
     case 'factorise_single_bracket': return 'Factorising into brackets'
+    case 'bracket_equation_simple': return 'Equations with brackets'
+    case 'bracket_equation_subtraction': return 'Equations with brackets'
+    case 'bracket_equation_negative': return 'Equations with a negative bracket'
+    case 'bracket_equation_both_sides': return 'Brackets on both sides'
+    case 'bracket_equation_expand_collect': return 'Expanding then solving'
   }
 }

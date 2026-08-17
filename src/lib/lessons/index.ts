@@ -433,6 +433,21 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Write the x term first, then the number — like 3x + 12, not 12 + 3x. To check a factorised answer, expand it back out: if you get the original expression, you factorised correctly.',
   },
+  '15/2': {
+    title: 'Equations with Brackets',
+    explanation: 'This is expanding put to work. When an equation has brackets, expand them first, then solve the way you already know. For 3(x + 4) = 27, expand the left side to 3x + 12 = 27, take 12 off both sides to get 3x = 15, then divide by 3 to get x = 5. A negative outside the bracket flips both signs inside, so -2(x + 5) = -18 becomes -2x - 10 = -18, then -2x = -8, and dividing by -2 gives x = 4. When brackets appear on both sides, expand both first, then gather the x terms on one side and the numbers on the other. Some questions have an extra x term outside, like 3(x + 2) + 4x = 34, so expand the bracket and combine the x terms before you solve.',
+    example: {
+      problem: 'Solve for x: 3(x + 4) = 27',
+      steps: [
+        'Expand the bracket: 3x + 12 = 27',
+        'Subtract 12 from both sides: 3x = 15',
+        'Divide both sides by 3: x = 5',
+        'Check it: 3(5 + 4) = 3 × 9 = 27 ✓',
+      ],
+      answer: '5',
+    },
+    tip: 'Answer with just the number, so 5 and not x = 5. Always expand before you move anything across, and check your answer by putting it back into the original equation: if both sides match, you are right.',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

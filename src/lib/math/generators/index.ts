@@ -19,6 +19,7 @@ import { generateLinearEquationsGraphsProblems } from './linear-equations-graphs
 import { generateSystemsOfEquationsProblems } from './systems-of-equations'
 import { generateExponentProblems } from './exponents'
 import { generateExpandingBracketsProblems } from './expanding-brackets'
+import { generateBracketEquationProblems } from './bracket-equations'
 
 export type { MathProblem, ProblemType } from './factorization'
 export type { AdditionProblem, AdditionProblemType } from './addition'
@@ -50,6 +51,10 @@ export type {
   ExpandingBracketsProblem,
   ExpandingBracketsProblemType,
 } from './expanding-brackets'
+export type {
+  BracketEquationProblem,
+  BracketEquationProblemType,
+} from './bracket-equations'
 
 // Unified problem type covering all generators
 export type AnyProblemType =
@@ -74,6 +79,7 @@ export type AnyProblemType =
   | import('./systems-of-equations').SystemsOfEquationsProblemType
   | import('./exponents').ExponentProblemType
   | import('./expanding-brackets').ExpandingBracketsProblemType
+  | import('./bracket-equations').BracketEquationProblemType
 
 export function generateProblems(levelNumber: number, sublevelNumber: number, count: number) {
   if (levelNumber === 1 && sublevelNumber === 1) {
@@ -162,6 +168,9 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 15 && sublevelNumber === 1) {
     return generateExpandingBracketsProblems(count)
+  }
+  if (levelNumber === 15 && sublevelNumber === 2) {
+    return generateBracketEquationProblems(count)
   }
   return []
 }

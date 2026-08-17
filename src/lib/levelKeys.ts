@@ -8,5 +8,5 @@ export const SUPPORTED_LEVEL_KEYS: [number, number][] = [
   [12, 1], [12, 2],
   [13, 1], [13, 2],
   [14, 1], [14, 2],
-  [15, 1],
+  [15, 1], [15, 2],
 ]
