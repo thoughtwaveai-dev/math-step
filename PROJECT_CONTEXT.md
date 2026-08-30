@@ -688,6 +688,36 @@ email per parent account — no new login, no new student ownership changes.
   confirmed or unsubscribed; email body does not mention the cc recipient;
   daily reminders not sent to cc address.
 
+## Streak date handling (2026-08-30)
+
+`streaks.last_session_date` and the streak arithmetic are **NZ-local
+(Pacific/Auckland)**, matching the rule already stated for the Daily Habit Loop.
+
+The streak update used to derive its day key with
+`new Date().toISOString().split('T')[0]`, which is UTC. UTC's date rolls over at
+NZ **noon**, so any session completed between NZ midnight and NZ noon was filed
+under the *previous* day. (Note the direction: it is the NZ **morning** that was
+mis-stamped as yesterday, not the afternoon as first assumed.) Mixed
+morning/afternoon practice could then either stall a streak that was never
+broken, or increment it twice for a single real day.
+
+The arithmetic now lives in `src/lib/streak.ts` as the pure, time-injectable
+`computeStreakUpdate(existing, passed, now = new Date())`, which returns the
+whole `streaks` update object. It was extracted from `submitWorksheet` because
+`worksheet.ts` is a `'use server'` module and may only export async functions,
+so a sync helper could not be exported from it for testing. This is the same
+reason `gradeAnswer` lives in its own file. Behaviour is unchanged apart from
+the day source.
+
+Gate: `scripts/streak-date-gate.ts` (`npx tsx`), 34 assertions covering the
+UTC/NZ boundary at noon, the NZST and NZDT offsets, same-NZ-day repeat sessions,
+gap resets, and month/year rollovers.
+
+**Do not reintroduce `toISOString()` for a date key.** It is still correct for
+timestamp *instants* (`completed_at`, `started_at`, `updated_at`,
+`pin_locked_until`, and the cron 8-day lookback window), which are all stored as
+`timestamptz` and are unaffected.
+
 ## Curriculum ceiling signal (2026-08-16)
 
 Before this, reaching the end of the curriculum was completely silent. `submitWorksheet`'s

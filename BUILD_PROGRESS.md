@@ -6,7 +6,9 @@
 
 ## Current Status
 
-**Phase:** Level 15.2 Equations with Brackets (2026-08-17). Joaquin was on 15.1 with nothing after it, which the ceiling work built the day before had just started warning about. New curriculum level adds 5 problem types: solve `a(x + b) = c`, solve with subtraction inside, solve with a negative outside the bracket, brackets on both sides, and expand-then-collect before solving. Every answer is a single positive integer, so it rides the existing signed-integer path with no `gradeAnswer` change and stays on the numeric keypad. `levels` row inserted (id=30) and the `levels_id_seq` sequence resynced, since earlier rows were added with explicit ids. See entry below.
+**Phase:** Streak date handling fix (2026-08-30). The streak update derived "today" with `new Date().toISOString().split('T')[0]`, which is UTC. UTC's date rolls over at NZ noon, so sessions completed between NZ midnight and NZ noon were filed under the previous day. Mixed morning/afternoon practice could stall a streak that was never broken, or increment it twice for one real day. Now uses the existing `nzDateKey` / `shiftDateKey` helpers, with the arithmetic extracted to `src/lib/streak.ts` so it can be tested at a fixed instant. Existing data audited read-only: 6 of 8 streak rows clean, 2 affected. No data changed, awaiting a decision. See entry below.
+
+**Phase (preceding):** Level 15.2 Equations with Brackets (2026-08-17). Joaquin was on 15.1 with nothing after it, which the ceiling work built the day before had just started warning about. New curriculum level adds 5 problem types: solve `a(x + b) = c`, solve with subtraction inside, solve with a negative outside the bracket, brackets on both sides, and expand-then-collect before solving. Every answer is a single positive integer, so it rides the existing signed-integer path with no `gradeAnswer` change and stays on the numeric keypad. `levels` row inserted (id=30) and the `levels_id_seq` sequence resynced, since earlier rows were added with explicit ids. See entry below.
 
 **Phase (preceding):** Curriculum ceiling signal (2026-08-16). Reaching the end of the curriculum was silent: `submitWorksheet` looked for the next `levels` row, found none, and did nothing, so the student kept re-passing the same level indefinitely. That is how Joaquin reached 10 consecutive passes on 14.1 against 3 required. "Coming Soon" never covered this, because it only fires for a level row with no generator, not for a final level that works. Three surfaces now report it off one shared condition: a banner on the student's results page, an amber notice on the parent dashboard, and a line in the weekly review email. Fires on *reaching* the last level, not on clearing it, so there is lead time to add the next one. No schema change, no new query, no new cron. See entry below.
 
@@ -23,6 +25,87 @@
 **Phase (preceding):** Level 13.2 Systems of Equations (2026-06-16). Students finishing 13.1 were hitting Coming Soon at 13.2. New curriculum level adds 5 problem types: solve by substitution, solve by elimination, find a missing value, check a solution (yes/no), and a simple sum/difference word problem. Integer-only, text-only (no graphs in v1). `levels` row inserted (id=26); no `gradeAnswer`/`worksheet.ts`/schema changes. Reuses the shared answer-control system (coordinate_pair + yes_no) so worksheet, targeted practice, and self-correction wire up automatically.
 
 **Phase (preceding):** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
+
+---
+
+### Streak date handling fix (2026-08-30)
+
+**The bug.** `submitWorksheet` derived its day key with
+`new Date().toISOString().split('T')[0]`, which is always UTC. Students are in
+New Zealand (UTC+12 in winter, UTC+13 in summer), so UTC's date rolls over at NZ
+midday, not NZ midnight.
+
+**Direction correction.** The brief said an afternoon or evening session gets
+recorded against tomorrow. It is the other way round: NZ is *ahead* of UTC, so
+between NZ midnight and NZ noon the UTC date is still yesterday, and it is the
+**morning** session that was stamped with the previous day. The noon rollover in
+the brief was right; the consequence was inverted. The live data confirms it:
+the one bad date key found is a day **behind** the real NZ day, never ahead.
+
+**Effect, both directions.** With an afternoon session stamping day D and the
+next morning's session also stamping D, `lastDate === today` and the streak
+stalls even though the student practised two days running. With a morning
+session stamping D-1 and that same afternoon stamping D, the streak increments
+twice for one real day.
+
+**The fix.** `today = nzDateKey(new Date())` and `yesterday = shiftDateKey(today, -1)`,
+using the helpers already in `src/lib/habit.ts` that the dashboard HabitCard and
+both cron routes use. Surrounding streak logic is unchanged.
+
+**One structural change, to make it testable.** The arithmetic moved to
+`src/lib/streak.ts` as pure `computeStreakUpdate(existing, passed, now)`.
+`worksheet.ts` is `'use server'` and may only export async functions, so a sync
+helper cannot be exported from it for a test to import. Same reason `gradeAnswer`
+was extracted. The call site is now a single line and the update object is built
+by the helper; behaviour is byte-identical apart from the day source.
+
+**Repo-wide date audit.** Every `toISOString` hit was reviewed, not blanket
+replaced:
+
+| Location | Verdict |
+|---|---|
+| `worksheet.ts:129,141` (old lines) | **Bug, fixed.** Date keys, must be NZ-local |
+| `worksheet.ts:95` `completed_at`, `worksheet/page.tsx:260` `started_at` | Correct. `timestamptz` instants |
+| `worksheet.ts` / `placement.ts` / `students.ts` `updated_at` | Correct. Instants |
+| `pin.ts:192,277` `pin_locked_until` | Correct. Instant |
+| `daily-reminders/route.ts:80` 8-day lookback | Correct. Deliberately a wide UTC window, filtered to NZ days in JS |
+| `habit.ts:33` inside `shiftDateKey` | Correct. Operates on a `Date.UTC(...)` value, so UTC is the intended frame |
+| `format.ts:12,22` | Correct. Already pass `timeZone: 'Pacific/Auckland'` |
+
+`last_session_date` is written in exactly one place, so there was one bug site.
+
+**Testing.** `scripts/streak-date-gate.ts`, 34 assertions, all passing. The three
+cases from the brief plus NZST/NZDT boundaries, consecutive NZ evenings, and
+month/year rollovers. The gate was then run against a reimplementation of the old
+UTC logic to confirm it actually catches the bug rather than merely passing:
+
+| Assertion | Old UTC code |
+|---|---|
+| Session at `2026-08-30T12:30:00Z` stamped with the NZ day | FAILED, stamped `2026-08-30` not `2026-08-31` |
+| That session continues the streak | FAILED, stayed 3 instead of 4 |
+| Second session the same NZ day does not increment again | FAILED, went 3 to 4 within one NZ day |
+| A one day gap resets the streak to 1 | FAILED, reported 8 instead of 1 |
+
+4 of 4 caught. `tsc`, `eslint`, `npm run build` clean; existing
+`answer-control-gate` (494) and `level-15-2-smoke` (72,307) still pass.
+
+**Existing data (audited read-only, nothing changed).** Replayed all 173
+completed sessions in NZ days and compared against the stored rows:
+
+- 6 of 8 streak rows fully clean.
+- `Vilma Tungol`: `last_session_date` stored `2026-04-19`, real NZ day
+  `2026-04-20`. Single practice day, so her streak counters are correct.
+- `Joaquin`: `longest_streak` stored `13`, NZ-correct value `25`. Understated,
+  because the stall case above repeatedly broke runs that were never missed.
+  This also holds back the Best-streak achievement tier (13 sits on the 7 tier;
+  25 would reach 14).
+- No `current_streak` value is wrong, so nothing is misreported today.
+
+Left untouched pending a decision.
+
+**Temp test data: none created.** The whole audit was read-only against
+production via PostgREST with the service role key, and the temporary audit
+script was deleted. No accounts, students, sessions, or rows were created.
 
 ---
 

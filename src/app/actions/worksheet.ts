@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { gradeAnswer } from '@/lib/math/gradeAnswer'
+import { computeStreakUpdate } from '@/lib/streak'
 
 export async function submitWorksheet(
   _prevState: { error: string } | null,
@@ -126,34 +127,12 @@ export async function submitWorksheet(
       .eq('student_id', studentId)
       .maybeSingle()
 
-    const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
-    const lastDate = currentStreak?.last_session_date ?? null
-
-    const prevStreak = currentStreak?.current_streak ?? 0
-    let newStreak = prevStreak
-    if (lastDate === null) {
-      newStreak = 1
-    } else if (lastDate === today) {
-      newStreak = prevStreak
-    } else {
-      const yesterday = new Date()
-      yesterday.setDate(yesterday.getDate() - 1)
-      const yesterdayStr = yesterday.toISOString().split('T')[0]
-      newStreak = lastDate === yesterdayStr ? prevStreak + 1 : 1
-    }
-
-    const prevLongest = currentStreak?.longest_streak ?? 0
-    const points = passed ? 15 : 10
+    // Day boundaries are NZ-local, not UTC. See src/lib/streak.ts.
+    const streakUpdate = computeStreakUpdate(currentStreak ?? null, passed)
 
     const { error: streakErr } = await supabase
       .from('streaks')
-      .update({
-        current_streak: newStreak,
-        longest_streak: Math.max(prevLongest, newStreak),
-        total_sessions: (currentStreak?.total_sessions ?? 0) + 1,
-        total_points: (currentStreak?.total_points ?? 0) + points,
-        last_session_date: today,
-      })
+      .update(streakUpdate)
       .eq('student_id', studentId)
 
     if (streakErr) console.error('Streak update failed:', streakErr.message)
