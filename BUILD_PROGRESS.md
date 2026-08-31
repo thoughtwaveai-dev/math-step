@@ -101,7 +101,19 @@ completed sessions in NZ days and compared against the stored rows:
   25 would reach 14).
 - No `current_streak` value is wrong, so nothing is misreported today.
 
-Left untouched pending a decision.
+**Data correction applied 2026-08-30** (approved after the audit was reported).
+`Joaquin.longest_streak` corrected `13` to `25`, one row, one field. Done with a
+guarded one-off script that aborted unless the stored value was still exactly 13
+and the NZ replay still produced exactly 25, then re-queried to confirm only
+that field moved (`current_streak` 2, `total_sessions` 113, `last_session_date`
+2026-08-30 all unchanged). A follow-up sweep of all 8 rows reports 0
+`longest_streak` mismatches. The script was deleted after use, deliberately not
+kept as a repeatable migration, since it is a one-time repair.
+
+`Vilma Tungol.last_session_date` (`2026-04-19` stored vs `2026-04-20` NZ truth)
+was left as is by decision: she has a single practice day so her counters are
+right, nothing is displayed wrongly, and the value self-corrects the next time
+she practises. It is the one remaining known artefact of the old UTC logic.
 
 **Temp test data: none created.** The whole audit was read-only against
 production via PostgREST with the service role key, and the temporary audit
