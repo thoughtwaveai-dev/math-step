@@ -93,6 +93,43 @@ uses.
 - `npx tsx scripts/level-15-2-smoke.ts` -> `72307 checks, 0 failures` (unchanged)
 - `npx tsc --noEmit` -> clean; `eslint` on touched files -> clean; `npm run build` -> exit 0
 
+**Production end-to-end (temp account, 2026-09-08).** Deployed first, waited for the new build to
+serve, then inserted the `levels` row (id=31, topic "Expanding Double Brackets",
+speed_target_seconds 960, accuracy_threshold 90, problems_per_session 20,
+consecutive_passes_required 3). That order matters this time: Joaquin was sitting on 15.2 with 9
+banked passes, so a `levels` row live ahead of the code would have advanced him straight into a
+"Coming Soon" screen.
+
+Verified on `https://mathstep.nz` with a temp parent and student:
+- `/play` reads the new row: Level 16, Sublevel 1, "Expanding Double Brackets", 16m target, 90%,
+  20 problems, 0/3 passes
+- Worksheet renders 20 problems, all five types, each with the quadratic control and the correct
+  parent-facing label, plus the new lesson card
+- The control built every canonical string correctly through its own React handlers, including
+  negative middle terms and negative constants (for example `x² - 11x + 18`, `x² + 3x - 28`)
+- Submitted 19 correct and 1 deliberately wrong: scored 19/20, 95%, passed, mastery 1 of 3
+- Results page renders the superscript correctly in both the student answer and the correct answer
+- Self-correction on the wrong one served the same quadratic control and returned "Corrected"
+- Database after the run: session on `level_id` 31, 20 `problems` rows with `problem_type` set
+  (4 of each type), 1 `self_corrected`, `student_level_progress` 1 of 3, streak incremented with
+  `last_session_date` on the NZ day
+- The browser pane would not paint during this run, so the control was driven through real DOM
+  input and click events rather than pixel clicks. The React `onChange` path and the hidden input
+  are the same either way; raw pointer hit-testing on the sign toggles was not exercised.
+
+**Pending, needs the Supabase SQL editor.** Row 31 was inserted with an explicit id (PostgREST
+cannot run raw SQL and the MathStep Supabase MCP is not connected), so the sequence still points at
+31 and the next id-less insert would collide:
+```sql
+select setval('public.levels_id_seq', (select max(id) from public.levels));
+```
+
+**Temp test data: created and cleaned up.** Parent `level161-test-20260908@example.com`, student
+`DoubleBracketTestKid` (`8b1b77ee-aa39-4300-b509-5d4b29c197ab`). Deleted 20 `problems`, 1
+`sessions`, 1 `student_level_progress`, 1 `streaks`, the student, the profile, and the auth user.
+Re-queried: all zero, auth user 404. Student and streak totals back to 8 and 8, matching the
+pre-test state.
+
 ### Streak date handling fix (2026-08-30)
 
 **The bug.** `submitWorksheet` derived its day key with
