@@ -448,6 +448,23 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Answer with just the number, so 5 and not x = 5. Always expand before you move anything across, and check your answer by putting it back into the original equation: if both sides match, you are right.',
   },
+  '16/1': {
+    title: 'Expanding Double Brackets',
+    explanation: 'Two brackets multiplied together means every term in the first bracket multiplies every term in the second. That is four small multiplications, and then you collect the two x terms into one. For (x + 3)(x + 5) you get x², 5x, 3x and 15, and the middle terms join up to make 8x. Watch the signs: a minus inside a bracket travels with its number, so in (x + 7)(x - 2) the second bracket contributes -2, giving x² + 5x - 14. When both brackets are negative, the two minus signs multiply to a plus, so (x - 4)(x - 6) gives x² - 10x + 24. A squared bracket like (x + 5)² just means (x + 5)(x + 5), so it expands to x² + 10x + 25.',
+    example: {
+      problem: 'Expand and simplify: (x + 3)(x + 5)',
+      steps: [
+        'x times x = x²',
+        'x times 5 = 5x',
+        '3 times x = 3x',
+        '3 times 5 = 15',
+        'Collect the two x terms: 5x + 3x = 8x',
+        '(x + 3)(x + 5) = x² + 8x + 15',
+      ],
+      answer: 'x² + 8x + 15',
+    },
+    tip: 'The biggest trap is squaring. (x + 5)² is NOT x² + 25, because you still have to do all four multiplications. Write it out as (x + 5)(x + 5) first and you will not forget the middle term. To check any answer, put x = 1 into the brackets and into your expansion: both should give the same number.',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

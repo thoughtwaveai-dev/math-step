@@ -66,6 +66,16 @@ export function inputModeForType(type: AnyProblemType): InputMode {
     type === 'expand_and_simplify' ||
     type === 'factorise_single_bracket'
   ) return 'text'
+  // Level 16.1: every answer is a quadratic expression containing 'x'. Keep them
+  // on 'text' to avoid the mobile stylus "x -> ." bug. These types ride the
+  // quadratic control, so the text input is a fallback only.
+  if (
+    type === 'expand_double_positive' ||
+    type === 'expand_double_mixed' ||
+    type === 'expand_double_negative' ||
+    type === 'expand_double_square_positive' ||
+    type === 'expand_double_square_negative'
+  ) return 'text'
   // Level 15.2 answers are the solved value of x, always a plain positive
   // integer, so the numeric keypad is safe: no letters or brackets are typed.
   // Level 14.2 answers are all plain non-negative integers → numeric keypad.
@@ -204,6 +214,15 @@ export function placeholderForType(type: AnyProblemType): string {
     case 'bracket_equation_expand_collect':
       return 'e.g. 6'
 
+    // Level 16.1 double brackets - kept for fallback safety, the quadratic
+    // control is what students actually see
+    case 'expand_double_positive':
+    case 'expand_double_mixed':
+    case 'expand_double_negative':
+    case 'expand_double_square_positive':
+    case 'expand_double_square_negative':
+      return 'e.g. x² + 8x + 15'
+
     // sim_eq, read_point_coordinates, system_* coordinate/yes-no types (structured
     // controls), match_equation_to_graph (MC) — text input never shown
     default:
@@ -292,5 +311,10 @@ export function problemTypeLabel(type: AnyProblemType): string {
     case 'bracket_equation_negative': return 'Equations with a negative bracket'
     case 'bracket_equation_both_sides': return 'Brackets on both sides'
     case 'bracket_equation_expand_collect': return 'Expanding then solving'
+    case 'expand_double_positive': return 'Expanding double brackets'
+    case 'expand_double_mixed': return 'Double brackets with a minus'
+    case 'expand_double_negative': return 'Double brackets, both negative'
+    case 'expand_double_square_positive': return 'Squaring a bracket'
+    case 'expand_double_square_negative': return 'Squaring a negative bracket'
   }
 }

@@ -9,12 +9,24 @@ import type { AnyProblemType } from './generators'
 // so they are intentionally NOT part of this dispatcher and fall through to 'default'.
 export type AnswerControlType =
   | 'equation_slope_intercept'
+  | 'quadratic_expression'
   | 'yes_no'
   | 'coordinate_pair'
   | 'default'
 
 export function getAnswerControlType(type: AnyProblemType): AnswerControlType {
   if (type === 'equation_from_slope_intercept') return 'equation_slope_intercept'
+  // Level 16.1: the canonical answer carries a superscript two, which a student
+  // cannot type on a tablet, so the control supplies it.
+  if (
+    type === 'expand_double_positive' ||
+    type === 'expand_double_mixed' ||
+    type === 'expand_double_negative' ||
+    type === 'expand_double_square_positive' ||
+    type === 'expand_double_square_negative'
+  ) {
+    return 'quadratic_expression'
+  }
   if (
     type === 'point_on_line' ||
     type === 'system_check_solution' ||

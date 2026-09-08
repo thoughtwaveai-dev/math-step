@@ -128,6 +128,11 @@ const PARENT_LABELS: Record<string, string> = {
   bracket_equation_negative: 'Equations with a negative bracket',
   bracket_equation_both_sides: 'Brackets on both sides',
   bracket_equation_expand_collect: 'Expanding then solving',
+  expand_double_positive: 'Expanding double brackets',
+  expand_double_mixed: 'Double brackets with a minus',
+  expand_double_negative: 'Double brackets, both negative',
+  expand_double_square_positive: 'Squaring a bracket',
+  expand_double_square_negative: 'Squaring a negative bracket',
 }
 
 export function parentLabelForType(type: string): string {

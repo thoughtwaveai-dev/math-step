@@ -6,7 +6,9 @@
 
 ## Current Status
 
-**Phase:** Streak date handling fix (2026-08-30). The streak update derived "today" with `new Date().toISOString().split('T')[0]`, which is UTC. UTC's date rolls over at NZ noon, so sessions completed between NZ midnight and NZ noon were filed under the previous day. Mixed morning/afternoon practice could stall a streak that was never broken, or increment it twice for one real day. Now uses the existing `nzDateKey` / `shiftDateKey` helpers, with the arithmetic extracted to `src/lib/streak.ts` so it can be tested at a fixed instant. Existing data audited read-only: 6 of 8 streak rows clean, 2 affected. No data changed, awaiting a decision. See entry below.
+**Phase:** Level 16.1 Expanding Double Brackets (2026-09-08). Joaquin was stuck again: 9 consecutive passes on 15.2 against 3 required, with nothing after it. New curriculum level adds 5 problem types, all double-bracket expansions: both signs positive, mixed signs, both negative, and the two squared-bracket cases. Every answer is a quadratic in the fixed shape `x² + bx + c`, which rides the existing algebraic path with no `gradeAnswer` change. The superscript two cannot be typed on a tablet, so this level also ships the first new answer control since 2026-06-08: `QuadraticExpressionInput`, cloned from `EquationSlopeInterceptInput`, which prints the `x²` and takes only two signs and two numbers. See entry below.
+
+**Phase (preceding):** Streak date handling fix (2026-08-30). The streak update derived "today" with `new Date().toISOString().split('T')[0]`, which is UTC. UTC's date rolls over at NZ noon, so sessions completed between NZ midnight and NZ noon were filed under the previous day. Mixed morning/afternoon practice could stall a streak that was never broken, or increment it twice for one real day. Now uses the existing `nzDateKey` / `shiftDateKey` helpers, with the arithmetic extracted to `src/lib/streak.ts` so it can be tested at a fixed instant. Existing data audited read-only: 6 of 8 streak rows clean, 2 affected. One approved correction applied (Joaquin's `longest_streak` 13 to 25); Vilma's stale date left alone by decision. See entry below.
 
 **Phase (preceding):** Level 15.2 Equations with Brackets (2026-08-17). Joaquin was on 15.1 with nothing after it, which the ceiling work built the day before had just started warning about. New curriculum level adds 5 problem types: solve `a(x + b) = c`, solve with subtraction inside, solve with a negative outside the bracket, brackets on both sides, and expand-then-collect before solving. Every answer is a single positive integer, so it rides the existing signed-integer path with no `gradeAnswer` change and stays on the numeric keypad. `levels` row inserted (id=30) and the `levels_id_seq` sequence resynced, since earlier rows were added with explicit ids. See entry below.
 
@@ -27,6 +29,69 @@
 **Phase (preceding):** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
 
 ---
+
+### Level 16.1 Expanding Double Brackets (2026-09-08)
+
+**Trigger.** Joaquin sat on 15.2 with 9 consecutive passes against the 3 required and no level
+after it, so he was re-passing a level he had clearly mastered. Same failure mode the ceiling
+signal was built to surface, and it surfaced it.
+
+**Why this topic.** The 15.2 entry below parked double brackets as "a future 16.1 if a quadratic
+answer control is ever built". That was the only thing blocking it, and 15.1 (expanding one
+bracket) plus 15.2 (using that to solve) make double brackets the actual next curriculum step
+rather than a sideways move. The alternative on the table was sequences and the nth term, which
+needed no new infrastructure but did not continue the strand. Quentin chose double brackets.
+
+**Five types** (`src/lib/math/generators/double-brackets.ts`, id prefix `dbr161_`):
+`expand_double_positive` `(x + a)(x + b)`, `expand_double_mixed` `(x + a)(x - b)`,
+`expand_double_negative` `(x - a)(x - b)`, `expand_double_square_positive` `(x + a)²`, and
+`expand_double_square_negative` `(x - a)²`. Each maker picks the two bracket numbers first and
+derives `b` and `c` from them, so the expansion is right by construction. Bracket numbers run 2 to
+9, and the mixed type requires `|a - b| >= 2`, which guarantees `|b| >= 2` and `|c| >= 4`, so
+`1x`, `0x` and `+ 0` can never reach the page.
+
+**Difference of squares was deliberately left out of v1.** `(x + a)(x - a)` expands to `x² - a²`,
+which has no `x` term. That needs a second canonical shape and a "put 0 in the x box" rule for the
+control, which is scope the level does not need. It stays available for 16.2.
+
+**New answer control: `QuadraticExpressionInput`.** The canonical answer carries a real superscript
+two. A student cannot type that on a tablet, and a caret would be worse, so the control prints the
+`x²` and the student only taps two sign toggles and types two numbers. Cloned from
+`EquationSlopeInterceptInput` and using the same shared `SignToggle` / digit-only magnitude field,
+so it inherits the stylus-bug protection. Registered as `quadratic_expression` in
+`getAnswerControlType`, which means worksheet, targeted practice, and self-correction all pick it
+up with no per-surface wiring.
+
+**No drift between generator and control.** The generator exports `formatQuadratic(b, c)` and the
+control imports it, rather than mirroring the format by hand. A format change now lands in both
+places at once. Both gates re-render the expected string independently, so they still catch a
+change in that helper.
+
+**No grading change.** `gradeAnswer.ts`, `worksheet.ts` and `selfCorrection.ts` are untouched. The
+answers ride the algebraic path (lowercase, strip whitespace, strict match), the same path 15/1
+uses.
+
+**Files changed:**
+- New: `src/lib/math/generators/double-brackets.ts`,
+  `src/components/answer-controls/QuadraticExpressionInput.tsx`, `scripts/level-16-1-smoke.ts`
+- Wiring: `src/lib/math/generators/index.ts` (import, type export, `AnyProblemType`, router arm),
+  `src/lib/levelKeys.ts`, `src/lib/math/answerControl.ts`,
+  `src/components/answer-controls/AnswerInput.tsx`, `src/lib/math/inputMode.ts` (input mode,
+  placeholder, label), `src/lib/mistakeJournal.ts` (`PARENT_LABELS`), `src/lib/lessons/index.ts`
+  (lesson card `16/1`)
+- Gate extended: `scripts/answer-control-gate.ts`
+
+**Gate results:**
+- `npx tsx scripts/level-16-1-smoke.ts` -> `96307 checks, 0 failures`. Re-parses each prompt,
+  expands it independently, renders the expected string by hand, and compares. Also asserts the
+  exact `x² [+-] Nx [+-] N` shape, no `1x` / `0x` / trailing zero, no prompt that leaks its own
+  answer, correct control dispatch, `inputMode` text, placeholder, and parent label.
+- `npx tsx scripts/answer-control-gate.ts` -> `4719 passed, 0 failed` (was 494). New section walks
+  every middle coefficient 2 to 18 in both signs against every constant the generator can produce
+  (all products of 2..9, both signs) and proves the control's string equals the generator's and
+  grades `=== true`.
+- `npx tsx scripts/level-15-2-smoke.ts` -> `72307 checks, 0 failures` (unchanged)
+- `npx tsc --noEmit` -> clean; `eslint` on touched files -> clean; `npm run build` -> exit 0
 
 ### Streak date handling fix (2026-08-30)
 
