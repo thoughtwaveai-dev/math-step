@@ -117,9 +117,9 @@ Verified on `https://mathstep.nz` with a temp parent and student:
   input and click events rather than pixel clicks. The React `onChange` path and the hidden input
   are the same either way; raw pointer hit-testing on the sign toggles was not exercised.
 
-**Pending, needs the Supabase SQL editor.** Row 31 was inserted with an explicit id (PostgREST
-cannot run raw SQL and the MathStep Supabase MCP is not connected), so the sequence still points at
-31 and the next id-less insert would collide:
+**Sequence resynced (2026-09-25).** Row 31 was inserted with an explicit id (PostgREST cannot run
+raw SQL and the MathStep Supabase MCP is not connected), so Quentin ran this in the Supabase SQL
+editor. It returned `31`:
 ```sql
 select setval('public.levels_id_seq', (select max(id) from public.levels));
 ```
