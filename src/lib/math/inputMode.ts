@@ -85,6 +85,25 @@ export function inputModeForType(type: AnyProblemType): InputMode {
     type === 'factorise_quadratic_mixed_negative' ||
     type === 'factorise_difference_of_squares'
   ) return 'text'
+  // Level 17.2: find_nth_term answers are rules like "3n + 4" with a letter, so
+  // keep them on 'text' (stylus bug). The other sequence types answer with a
+  // plain positive integer and fall through to 'numeric'.
+  if (type === 'sequence_find_nth_term') return 'text'
+  // Level 18.1: the check type answers yes/no and rides the yes/no control (text
+  // is a fallback only). The other four are plain integers ('numeric').
+  if (type === 'pythagoras_check_right_angle') return 'text'
+  // Level 19.1: the multiplier answers a decimal like 1.12 or 0.7. The other
+  // four percentage change types answer a plain integer ('numeric').
+  if (type === 'percent_multiplier') return 'decimal'
+  // Level 17.1: answers are "x = -5 or x = 3", which contain letters. They ride
+  // the quadratic roots control, so the text input is a fallback only.
+  if (
+    type === 'solve_quadratic_factorised' ||
+    type === 'solve_quadratic_positive_roots' ||
+    type === 'solve_quadratic_negative_roots' ||
+    type === 'solve_quadratic_mixed_roots' ||
+    type === 'solve_quadratic_difference_of_squares'
+  ) return 'text'
   // Level 15.2 answers are the solved value of x, always a plain positive
   // integer, so the numeric keypad is safe: no letters or brackets are typed.
   // Level 14.2 answers are all plain non-negative integers → numeric keypad.
@@ -241,6 +260,69 @@ export function placeholderForType(type: AnyProblemType): string {
     case 'factorise_difference_of_squares':
       return 'e.g. (x + 1)(x + 12)'
 
+    // Level 17.1 solving quadratics - fallback only, the quadratic roots
+    // control is what students see. Roots are never 1 or 12, so no leak.
+    case 'solve_quadratic_factorised':
+    case 'solve_quadratic_positive_roots':
+    case 'solve_quadratic_negative_roots':
+    case 'solve_quadratic_mixed_roots':
+    case 'solve_quadratic_difference_of_squares':
+      return 'e.g. x = -1 or x = 12'
+
+    // Level 17.2 sequences. Each example sits just past what the generator can
+    // produce (next or missing term at most 68, nth term value at most 189, term
+    // number 5 to 25), so it cannot leak an answer. The nth term example matches
+    // the prompt's format hint; a is 2 to 9 and b is -9 to 9, so no part of it
+    // is ever an answer.
+    case 'sequence_next_term':
+    case 'sequence_missing_term':
+      return 'e.g. 70'
+    case 'sequence_nth_term_value':
+      return 'e.g. 200'
+    case 'sequence_find_nth_term':
+      return 'e.g. 10n + 11'
+    case 'sequence_term_position':
+      return 'e.g. 30'
+
+    // Level 18.1 Pythagoras: plain whole numbers. 23 can never be a side of a
+    // triple with hypotenuse <= 65, so the example cannot leak an answer. The
+    // check type rides the yes/no control and keeps the default.
+    case 'pythagoras_hypotenuse':
+    case 'pythagoras_shorter_side':
+    case 'pythagoras_word_problem':
+    case 'pythagoras_distance_points':
+      return 'e.g. 23'
+
+    // Level 18.2 ratio and proportion: one positive integer. 37 is a prime
+    // above 12, which no 18.2 answer can ever be, so it cannot leak an answer.
+    case 'ratio_share_larger':
+    case 'ratio_share_smaller':
+    case 'ratio_missing_value':
+    case 'ratio_find_total':
+    case 'proportion_unitary':
+      return 'e.g. 37'
+
+    // Level 19.1 percentage change: amounts are always 20 or more and percent
+    // changes are multiples of 5, so 13 is never a real answer
+    case 'percent_increase_amount':
+    case 'percent_decrease_amount':
+    case 'percent_change_find':
+    case 'percent_reverse':
+      return 'e.g. 13'
+    // Multipliers stop at 1.95 (increases end at 95%), so 2.5 is never a real answer
+    case 'percent_multiplier':
+      return 'e.g. 2.5'
+
+    // Level 19.2 area and perimeter: positive whole numbers. 74 and 24 are never
+    // reachable answers for these types, so the hint cannot give one away.
+    case 'area_triangle':
+    case 'area_parallelogram':
+    case 'area_trapezium':
+    case 'rectangle_perimeter_area':
+      return 'e.g. 74'
+    case 'area_compound_shape':
+      return 'e.g. 24'
+
     // sim_eq, read_point_coordinates, system_* coordinate/yes-no types (structured
     // controls), match_equation_to_graph (MC) — text input never shown
     default:
@@ -339,5 +421,35 @@ export function problemTypeLabel(type: AnyProblemType): string {
     case 'factorise_quadratic_mixed_positive': return 'Factorising, minus constant'
     case 'factorise_quadratic_mixed_negative': return 'Factorising, minus x term and constant'
     case 'factorise_difference_of_squares': return 'Difference of two squares'
+    case 'solve_quadratic_factorised': return 'Solving from brackets'
+    case 'solve_quadratic_positive_roots': return 'Solving quadratics, positive answers'
+    case 'solve_quadratic_negative_roots': return 'Solving quadratics, negative answers'
+    case 'solve_quadratic_mixed_roots': return 'Solving quadratics, mixed signs'
+    case 'solve_quadratic_difference_of_squares': return 'Solving a difference of two squares'
+    case 'sequence_next_term': return 'Next term in a sequence'
+    case 'sequence_missing_term': return 'Missing term in a sequence'
+    case 'sequence_nth_term_value': return 'Using the nth term'
+    case 'sequence_find_nth_term': return 'Finding the nth term'
+    case 'sequence_term_position': return 'Finding the term number'
+    case 'pythagoras_hypotenuse': return 'Finding the hypotenuse'
+    case 'pythagoras_shorter_side': return 'Finding a shorter side'
+    case 'pythagoras_check_right_angle': return 'Checking for a right angle'
+    case 'pythagoras_word_problem': return 'Pythagoras word problems'
+    case 'pythagoras_distance_points': return 'Distance between points'
+    case 'ratio_share_larger': return 'Sharing in a ratio'
+    case 'ratio_share_smaller': return 'Smaller share of a ratio'
+    case 'ratio_missing_value': return 'Equivalent ratios'
+    case 'ratio_find_total': return 'Total from one share'
+    case 'proportion_unitary': return 'Unitary method'
+    case 'percent_increase_amount': return 'Increasing by a percentage'
+    case 'percent_decrease_amount': return 'Decreasing by a percentage'
+    case 'percent_change_find': return 'Finding the percentage change'
+    case 'percent_reverse': return 'Reverse percentages'
+    case 'percent_multiplier': return 'Percentage multipliers'
+    case 'area_triangle': return 'Area of a triangle'
+    case 'area_parallelogram': return 'Area of a parallelogram'
+    case 'area_trapezium': return 'Area of a trapezium'
+    case 'area_compound_shape': return 'Area of a compound shape'
+    case 'rectangle_perimeter_area': return 'Rectangle perimeter and area'
   }
 }

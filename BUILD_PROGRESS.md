@@ -6,7 +6,9 @@
 
 ## Current Status
 
-**Phase:** Level 16.2 Factorising Quadratics (2026-09-25). First of 7 new levels (16.2 to 19.2) planned to cover about one month at Joaquin's pace. He was parked on 16.1 with 10 consecutive passes against 3 required. Quentin chose the plan "Algebra first": 16.2 Factorising Quadratics, 17.1 Solving Quadratics, 17.2 Sequences, 18.1 Pythagoras, 18.2 Ratio and Proportion, 19.1 Percentage Change, 19.2 Area and Perimeter. 16.2 ships first on its own so he is unblocked quickly. It adds the `BracketPairInput` control, which sorts the two brackets so the student can enter them in any order under the strict grader. See entry below.
+**Phase:** Levels 17.1 to 19.2 (2026-09-25). The other six levels of the one-month plan: 17.1 Solving Quadratics, 17.2 Sequences, 18.1 Pythagoras' Theorem, 18.2 Ratio and Proportion, 19.1 Percentage Change, 19.2 Area and Perimeter. 30 new problem types. Only 17.1 needed new infrastructure: the `QuadraticRootsInput` control, which sorts the two roots so the strict grader accepts them in any order. The other five answer with plain integers or a decimal on existing grader paths, plus one yes/no type on the existing control. No `gradeAnswer` or schema change. See entry below.
+
+**Phase (preceding):** Level 16.2 Factorising Quadratics (2026-09-25). First of 7 new levels (16.2 to 19.2) planned to cover about one month at Joaquin's pace. He was parked on 16.1 with 10 consecutive passes against 3 required. Quentin chose the plan "Algebra first": 16.2 Factorising Quadratics, 17.1 Solving Quadratics, 17.2 Sequences, 18.1 Pythagoras, 18.2 Ratio and Proportion, 19.1 Percentage Change, 19.2 Area and Perimeter. 16.2 ships first on its own so he is unblocked quickly. It adds the `BracketPairInput` control, which sorts the two brackets so the student can enter them in any order under the strict grader. See entry below.
 
 **Phase (preceding):** Level 16.1 Expanding Double Brackets (2026-09-08). Joaquin was stuck again: 9 consecutive passes on 15.2 against 3 required, with nothing after it. New curriculum level adds 5 problem types, all double-bracket expansions: both signs positive, mixed signs, both negative, and the two squared-bracket cases. Every answer is a quadratic in the fixed shape `x² + bx + c`, which rides the existing algebraic path with no `gradeAnswer` change. The superscript two cannot be typed on a tablet, so this level also ships the first new answer control since 2026-06-08: `QuadraticExpressionInput`, cloned from `EquationSlopeInterceptInput`, which prints the `x²` and takes only two signs and two numbers. See entry below.
 
@@ -31,6 +33,53 @@
 **Phase (preceding):** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
 
 ---
+
+### Levels 17.1 to 19.2 (2026-09-25)
+
+**Why.** The rest of the one-month plan Quentin approved ("Algebra first"), so Joaquin does not reach
+the ceiling again for about four weeks. See the 16.2 entry below for the pace data.
+
+**How it was built.** Six Opus 5.5 sub-agents each wrote one generator and its smoke gate in parallel,
+from a shared brief (new files only, no shared-file edits, no git). The main session wrote the 17.1
+control, did all shared wiring, reviewed sample worksheets, and ran every gate.
+
+**Levels.** All five types per level, 4 of each per 20-problem sheet, answers built by construction.
+- **17.1 Solving Quadratics** (`solving-quadratics.ts`, `sq171_`): factorised form, two positive roots,
+  two negative roots, mixed roots, difference of squares. Answer `x = -5 or x = 3`, smaller root first.
+  New `QuadraticRootsInput` control built through the generator's `formatRoots`, same pattern as 16.2.
+- **17.2 Sequences** (`sequences.ts`, `seq172_`): next term, missing term, term from the nth term rule,
+  find the nth term rule, which term has a value. The rule answer (`3n + 4`) is typed on the strict
+  algebraic path, so the prompt ends "Write it like 10n + 11." Changed from the worker's "3n + 10",
+  which showed the right coefficient whenever the answer started with 3n.
+- **18.1 Pythagoras' Theorem** (`pythagoras.ts`, `pyt181_`): hypotenuse, shorter side, right-angle
+  check (yes/no control, 2 yes and 2 no per sheet), word problems, distance between points.
+- **18.2 Ratio and Proportion** (`ratio.ts`, `rat182_`): larger share, smaller share, equivalent
+  ratios, total from one share, unitary method. No answer is ever a ratio string, because the
+  grader's digit-set fallback accepts `4:3` for `3:4`.
+- **19.1 Percentage Change** (`percentage-change.ts`, `pct191_`): increase, decrease, find the
+  percentage change, reverse percentages, decimal multiplier (decimal path, `1.50` grades as `1.5`).
+- **19.2 Area and Perimeter** (`area-perimeter.ts`, `ap192_`): triangle, parallelogram (with a slanted
+  side distractor), trapezium, rectangle with a corner cut out, rectangle perimeter and area both ways.
+
+**Placeholders.** Every placeholder in 17.2 to 19.2 is a value the level can never produce, so it
+cannot leak an answer: 17.2 `e.g. 70` / `e.g. 200` / `e.g. 30` / `e.g. 10n + 11`, 18.1 `e.g. 23`,
+18.2 `e.g. 37`, 19.1 `e.g. 13` / `e.g. 2.5`, 19.2 `e.g. 74` / `e.g. 24`. Each smoke gate checks it.
+
+**Review fixes by the main session.** 17.2 hint (above). Two grammar slips found by scanning 8000
+sheets: 19.1 "A $80 ticket" reworded to "The price of a ticket is $80.", 19.2 "a 8 cm" now picks "an".
+
+**Files.** New: six generators and six smoke gates (`scripts/level-17-1-smoke.ts` to
+`level-19-2-smoke.ts`), `src/components/answer-controls/QuadraticRootsInput.tsx`. Changed:
+`generators/index.ts`, `levelKeys.ts` (`[17,1]` to `[19,2]`), `answerControl.ts` (`quadratic_roots`,
+and `pythagoras_check_right_angle` on `yes_no`), `AnswerInput.tsx`, `inputMode.ts`,
+`mistakeJournal.ts`, `lessons/index.ts` (six cards), `scripts/answer-control-gate.ts` (roots section).
+
+**Gates (2026-09-25).**
+- `level-16-2-smoke.ts` `114307 checks, 0 failures`; `level-17-1-smoke.ts` `170267, 0`;
+  `level-17-2-smoke.ts` `94003, 0`; `level-18-1-smoke.ts` `82241, 0`; `level-18-2-smoke.ts` `97857, 0`;
+  `level-19-1-smoke.ts` `68871, 0`; `level-19-2-smoke.ts` `90932, 0`; `level-16-1-smoke.ts` `96307, 0`
+- `answer-control-gate.ts`: `6626 passed, 0 failed`
+- `npx tsc --noEmit` clean; `eslint` on all touched files clean; `npm run build` exit 0
 
 ### Level 16.2 Factorising Quadratics (2026-09-25)
 
@@ -72,6 +121,27 @@ section).
 - `npx tsx scripts/answer-control-gate.ts`: `5700 passed, 0 failed` (was 4719)
 - `npx tsx scripts/level-16-1-smoke.ts`: `96307 checks, 0 failures`
 - `npx tsc --noEmit` clean; `eslint` on touched files clean; Next compile succeeded
+
+**Deploy and production end-to-end (2026-09-25).** Pushed `8b70962`; Vercel reported "Deployment has
+completed" and the homepage Etag changed. Then inserted `levels` row id 32 (explicit id):
+`{"id":32,"level_number":16,"sublevel_number":2,"topic":"Factorising Quadratics","description":"Writing a quadratic as two brackets","speed_target_seconds":1020,"accuracy_threshold":90,"problems_per_session":20,"consecutive_passes_required":3}`.
+Speed target keeps the +60 step (Joaquin's real times on 15.1 to 16.1 are about 80 to 170 seconds).
+- Temp parent `level162-test-20260925@example.com`, student `FactoriseTestKid` at 16.2, logged in by magic link.
+- `/play` showed Level 16, Sublevel 2, "Factorising Quadratics", 17m, 90%, 20 problems, 0/3 passes.
+- Worksheet rendered 20 problems, 4 of each type, all with the bracket pair control. The browser pane
+  painted this time, so problem 1 was entered with real pointer clicks on the sign toggles, in the
+  non-canonical order `(x - 2)(x + 9)`: the hidden field held `(x + 9)(x - 2)`. The other 19 were filled
+  by script, half in reverse order; every hidden value came out canonical.
+- Submitted 19 correct, 1 deliberately wrong (problem 3, `x² - 6x + 8`, entered `(x - 3)(x - 4)`):
+  `19/20`, `95%`, Passed, `40s`, milestones "First Worksheet" and "Beat the Time Target", mastery 1 / 3.
+- Self-correction served the bracket pair control; entered `(x - 4)(x - 2)` by real clicks, hidden
+  value `(x - 2)(x - 4)`, result "✓ Corrected".
+- DB: session `level_id` 32, passed, accuracy 95, time 40, correct 19; 20 problems, 4 of each type;
+  1 `self_corrected`; progress `consecutive_passes` 1; streak `current_streak` 1, `total_points` 15,
+  `last_session_date` `2026-09-25`.
+- Cleanup: deleted problems, sessions, student_level_progress, practice_sessions, streaks, student,
+  profile (all HTTP 204) and the auth user (HTTP 200). Re-query all 0, auth GET 404. Students 8, streak
+  rows 8, as before.
 
 ### Level 16.1 Expanding Double Brackets (2026-09-08)
 

@@ -22,6 +22,12 @@ import { generateExpandingBracketsProblems } from './expanding-brackets'
 import { generateBracketEquationProblems } from './bracket-equations'
 import { generateDoubleBracketsProblems } from './double-brackets'
 import { generateFactorisingQuadraticsProblems } from './factorising-quadratics'
+import { generateSolvingQuadraticsProblems } from './solving-quadratics'
+import { generateSequenceProblems } from './sequences'
+import { generatePythagorasProblems } from './pythagoras'
+import { generateRatioProblems } from './ratio'
+import { generatePercentageChangeProblems } from './percentage-change'
+import { generateAreaPerimeterProblems } from './area-perimeter'
 
 export type { MathProblem, ProblemType } from './factorization'
 export type { AdditionProblem, AdditionProblemType } from './addition'
@@ -65,6 +71,21 @@ export type {
   FactorisingQuadraticsProblem,
   FactorisingQuadraticsProblemType,
 } from './factorising-quadratics'
+export type {
+  SolvingQuadraticsProblem,
+  SolvingQuadraticsProblemType,
+} from './solving-quadratics'
+export type { SequenceProblem, SequenceProblemType } from './sequences'
+export type { PythagorasProblem, PythagorasProblemType } from './pythagoras'
+export type { RatioProblem, RatioProblemType } from './ratio'
+export type {
+  PercentageChangeProblem,
+  PercentageChangeProblemType,
+} from './percentage-change'
+export type {
+  AreaPerimeterProblem,
+  AreaPerimeterProblemType,
+} from './area-perimeter'
 
 // Unified problem type covering all generators
 export type AnyProblemType =
@@ -92,6 +113,12 @@ export type AnyProblemType =
   | import('./bracket-equations').BracketEquationProblemType
   | import('./double-brackets').DoubleBracketsProblemType
   | import('./factorising-quadratics').FactorisingQuadraticsProblemType
+  | import('./solving-quadratics').SolvingQuadraticsProblemType
+  | import('./sequences').SequenceProblemType
+  | import('./pythagoras').PythagorasProblemType
+  | import('./ratio').RatioProblemType
+  | import('./percentage-change').PercentageChangeProblemType
+  | import('./area-perimeter').AreaPerimeterProblemType
 
 export function generateProblems(levelNumber: number, sublevelNumber: number, count: number) {
   if (levelNumber === 1 && sublevelNumber === 1) {
@@ -189,6 +216,24 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 16 && sublevelNumber === 2) {
     return generateFactorisingQuadraticsProblems(count)
+  }
+  if (levelNumber === 17 && sublevelNumber === 1) {
+    return generateSolvingQuadraticsProblems(count)
+  }
+  if (levelNumber === 17 && sublevelNumber === 2) {
+    return generateSequenceProblems(count)
+  }
+  if (levelNumber === 18 && sublevelNumber === 1) {
+    return generatePythagorasProblems(count)
+  }
+  if (levelNumber === 18 && sublevelNumber === 2) {
+    return generateRatioProblems(count)
+  }
+  if (levelNumber === 19 && sublevelNumber === 1) {
+    return generatePercentageChangeProblems(count)
+  }
+  if (levelNumber === 19 && sublevelNumber === 2) {
+    return generateAreaPerimeterProblems(count)
   }
   return []
 }

@@ -6,6 +6,7 @@ import { inputModeForType, placeholderForType } from '@/lib/math/inputMode'
 import EquationSlopeInterceptInput from './EquationSlopeInterceptInput'
 import QuadraticExpressionInput from './QuadraticExpressionInput'
 import BracketPairInput from './BracketPairInput'
+import QuadraticRootsInput from './QuadraticRootsInput'
 import CoordinatePairInput from './CoordinatePairInput'
 import YesNoAnswerInput from './YesNoAnswerInput'
 
@@ -38,6 +39,9 @@ export default function AnswerInput({ name, type, value, onValueChange, classNam
   }
   if (control === 'bracket_pair') {
     return <BracketPairInput name={name} onValueChange={onValueChange} />
+  }
+  if (control === 'quadratic_roots') {
+    return <QuadraticRootsInput name={name} onValueChange={onValueChange} />
   }
   if (control === 'coordinate_pair') {
     return <CoordinatePairInput name={name} onValueChange={onValueChange} />

@@ -5,6 +5,7 @@
 import { gradeAnswer } from '../src/lib/math/gradeAnswer'
 import { formatQuadratic } from '../src/lib/math/generators/double-brackets'
 import { formatBracketPair } from '../src/lib/math/generators/factorising-quadratics'
+import { formatRoots } from '../src/lib/math/generators/solving-quadratics'
 
 let pass = 0
 let fail = 0
@@ -142,6 +143,40 @@ check('pair raw swapped order rejected by grader', gradeAnswer('(x + 5)(x + 3)',
 check('pair wrong number rejected', gradeAnswer('(x + 3)(x + 6)', '(x + 3)(x + 5)') === false)
 check('pair wrong sign rejected', gradeAnswer('(x + 3)(x - 5)', '(x + 3)(x + 5)') === false)
 check('pair blank rejected', gradeAnswer('', '(x + 3)(x + 5)') === false)
+
+// --- Quadratic roots control: x = a or x = b --------------------------------
+// Mirror QuadraticRootsInput.buildCanonical exactly. It calls the 17.1
+// generator's own formatRoots, which puts the smaller root first, so both entry
+// orders build the same string and that string grades === true.
+function buildRoots(aSign: Sign, aMag: string, bSign: Sign, bMag: string): string {
+  if (aMag === '' || bMag === '') return ''
+  const aAbs = Number(aMag)
+  const bAbs = Number(bMag)
+  if (!Number.isFinite(aAbs) || !Number.isFinite(bAbs)) return ''
+  const a = aAbs === 0 ? 0 : aSign === '-' ? -aAbs : aAbs
+  const b = bAbs === 0 ? 0 : bSign === '-' ? -bAbs : bAbs
+  return formatRoots(a, b)
+}
+for (const a of bracketNums) {
+  for (const b of bracketNums) {
+    if (a === b) continue
+    const ab = buildRoots(a < 0 ? '-' : '+', String(Math.abs(a)), b < 0 ? '-' : '+', String(Math.abs(b)))
+    const ba = buildRoots(b < 0 ? '-' : '+', String(Math.abs(b)), a < 0 ? '-' : '+', String(Math.abs(a)))
+    // Independent render of what the generator stores: smaller root first.
+    const generatorAnswer = `x = ${Math.min(a, b)} or x = ${Math.max(a, b)}`
+    check(`roots order ${a},${b}`, ab === ba)
+    check(`roots display ${a},${b}`, ab === generatorAnswer)
+    check(`roots grade ${a},${b}`, gradeAnswer(ab, generatorAnswer) === true)
+  }
+}
+check('roots blank a is no answer', buildRoots('+', '', '+', '5') === '')
+check('roots blank b is no answer', buildRoots('+', '3', '+', '') === '')
+check('roots never emit -0', buildRoots('-', '0', '+', '5') === 'x = 0 or x = 5')
+check('roots no-space accepted', gradeAnswer('x=-5orx=3', 'x = -5 or x = 3') === true)
+check('roots uppercase accepted', gradeAnswer('X = -5 OR X = 3', 'x = -5 or x = 3') === true)
+check('roots raw swapped order rejected by grader', gradeAnswer('x = 3 or x = -5', 'x = -5 or x = 3') === false)
+check('roots wrong sign rejected', gradeAnswer('x = 5 or x = 3', 'x = -5 or x = 3') === false)
+check('roots blank rejected', gradeAnswer('', 'x = -5 or x = 3') === false)
 
 console.log(`\nanswer-control gate: ${pass} passed, ${fail} failed`)
 process.exit(fail === 0 ? 0 : 1)

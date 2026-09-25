@@ -11,6 +11,7 @@ export type AnswerControlType =
   | 'equation_slope_intercept'
   | 'quadratic_expression'
   | 'bracket_pair'
+  | 'quadratic_roots'
   | 'yes_no'
   | 'coordinate_pair'
   | 'default'
@@ -39,10 +40,21 @@ export function getAnswerControlType(type: AnyProblemType): AnswerControlType {
   ) {
     return 'bracket_pair'
   }
+  // Level 17.1: two roots under a strict grader, so the control sorts them.
+  if (
+    type === 'solve_quadratic_factorised' ||
+    type === 'solve_quadratic_positive_roots' ||
+    type === 'solve_quadratic_negative_roots' ||
+    type === 'solve_quadratic_mixed_roots' ||
+    type === 'solve_quadratic_difference_of_squares'
+  ) {
+    return 'quadratic_roots'
+  }
   if (
     type === 'point_on_line' ||
     type === 'system_check_solution' ||
-    type === 'inequality_check_value'
+    type === 'inequality_check_value' ||
+    type === 'pythagoras_check_right_angle'
   ) {
     return 'yes_no'
   }

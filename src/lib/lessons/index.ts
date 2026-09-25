@@ -481,6 +481,99 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'Always check by expanding your brackets. If (x + 5)(x - 3) does not give back the question, swap a sign and try again. The order of the two brackets does not matter.',
   },
+  '17/1': {
+    title: 'Solving Quadratics',
+    explanation: 'A quadratic equation like x² - 2x - 15 = 0 has two answers. The trick is to factorise it into two brackets first, then use one simple fact: if two things multiply to make 0, one of them must be 0. To factorise x² + bx + c, look for two numbers that multiply to c and add to b. For x² - 2x - 15 those are 3 and -5, so it becomes (x + 3)(x - 5) = 0. Then set each bracket to 0: x + 3 = 0 gives x = -3, and x - 5 = 0 gives x = 5. Notice that each answer has the opposite sign to the number in its bracket. For something like x² - 49 = 0, think of it as (x - 7)(x + 7) = 0, which gives x = -7 or x = 7. Write both answers, like x = -3 or x = 5.',
+    example: {
+      problem: 'Solve: x² - 2x - 15 = 0',
+      steps: [
+        'Find two numbers that multiply to -15 and add to -2: they are 3 and -5',
+        'So x² - 2x - 15 = (x + 3)(x - 5)',
+        'Now (x + 3)(x - 5) = 0, so one of the brackets must be 0',
+        'x + 3 = 0 gives x = -3',
+        'x - 5 = 0 gives x = 5',
+      ],
+      answer: 'x = -3 or x = 5',
+    },
+    tip: 'The most common slip is the sign. (x + 4) = 0 means x = -4, not 4, because -4 + 4 = 0. And do not forget that x² - 25 = 0 has two answers, x = -5 and x = 5, since both square to 25. You can check any answer by putting it back into the equation: it should give exactly 0.',
+  },
+  '17/2': {
+    title: 'Sequences',
+    explanation: 'A sequence is a list of numbers that follows a rule. In a linear sequence the numbers go up or down by the same amount every time, and that amount is called the common difference. In 4, 9, 14, 19 the difference is 5, so the next term is 19 + 5 = 24. If the numbers go down, the difference is negative: 30, 26, 22 goes down by 4 each time, so the next term is 18. The nth term is a rule that gives you any term from its position n. For the rule 4n + 3, the 1st term is 4 times 1 plus 3 = 7, and the 12th term is 4 times 12 plus 3 = 51. To work out which term a number is, set the rule equal to it and solve: 3n + 5 = 41 gives 3n = 36, so n = 12 and it is the 12th term.',
+    example: {
+      problem: 'Find the nth term of this sequence: 5, 8, 11, 14.',
+      steps: [
+        'The terms go up by 3 each time, so the rule starts with 3n',
+        '3n on its own gives 3, 6, 9, 12',
+        'Each term in the sequence is 2 more than that',
+        'So the nth term is 3n + 2',
+        'Check with n = 1: 3 times 1 plus 2 = 5, the first term',
+      ],
+      answer: '3n + 2',
+    },
+    tip: 'The number in front of n is always the common difference. For the number on the end, take the difference away from the first term: 5 - 3 = 2, so the rule is 3n + 2. If the first term is smaller than the difference, the number on the end is negative, like 4n - 2 for 2, 6, 10, 14. Always write the n term first and the number second, like 3n + 2, and check your rule by putting n = 1 back in.',
+  },
+  '18/1': {
+    title: 'Pythagoras\' Theorem',
+    explanation: 'In a right-angled triangle, the longest side is the one opposite the right angle. It is called the hypotenuse. If the two shorter sides are a and b and the hypotenuse is c, then a² + b² = c². To find the hypotenuse, square the two shorter sides, add them, then take the square root. To find a shorter side, square the hypotenuse, take away the square of the side you know, then take the square root. The rule also works as a test: if the two smaller squares add up to the biggest square, the triangle has a right angle. And it finds the distance between two points, because the gap across and the gap up are the two shorter sides of a right-angled triangle.',
+    example: {
+      problem: 'A right-angled triangle has shorter sides of 6 cm and 8 cm. How long is the longest side?',
+      steps: [
+        'Square the two shorter sides: 6² = 36 and 8² = 64',
+        'Add the squares: 36 + 64 = 100',
+        'That total is c², so c² = 100',
+        'Take the square root: 10 × 10 = 100, so c = 10',
+        'The longest side is 10 cm',
+      ],
+      answer: '10',
+    },
+    tip: 'Find the hypotenuse first: it is the longest side, opposite the right angle. If the question gives you the hypotenuse, you take away instead of adding. Quick check: the hypotenuse must be longer than both other sides, so if your answer for a shorter side comes out bigger than the hypotenuse, you added when you should have taken away. For two points, work out how far apart the x values are and how far apart the y values are, and use those as the two shorter sides.',
+  },
+  '18/2': {
+    title: 'Ratio and Proportion',
+    explanation: 'A ratio compares amounts. The ratio 3:5 means that for every 3 of one thing there are 5 of the other, so the whole amount is split into 3 + 5 = 8 equal parts. To share an amount in a ratio, add the parts, divide the amount by that total to find ONE part, then multiply. To share 56 in the ratio 3:5, one part is 56 ÷ 8 = 7, so the shares are 3 × 7 = 21 and 5 × 7 = 35. Equivalent ratios work like equivalent fractions: multiply or divide both numbers by the same thing, so 3:5 is the same as 12:20. If you know the share of one person, divide it by their number of parts to find one part, then multiply by the total number of parts to get the whole amount. For proportion questions, use the unitary method: find the value of ONE first, then multiply. If 5 pens cost $15, one pen costs $3, so 8 pens cost $24.',
+    example: {
+      problem: 'Share 56 in the ratio 3:5. How much is the larger share?',
+      steps: [
+        'Add the parts: 3 + 5 = 8 parts',
+        'Find one part: 56 ÷ 8 = 7',
+        'The larger share is 5 parts: 5 × 7 = 35',
+        'Check: the smaller share is 3 × 7 = 21, and 21 + 35 = 56 ✓',
+      ],
+      answer: '35',
+    },
+    tip: 'Always find ONE part (or the cost of ONE item) first, then multiply. Answer with just the number, so 35 and not $35 or 21:35. To check a sharing answer, add the shares back up: they should make the amount you started with.',
+  },
+  '19/1': {
+    title: 'Percentage Change',
+    explanation: 'A percentage change makes an amount bigger or smaller by a percent of itself. To increase 80 by 15%, find 15% of 80, which is 12, and add it on to get 92. To decrease, find the percent and take it away instead. A quicker way is a multiplier. After a 15% increase you have 115% of what you started with, so you multiply by 1.15. After a 30% decrease you have 70% left, so you multiply by 0.7. To find a percentage change, divide the change by the ORIGINAL amount and times by 100: going from $40 to $50 is a change of 10, and 10 ÷ 40 × 100 = 25%. To work backwards to an original price, divide by the multiplier: after a 20% increase a price is $96, so the original was 96 ÷ 1.2 = $80.',
+    example: {
+      problem: 'A jacket costs $240. It is reduced by 35% in a sale. What is the sale price?',
+      steps: [
+        '10% of 240 is 24, and 5% is half of that, which is 12',
+        '35% is 10% + 10% + 10% + 5%, so 24 + 24 + 24 + 12 = 84',
+        'Take it off the price: 240 - 84 = 156',
+        'Check with a multiplier: 100% - 35% = 65%, and 240 × 0.65 = 156',
+      ],
+      answer: '156',
+    },
+    tip: 'The big trap is working backwards. If a price went up 20% to $96, the original is NOT $96 take away 20% of $96. Divide by the multiplier 1.2 instead, then check: 20% more than your answer should give the price in the question. For a percentage change, always divide by the amount you started with, not the new amount.',
+  },
+  '19/2': {
+    title: 'Area and Perimeter',
+    explanation: 'Area is the space inside a flat shape, measured in square units like cm² or m². Perimeter is the distance all the way around the outside, measured in plain cm or m. A rectangle is length × width, and a parallelogram is base × perpendicular height. A triangle is half a rectangle, so its area is base × perpendicular height ÷ 2. A trapezium has two parallel sides: add them, halve the total, then multiply by the perpendicular height. For a rectangle with a piece cut out of the corner, find the area of the whole rectangle and take away the piece. If you know the area of a rectangle and one side, divide to find the other side. If you know the perimeter and one side, halve the perimeter and take that side away.',
+    example: {
+      problem: 'A trapezium has parallel sides of 6 cm and 10 cm, and a perpendicular height of 5 cm. What is its area in cm²?',
+      steps: [
+        'Add the parallel sides: 6 + 10 = 16',
+        'Halve the total: 16 ÷ 2 = 8',
+        'Multiply by the perpendicular height: 8 × 5 = 40',
+        'The area is 40 cm²',
+      ],
+      answer: '40',
+    },
+    tip: 'Always use the perpendicular height, the one that meets the base at a right angle. A slanted side is a trap: it is longer than the height and gives the wrong answer. Watch the units too: area is in square units like cm², perimeter is in plain cm. Answer with just the number, so 40 and not 40 cm².',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',
