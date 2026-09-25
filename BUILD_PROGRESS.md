@@ -105,9 +105,9 @@ accuracy 90, 20 problems, 3 passes, and the speed target still stepping +60:
   student_level_progress, practice_sessions, streaks, student, profile (all HTTP 204) and the auth
   user (HTTP 200). Re-query all 0, auth GET 404. Students 8, streak rows 8.
 
-**Pending: sequence resync.** Rows 32 to 38 went in with explicit ids, so `levels_id_seq` lags. Quentin
-to run in the Supabase SQL editor:
-`select setval('public.levels_id_seq', (select max(id) from public.levels));` (expected result `38`).
+**Sequence resynced (2026-09-25).** Rows 32 to 38 went in with explicit ids, so `levels_id_seq` lagged.
+Quentin ran `select setval('public.levels_id_seq', (select max(id) from public.levels));` in the
+Supabase SQL editor; result `38`. The next id-less insert gets 39.
 
 ### Level 16.2 Factorising Quadratics (2026-09-25)
 
