@@ -76,6 +76,15 @@ export function inputModeForType(type: AnyProblemType): InputMode {
     type === 'expand_double_square_positive' ||
     type === 'expand_double_square_negative'
   ) return 'text'
+  // Level 16.2: answers are bracket pairs containing 'x'. They ride the bracket
+  // pair control, so the text input is a fallback only; keep it on 'text'.
+  if (
+    type === 'factorise_quadratic_positive' ||
+    type === 'factorise_quadratic_negative' ||
+    type === 'factorise_quadratic_mixed_positive' ||
+    type === 'factorise_quadratic_mixed_negative' ||
+    type === 'factorise_difference_of_squares'
+  ) return 'text'
   // Level 15.2 answers are the solved value of x, always a plain positive
   // integer, so the numeric keypad is safe: no letters or brackets are typed.
   // Level 14.2 answers are all plain non-negative integers → numeric keypad.
@@ -223,6 +232,15 @@ export function placeholderForType(type: AnyProblemType): string {
     case 'expand_double_square_negative':
       return 'e.g. x² + 8x + 15'
 
+    // Level 16.2 factorising - kept for fallback safety, the bracket pair
+    // control is what students actually see
+    case 'factorise_quadratic_positive':
+    case 'factorise_quadratic_negative':
+    case 'factorise_quadratic_mixed_positive':
+    case 'factorise_quadratic_mixed_negative':
+    case 'factorise_difference_of_squares':
+      return 'e.g. (x + 1)(x + 12)'
+
     // sim_eq, read_point_coordinates, system_* coordinate/yes-no types (structured
     // controls), match_equation_to_graph (MC) — text input never shown
     default:
@@ -316,5 +334,10 @@ export function problemTypeLabel(type: AnyProblemType): string {
     case 'expand_double_negative': return 'Double brackets, both negative'
     case 'expand_double_square_positive': return 'Squaring a bracket'
     case 'expand_double_square_negative': return 'Squaring a negative bracket'
+    case 'factorise_quadratic_positive': return 'Factorising quadratics'
+    case 'factorise_quadratic_negative': return 'Factorising, both negative'
+    case 'factorise_quadratic_mixed_positive': return 'Factorising, minus constant'
+    case 'factorise_quadratic_mixed_negative': return 'Factorising, minus x term and constant'
+    case 'factorise_difference_of_squares': return 'Difference of two squares'
   }
 }

@@ -277,6 +277,7 @@ Generators live in `src/lib/math/generators/`. The router is `generateProblems(l
 | 15/1 | expanding brackets (5 types: `expand_single_bracket`, `expand_bracket_subtraction`, `expand_negative_multiplier`, `expand_and_simplify`, `factorise_single_bracket`) | algebraic expression: `"3x + 12"`, `"-2x - 10"`, `"7x + 6"`, `"3(2x + 5)"` | algebraic path (`/[a-zA-Z]/`, lowercase + strip whitespace, strict match) — the same path Level 8/1 uses. **No `gradeAnswer` change.** Generator `src/lib/math/generators/expanding-brackets.ts`, id prefix `exb151_`. Coefficients ≥ 2 and constants ≥ 2 so `1x` / `+ 0` can never appear. `factorise_single_bracket` enforces `gcd(p, q) = 1` so the extracted factor really is the HCF and the fully-factorised answer is unique. Because the grader does not reorder terms, every prompt carries a format hint using a fixed example, and the build loop rejects any problem whose prompt contains its own answer (so a hint can never leak the answer). All five types use `inputMode="text"` (stylus-bug rule). |
 | 15/2 | equations with brackets (5 types: `bracket_equation_simple`, `bracket_equation_subtraction`, `bracket_equation_negative`, `bracket_equation_both_sides`, `bracket_equation_expand_collect`) | single positive integer: `"5"`, `"12"` | signed-integer path (`/^-?\d+$/`). **No `gradeAnswer` change.** Generator `src/lib/math/generators/bracket-equations.ts`, id prefix `beq152_`. Applies the 15.1 expanding skill to solving. Every maker picks the **solution first** and derives the constants from it, so whole-number answers are guaranteed by construction rather than by filtering; `bracket_equation_both_sides` is the one exception and retries (up to 60) until `b = (cd + x(c - a)) / a` lands on a usable integer, with a fixed fallback problem. Solutions are always positive in v1 (the skill being trained is bracket manipulation, not negative arithmetic, which is 7.1), so `inputMode` is `numeric`, which is safe here because no letters or brackets are ever typed. Every prompt carries "Answer with just the number." because the grader would reject `x = 5`. |
 | 16/1 | expanding double brackets (5 types: `expand_double_positive`, `expand_double_mixed`, `expand_double_negative`, `expand_double_square_positive`, `expand_double_square_negative`) | quadratic expression in a fixed shape: `"x² + 8x + 15"`, `"x² - 10x + 24"`, `"x² + 5x - 14"` | algebraic path (`/[a-zA-Z]/`, lowercase + strip whitespace, strict match), the same path 15/1 uses. **No `gradeAnswer` change.** Generator `src/lib/math/generators/double-brackets.ts`, id prefix `dbr161_`. Straight on from 15.1 and 15.2. Each maker picks the two bracket numbers first and derives `b` and `c`, so the expansion is correct by construction; ranges (2 to 9, and `|a - b| >= 2` on the mixed type) guarantee `|b| >= 2` and `|c| >= 4`, so `1x`, `0x` and `+ 0` can never appear. The canonical answer carries a real superscript two, which a student cannot type on a tablet, so this level ships the **quadratic answer control** instead of a prompt format hint, and the generator exports `formatQuadratic(b, c)` as the single source of truth for the string (imported by the control and both gates, so they cannot drift). All five types use `inputMode="text"` (stylus-bug rule) for the fallback input. Difference of squares was deliberately left out of v1: it produces a zero `x` term, which needs a second canonical shape. |
+| 16/2 | factorising quadratics (5 types: `factorise_quadratic_positive`, `factorise_quadratic_negative`, `factorise_quadratic_mixed_positive`, `factorise_quadratic_mixed_negative`, `factorise_difference_of_squares`) | bracket pair: `"(x + 3)(x + 5)"`, `"(x + 7)(x - 3)"`, `"(x + 5)(x - 5)"` | algebraic path (strict match). **No `gradeAnswer` change.** Generator `src/lib/math/generators/factorising-quadratics.ts`, id prefix `fq162_`. The reverse of 16/1: the prompt is rendered by 16/1's own `formatQuadratic`. Bracket numbers 2 to 9 (difference of squares 2 to 10), never 0 or 1; mixed types keep the two numbers at least 2 apart so the prompt never shows `1x`. Strict match makes bracket order matter, so the generator exports `formatBracketPair(p, q)`, which fixes one canonical order (plus brackets first, then smaller number first); the **bracket pair control** imports it, so a student can fill the brackets in either order. |
 | others | not implemented | — | returns [] → "Coming Soon" |
 
 ### Generator architecture (Milestone 26)
@@ -301,7 +302,7 @@ All generators use **bounded algorithmic random generation** — no more fixed 1
 
 ### Lesson cards
 
-`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. All 31 currently supported levels have lesson cards: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 9/2, 10/1, 10/2, 11/1, 11/2, 12/1, 12/2, 13/1, 13/2, 14/1, 14/2, 15/1, 15/2, 16/1.
+`src/lib/lessons/index.ts` — static content keyed by `"level/sublevel"`. All 32 currently supported levels have lesson cards: 1/1, 1/2, 2/1, 2/2, 3/1, 3/2, 4/1, 4/2, 5/1, 5/2, 6/1, 6/2, 7/1, 7/2, 8/1, 8/2, 9/1, 9/2, 10/1, 10/2, 11/1, 11/2, 12/1, 12/2, 13/1, 13/2, 14/1, 14/2, 15/1, 15/2, 16/1, 16/2.
 
 ### Level 12.2 Graphing — SVG rendering pattern
 
@@ -324,9 +325,10 @@ no per-surface wiring. **No grading change:** every control submits the exact ca
 untouched.
 
 - **Mapping:** `src/lib/math/answerControl.ts → getAnswerControlType(type)` returns one of
-  `equation_slope_intercept` | `quadratic_expression` | `yes_no` | `coordinate_pair` | `default`.
+  `equation_slope_intercept` | `quadratic_expression` | `bracket_pair` | `yes_no` | `coordinate_pair` | `default`.
   - `equation_from_slope_intercept` → equation control (`y = [±]m x [±]b`, canonical `y = 2x + 3`)
   - Level 16.1 `expand_double_*` (5 types) → quadratic control (`x² [±][b]x [±][c]`, canonical `x² + 8x + 15`)
+  - Level 16.2 `factorise_quadratic_*` and `factorise_difference_of_squares` (5 types) → bracket pair control (`(x [±][p])(x [±][q])`, canonical `(x + 3)(x + 5)`)
   - `point_on_line`, `system_check_solution`, `inequality_check_value` → Yes/No buttons (canonical `yes`/`no`)
   - `sim_eq`, `read_point_coordinates`, `system_substitution_simple`, `system_elimination_simple`, `system_word_problem_simple` → coordinate control (`x = [±]n, y = [±]n`, canonical `x = 3, y = -2`). (`system_find_missing_value` uses the default numeric input, not a structured control.)
   - everything else (~60 types) → plain text input (with `inputModeForType` + `placeholderForType`)
@@ -337,7 +339,7 @@ untouched.
     types grade by digit-set). The shared magnitude-input/sign-toggle height was bumped `py-2.5`→`py-3`
     so structured-control boxes match the default input. Grading is byte-for-byte unchanged.
 - **Components:** `src/components/answer-controls/` — `AnswerInput.tsx` (dispatcher),
-  `EquationSlopeInterceptInput.tsx`, `QuadraticExpressionInput.tsx`, `CoordinatePairInput.tsx`,
+  `EquationSlopeInterceptInput.tsx`, `QuadraticExpressionInput.tsx`, `BracketPairInput.tsx`, `CoordinatePairInput.tsx`,
   `YesNoAnswerInput.tsx`, and shared
   `signToggle.tsx` (`SignToggle` + digit-only helper).
 - **Dual form-pattern:** every control renders one hidden `<input name>` **and** calls an optional
@@ -353,6 +355,12 @@ untouched.
   generator's own `formatQuadratic(b, c)`, imported by the control, so a format change lands in both
   places at once. `scripts/answer-control-gate.ts` proves every string this pairing can build grades
   `=== true` across the full coefficient and constant range the generator can produce.
+- **Bracket pair control rules (2026-09-25):** the grader matches strictly and does not reorder, so
+  `(x + 5)(x + 3)` would fail against `(x + 3)(x + 5)`. The control builds its string through the
+  16.2 generator's own `formatBracketPair(p, q)`, which sorts the two brackets (plus first, then
+  smaller number first), so the order the student types them in never matters. A blank field or a 0
+  counts as "no answer". `scripts/answer-control-gate.ts` proves both input orders build the same
+  string and that it grades `=== true` for every pair from -10 to 10 (excluding -1, 0, 1).
 - **Coordinate control rules:** magnitude 0 is allowed (axis points like `x = 0, y = 3`); only a
   blank field counts as "no answer"; never emits `-0`. Format matches the generators
   (`simultaneous-equations.ts` / `graphing.ts`) byte-for-byte so the results page displays
@@ -373,7 +381,7 @@ untouched.
 Worksheets can include a small set of review problems from previously mastered levels to improve long-term retention.
 
 **Logic lives in `src/app/worksheet/page.tsx`:**
-- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support: `[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2],[6,1],[6,2],[7,1],[7,2],[8,1],[8,2],[9,1],[9,2],[10,1],[10,2],[11,1],[11,2],[12,1],[12,2],[13,1],[13,2],[14,1],[14,2],[15,1],[15,2],[16,1]`
+- `SUPPORTED_LEVEL_KEYS` — ordered list of all levels with generator support: `[1,1],[1,2],[2,1],[2,2],[3,1],[3,2],[4,1],[4,2],[5,1],[5,2],[6,1],[6,2],[7,1],[7,2],[8,1],[8,2],[9,1],[9,2],[10,1],[10,2],[11,1],[11,2],[12,1],[12,2],[13,1],[13,2],[14,1],[14,2],[15,1],[15,2],[16,1],[16,2]`
 - `REVIEW_PROBLEM_COUNT = 4` — number of review problems in a mixed worksheet
 - For a 20-problem worksheet: 16 current-level + 4 review, shuffled to interleave
 - Review eligibility: `student_level_progress` row must exist with `consecutive_passes > 0 OR last_result_passed = true`. This filters out placement-jumped levels.

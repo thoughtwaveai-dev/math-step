@@ -4,6 +4,7 @@
 //   npx tsx scripts/answer-control-gate.ts
 import { gradeAnswer } from '../src/lib/math/gradeAnswer'
 import { formatQuadratic } from '../src/lib/math/generators/double-brackets'
+import { formatBracketPair } from '../src/lib/math/generators/factorising-quadratics'
 
 let pass = 0
 let fail = 0
@@ -101,6 +102,46 @@ check('quad wrong middle rejected', gradeAnswer('x\u00B2 + 7x + 15', 'x\u00B2 + 
 check('quad wrong constant rejected', gradeAnswer('x\u00B2 + 8x + 14', 'x\u00B2 + 8x + 15') === false)
 check('quad wrong sign rejected', gradeAnswer('x\u00B2 - 8x + 15', 'x\u00B2 + 8x + 15') === false)
 check('quad blank rejected', gradeAnswer('', 'x\u00B2 + 8x + 15') === false)
+
+// --- Bracket pair control: (x + p)(x + q) ----------------------------------
+// Mirror BracketPairInput.buildCanonical exactly. It calls the generator's own
+// formatBracketPair, which sorts the brackets, so the student can fill them in
+// either order. The grader matches strictly, so this gate proves both orders
+// build the same string and that string grades === true.
+function buildBracketPair(pSign: Sign, pMag: string, qSign: Sign, qMag: string): string {
+  if (pMag === '' || qMag === '') return ''
+  const pAbs = Number(pMag)
+  const qAbs = Number(qMag)
+  if (!Number.isFinite(pAbs) || !Number.isFinite(qAbs)) return ''
+  if (pAbs === 0 || qAbs === 0) return ''
+  return formatBracketPair(pSign === '-' ? -pAbs : pAbs, qSign === '-' ? -qAbs : qAbs)
+}
+const bracketNums: number[] = []
+for (let n = 2; n <= 10; n++) bracketNums.push(n, -n)
+const bracketOf = (n: number) => `(x ${n < 0 ? '-' : '+'} ${Math.abs(n)})`
+for (const p of bracketNums) {
+  for (const q of bracketNums) {
+    const pq = buildBracketPair(p < 0 ? '-' : '+', String(Math.abs(p)), q < 0 ? '-' : '+', String(Math.abs(q)))
+    const qp = buildBracketPair(q < 0 ? '-' : '+', String(Math.abs(q)), p < 0 ? '-' : '+', String(Math.abs(p)))
+    // Independent render of the canonical order: plus first, then smaller number first.
+    const ordered = (p > 0) !== (q > 0)
+      ? (p > 0 ? [p, q] : [q, p])
+      : (Math.abs(p) <= Math.abs(q) ? [p, q] : [q, p])
+    const generatorAnswer = `${bracketOf(ordered[0])}${bracketOf(ordered[1])}`
+    check(`pair order ${p},${q}`, pq === qp)
+    check(`pair display ${p},${q}`, pq === generatorAnswer)
+    check(`pair grade ${p},${q}`, gradeAnswer(pq, generatorAnswer) === true)
+  }
+}
+check('pair blank p is no answer', buildBracketPair('+', '', '+', '5') === '')
+check('pair blank q is no answer', buildBracketPair('+', '3', '+', '') === '')
+check('pair zero is no answer', buildBracketPair('+', '0', '+', '5') === '')
+check('pair no-space accepted', gradeAnswer('(x+3)(x+5)', '(x + 3)(x + 5)') === true)
+check('pair uppercase accepted', gradeAnswer('(X + 3)(X + 5)', '(x + 3)(x + 5)') === true)
+check('pair raw swapped order rejected by grader', gradeAnswer('(x + 5)(x + 3)', '(x + 3)(x + 5)') === false)
+check('pair wrong number rejected', gradeAnswer('(x + 3)(x + 6)', '(x + 3)(x + 5)') === false)
+check('pair wrong sign rejected', gradeAnswer('(x + 3)(x - 5)', '(x + 3)(x + 5)') === false)
+check('pair blank rejected', gradeAnswer('', '(x + 3)(x + 5)') === false)
 
 console.log(`\nanswer-control gate: ${pass} passed, ${fail} failed`)
 process.exit(fail === 0 ? 0 : 1)

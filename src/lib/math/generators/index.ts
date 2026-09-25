@@ -21,6 +21,7 @@ import { generateExponentProblems } from './exponents'
 import { generateExpandingBracketsProblems } from './expanding-brackets'
 import { generateBracketEquationProblems } from './bracket-equations'
 import { generateDoubleBracketsProblems } from './double-brackets'
+import { generateFactorisingQuadraticsProblems } from './factorising-quadratics'
 
 export type { MathProblem, ProblemType } from './factorization'
 export type { AdditionProblem, AdditionProblemType } from './addition'
@@ -60,6 +61,10 @@ export type {
   DoubleBracketsProblem,
   DoubleBracketsProblemType,
 } from './double-brackets'
+export type {
+  FactorisingQuadraticsProblem,
+  FactorisingQuadraticsProblemType,
+} from './factorising-quadratics'
 
 // Unified problem type covering all generators
 export type AnyProblemType =
@@ -86,6 +91,7 @@ export type AnyProblemType =
   | import('./expanding-brackets').ExpandingBracketsProblemType
   | import('./bracket-equations').BracketEquationProblemType
   | import('./double-brackets').DoubleBracketsProblemType
+  | import('./factorising-quadratics').FactorisingQuadraticsProblemType
 
 export function generateProblems(levelNumber: number, sublevelNumber: number, count: number) {
   if (levelNumber === 1 && sublevelNumber === 1) {
@@ -180,6 +186,9 @@ export function generateProblems(levelNumber: number, sublevelNumber: number, co
   }
   if (levelNumber === 16 && sublevelNumber === 1) {
     return generateDoubleBracketsProblems(count)
+  }
+  if (levelNumber === 16 && sublevelNumber === 2) {
+    return generateFactorisingQuadraticsProblems(count)
   }
   return []
 }

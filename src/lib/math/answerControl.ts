@@ -10,6 +10,7 @@ import type { AnyProblemType } from './generators'
 export type AnswerControlType =
   | 'equation_slope_intercept'
   | 'quadratic_expression'
+  | 'bracket_pair'
   | 'yes_no'
   | 'coordinate_pair'
   | 'default'
@@ -26,6 +27,17 @@ export function getAnswerControlType(type: AnyProblemType): AnswerControlType {
     type === 'expand_double_square_negative'
   ) {
     return 'quadratic_expression'
+  }
+  // Level 16.2: the grader matches strictly, so bracket order matters. The control
+  // sorts the two brackets into the generator's canonical order.
+  if (
+    type === 'factorise_quadratic_positive' ||
+    type === 'factorise_quadratic_negative' ||
+    type === 'factorise_quadratic_mixed_positive' ||
+    type === 'factorise_quadratic_mixed_negative' ||
+    type === 'factorise_difference_of_squares'
+  ) {
+    return 'bracket_pair'
   }
   if (
     type === 'point_on_line' ||

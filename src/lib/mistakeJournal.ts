@@ -133,6 +133,11 @@ const PARENT_LABELS: Record<string, string> = {
   expand_double_negative: 'Double brackets, both negative',
   expand_double_square_positive: 'Squaring a bracket',
   expand_double_square_negative: 'Squaring a negative bracket',
+  factorise_quadratic_positive: 'Factorising quadratics',
+  factorise_quadratic_negative: 'Factorising, both negative',
+  factorise_quadratic_mixed_positive: 'Factorising, minus constant',
+  factorise_quadratic_mixed_negative: 'Factorising, minus x term and constant',
+  factorise_difference_of_squares: 'Difference of two squares',
 }
 
 export function parentLabelForType(type: string): string {

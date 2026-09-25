@@ -465,6 +465,22 @@ const lessons: Record<LessonKey, Lesson> = {
     },
     tip: 'The biggest trap is squaring. (x + 5)² is NOT x² + 25, because you still have to do all four multiplications. Write it out as (x + 5)(x + 5) first and you will not forget the middle term. To check any answer, put x = 1 into the brackets and into your expansion: both should give the same number.',
   },
+  '16/2': {
+    title: 'Factorising Quadratics',
+    explanation: 'Factorising is expanding backwards. You start with x² + bx + c and find the two brackets that multiply to make it. Look for two numbers that multiply to give c and add to give b. For x² + 8x + 15 you need two numbers that multiply to 15 and add to 8: that is 3 and 5, so the answer is (x + 3)(x + 5). The signs tell you a lot. If c is positive, both numbers have the same sign as b. If c is negative, one number is plus and one is minus. When there is no x term at all, like x² - 25, it is a difference of two squares: (x + 5)(x - 5).',
+    example: {
+      problem: 'Factorise: x² + 2x - 15',
+      steps: [
+        'c is -15, so the two numbers multiply to -15',
+        'b is 2, so the two numbers add to 2',
+        'c is negative, so one number is plus and one is minus',
+        'Try 5 and -3: 5 times -3 = -15 and 5 + (-3) = 2',
+        'x² + 2x - 15 = (x + 5)(x - 3)',
+      ],
+      answer: '(x + 5)(x - 3)',
+    },
+    tip: 'Always check by expanding your brackets. If (x + 5)(x - 3) does not give back the question, swap a sign and try again. The order of the two brackets does not matter.',
+  },
   '9/1': {
     title: 'Factorization',
     explanation: 'Factors are numbers that divide evenly into another number. Prime factorization breaks a number down into its prime building blocks. GCF (Greatest Common Factor) is the biggest factor shared by two numbers. LCM (Least Common Multiple) is the smallest number both can divide into.',

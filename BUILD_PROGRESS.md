@@ -6,7 +6,9 @@
 
 ## Current Status
 
-**Phase:** Level 16.1 Expanding Double Brackets (2026-09-08). Joaquin was stuck again: 9 consecutive passes on 15.2 against 3 required, with nothing after it. New curriculum level adds 5 problem types, all double-bracket expansions: both signs positive, mixed signs, both negative, and the two squared-bracket cases. Every answer is a quadratic in the fixed shape `x² + bx + c`, which rides the existing algebraic path with no `gradeAnswer` change. The superscript two cannot be typed on a tablet, so this level also ships the first new answer control since 2026-06-08: `QuadraticExpressionInput`, cloned from `EquationSlopeInterceptInput`, which prints the `x²` and takes only two signs and two numbers. See entry below.
+**Phase:** Level 16.2 Factorising Quadratics (2026-09-25). First of 7 new levels (16.2 to 19.2) planned to cover about one month at Joaquin's pace. He was parked on 16.1 with 10 consecutive passes against 3 required. Quentin chose the plan "Algebra first": 16.2 Factorising Quadratics, 17.1 Solving Quadratics, 17.2 Sequences, 18.1 Pythagoras, 18.2 Ratio and Proportion, 19.1 Percentage Change, 19.2 Area and Perimeter. 16.2 ships first on its own so he is unblocked quickly. It adds the `BracketPairInput` control, which sorts the two brackets so the student can enter them in any order under the strict grader. See entry below.
+
+**Phase (preceding):** Level 16.1 Expanding Double Brackets (2026-09-08). Joaquin was stuck again: 9 consecutive passes on 15.2 against 3 required, with nothing after it. New curriculum level adds 5 problem types, all double-bracket expansions: both signs positive, mixed signs, both negative, and the two squared-bracket cases. Every answer is a quadratic in the fixed shape `x² + bx + c`, which rides the existing algebraic path with no `gradeAnswer` change. The superscript two cannot be typed on a tablet, so this level also ships the first new answer control since 2026-06-08: `QuadraticExpressionInput`, cloned from `EquationSlopeInterceptInput`, which prints the `x²` and takes only two signs and two numbers. See entry below.
 
 **Phase (preceding):** Streak date handling fix (2026-08-30). The streak update derived "today" with `new Date().toISOString().split('T')[0]`, which is UTC. UTC's date rolls over at NZ noon, so sessions completed between NZ midnight and NZ noon were filed under the previous day. Mixed morning/afternoon practice could stall a streak that was never broken, or increment it twice for one real day. Now uses the existing `nzDateKey` / `shiftDateKey` helpers, with the arithmetic extracted to `src/lib/streak.ts` so it can be tested at a fixed instant. Existing data audited read-only: 6 of 8 streak rows clean, 2 affected. One approved correction applied (Joaquin's `longest_streak` 13 to 25); Vilma's stale date left alone by decision. See entry below.
 
@@ -29,6 +31,47 @@
 **Phase (preceding):** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
 
 ---
+
+### Level 16.2 Factorising Quadratics (2026-09-25)
+
+**Trigger.** Joaquin sat on 16.1 with 10 consecutive passes against 3 required (sessions from
+2026-09-10 to 2026-09-25, 14 of 15 passed). Quentin asked for enough new levels to last one month.
+
+**How many levels.** From live `sessions` data, Joaquin clears a new level in 3 to 5 days when he is
+not parked at the ceiling (10.1 to 12.2 took 3 to 4 days each, 13.2 3 days, 15.1 5 days, 14.2 8 days).
+He practises about once a day. So 7 levels, 16.2 to 19.2, cover roughly a month. No other student is
+near the top (the next highest is on 9.1 and inactive).
+
+**Plan chosen by Quentin ("Algebra first").** 16.2 Factorising Quadratics, 17.1 Solving Quadratics,
+17.2 Sequences, 18.1 Pythagoras, 18.2 Ratio and Proportion, 19.1 Percentage Change, 19.2 Area and
+Perimeter. 16.2 ships alone first (deploy, then `levels` row id 32), then the other six.
+
+**What 16.2 does.** Five types, all monic: both brackets positive, both negative, mixed with a plus x
+term, mixed with a minus x term, and difference of two squares. The prompt is rendered by 16.1's own
+`formatQuadratic`, so it reads exactly like a 16.1 answer. Bracket numbers are 2 to 9 (2 to 10 for
+difference of squares), and the mixed types keep the two numbers at least 2 apart, so the prompt never
+shows `1x` or `0x`.
+
+**The ordering trap and the control.** `gradeAnswer` sends any answer with a letter down the algebraic
+path, which is a strict string match with no reordering. `(x + 5)(x + 3)` would be marked wrong
+against `(x + 3)(x + 5)`. The generator exports `formatBracketPair(p, q)`, which sorts the brackets into
+one canonical order (plus first, then smaller number first). The new `BracketPairInput` control
+(`(x [±][p])(x [±][q])`, cloned from `QuadraticExpressionInput`) builds its string through that same
+function, so the student can enter the brackets in either order. No `gradeAnswer` change.
+
+**Files.** New: `src/lib/math/generators/factorising-quadratics.ts`,
+`src/components/answer-controls/BracketPairInput.tsx`, `scripts/level-16-2-smoke.ts`. Changed:
+`generators/index.ts` (import, type export, `AnyProblemType`, router arm), `levelKeys.ts` (`[16, 2]`),
+`answerControl.ts` (`bracket_pair`), `AnswerInput.tsx`, `inputMode.ts` (text mode, placeholder
+`e.g. (x + 1)(x + 12)` which can never be a real answer, labels), `mistakeJournal.ts`
+(`PARENT_LABELS`), `lessons/index.ts` (card `'16/2'`), `scripts/answer-control-gate.ts` (bracket pair
+section).
+
+**Gates (2026-09-25).**
+- `npx tsx scripts/level-16-2-smoke.ts`: every type 1200 times, `114307 checks, 0 failures`
+- `npx tsx scripts/answer-control-gate.ts`: `5700 passed, 0 failed` (was 4719)
+- `npx tsx scripts/level-16-1-smoke.ts`: `96307 checks, 0 failures`
+- `npx tsc --noEmit` clean; `eslint` on touched files clean; Next compile succeeded
 
 ### Level 16.1 Expanding Double Brackets (2026-09-08)
 
