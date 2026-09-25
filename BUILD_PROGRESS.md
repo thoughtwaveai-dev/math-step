@@ -81,6 +81,34 @@ and `pythagoras_check_right_angle` on `yes_no`), `AnswerInput.tsx`, `inputMode.t
 - `answer-control-gate.ts`: `6626 passed, 0 failed`
 - `npx tsc --noEmit` clean; `eslint` on all touched files clean; `npm run build` exit 0
 
+**Deploy and production checks (2026-09-25).** Pushed `0b2e71e`; Vercel reported "Deployment has
+completed". Then inserted `levels` rows 33 to 38 with explicit ids (max id was 32 before), all with
+accuracy 90, 20 problems, 3 passes, and the speed target still stepping +60:
+33 `17.1 Solving Quadratics` 1080, 34 `17.2 Sequences` 1140, 35 `18.1 Pythagoras' Theorem` 1200,
+36 `18.2 Ratio and Proportion` 1260, 37 `19.1 Percentage Change` 1320, 38 `19.2 Area and Perimeter` 1380.
+`levels` now has 38 rows. Joaquin was still on 16.1 at insert time.
+- 17.1 full run, temp parent `level171-test-20260925@example.com`, student `RootsTestKid`: `/play`
+  showed "Solving Quadratics", 18m. Worksheet had 20 problems, all with the roots control. Problems 1
+  and 2 entered by real clicks in reverse order (`8` then `4`, `-8` then `-9`); hidden values
+  `x = 4 or x = 8` and `x = -9 or x = -8`. At 375px wide the control wraps to two lines with no
+  sideways scroll. Submitted 19 correct and 1 deliberately wrong (problem 3): `19/20`, `95%`, Passed,
+  `44s`. Self-correction with the roots control by real clicks (`5` then `-9`) gave "✓ Corrected".
+  DB: session `level_id` 33, 20 problems 4 of each type, 1 `self_corrected`, progress 1.
+- 17.2 to 19.2 render checks with the same student moved level by level: each worksheet loaded with
+  20 problems (16 new plus 4 "Review" problems from 17.1, which the student had passed, so review
+  interleaving works with the new roots control), no "Coming Soon", and the expected keypads and
+  placeholders (17.2 numeric `e.g. 70` / `e.g. 30` / `e.g. 200` and text `e.g. 10n + 11`; 18.1
+  numeric `e.g. 23` plus yes/no radios; 18.2 `e.g. 37`; 19.1 numeric `e.g. 13` and decimal
+  `e.g. 2.5`; 19.2 `e.g. 74` / `e.g. 24`). Not submitted: these levels use grader paths and controls
+  that are already live.
+- Cleanup: problems, sessions (including the 5 unfinished sessions the render checks opened),
+  student_level_progress, practice_sessions, streaks, student, profile (all HTTP 204) and the auth
+  user (HTTP 200). Re-query all 0, auth GET 404. Students 8, streak rows 8.
+
+**Pending: sequence resync.** Rows 32 to 38 went in with explicit ids, so `levels_id_seq` lags. Quentin
+to run in the Supabase SQL editor:
+`select setval('public.levels_id_seq', (select max(id) from public.levels));` (expected result `38`).
+
 ### Level 16.2 Factorising Quadratics (2026-09-25)
 
 **Trigger.** Joaquin sat on 16.1 with 10 consecutive passes against 3 required (sessions from
