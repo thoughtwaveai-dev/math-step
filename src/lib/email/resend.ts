@@ -66,3 +66,14 @@ export async function sendWeeklyReview(args: {
   if (!from) return { ok: false, error: 'WEEKLY_FROM_EMAIL / REMINDER_FROM_EMAIL is not set.' }
   return send({ from, ...args })
 }
+
+export async function sendCurriculumRenewal(args: {
+  to: string
+  subject: string
+  html: string
+  text: string
+}): Promise<SendResult> {
+  const from = process.env.WEEKLY_FROM_EMAIL ?? process.env.REMINDER_FROM_EMAIL
+  if (!from) return { ok: false, error: 'WEEKLY_FROM_EMAIL / REMINDER_FROM_EMAIL is not set.' }
+  return send({ from, ...args })
+}

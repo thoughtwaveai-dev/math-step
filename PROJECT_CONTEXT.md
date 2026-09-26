@@ -775,9 +775,20 @@ current `(level_number, sublevel_number)`".
   level rather than on clearing it, so there is lead time to add the next one, which matters because
   the email is weekly.
 
-No schema change, no new query, no new cron, no new email stream. Making `atCurriculumEnd` a
+No schema change, no new query, no new cron. Making `atCurriculumEnd` a
 required field is intentional: it forces a compile error rather than a silently missing line if
 another caller of `buildWeeklyReview` is ever added.
+
+**Curriculum renewal email (2026-09-26).** A fourth surface, and a separate email stream. The
+weekly-review cron computes `levelsLeft = countLevelsAfter(levels, level, sublevel)` per student
+(`atCurriculumEnd` is `levelsLeft === 0`). Any student with `levelsLeft <= RENEWAL_THRESHOLD` (3)
+goes into one extra email per parent, built by `src/lib/email/templates/curriculumRenewal.ts` and
+sent with `sendCurriculumRenewal`. Subject leads with the action: "Action needed: add new MathStep
+levels for Joaquin (3 left)" or "(on the last level)". Sent to `profile.email` only, never
+`weekly_cc_email`. Sent before the weekly email so a weekly failure cannot suppress it. Skipped if the
+`levels` fetch is empty. It rides the weekly run, so `weekly_enabled` and `last_weekly_sent_date`
+gate it: at most one per parent per Sunday, repeating until new levels exist. No schema change, no new
+cron, no new env var, no separate unsubscribe stream.
 
 ## Delete Student admin control (Milestone 61)
 

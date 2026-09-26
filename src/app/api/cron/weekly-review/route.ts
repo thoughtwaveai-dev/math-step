@@ -3,8 +3,14 @@
 // Auth: requires `Authorization: Bearer ${CRON_SECRET}` (Vercel Cron sets it).
 
 import { createServiceRoleClient } from '@/lib/supabase/serviceRole'
-import { sendWeeklyReview } from '@/lib/email/resend'
+import { sendWeeklyReview, sendCurriculumRenewal } from '@/lib/email/resend'
 import { buildWeeklyReview, type WeeklyStudentBlock } from '@/lib/email/templates/weeklyReview'
+import {
+  buildCurriculumRenewal,
+  countLevelsAfter,
+  RENEWAL_THRESHOLD,
+  type RenewalStudent,
+} from '@/lib/email/templates/curriculumRenewal'
 import { createWeeklyUnsubscribeToken } from '@/lib/reminderToken'
 import { getNzWeekRange, nzDateKey, shiftDateKey, NZ_TIME_ZONE } from '@/lib/habit'
 import {
@@ -188,6 +194,8 @@ export async function GET(request: Request) {
   let sent = 0
   let skipped = 0
   let errors = 0
+  let renewalSent = 0
+  let renewalErrors = 0
   const errorDetails: { parentId: string; reason: string }[] = []
 
   for (const profile of pendingProfiles) {
@@ -261,6 +269,7 @@ export async function GET(request: Request) {
     }
 
     const studentBlocks: WeeklyStudentBlock[] = []
+    const renewalStudents: RenewalStudent[] = []
     for (const stu of students) {
       const stuSessions = sessionsByStudent.get(stu.id) ?? []
 
@@ -319,10 +328,19 @@ export async function GET(request: Request) {
 
       // No level ordered after the student's current one means they have run out
       // of curriculum. Reuses the already-fetched `levels`, so no extra query.
-      const atCurriculumEnd = !levels.some(l =>
-        l.level_number > stu.current_level ||
-        (l.level_number === stu.current_level && l.sublevel_number > stu.current_sublevel)
-      )
+      const levelsLeft = countLevelsAfter(levels, stu.current_level, stu.current_sublevel)
+      const atCurriculumEnd = levelsLeft === 0
+
+      // An empty `levels` fetch would read as "0 left" for everyone, so skip then.
+      if (levels.length > 0 && levelsLeft <= RENEWAL_THRESHOLD) {
+        renewalStudents.push({
+          name: stu.name,
+          currentLevel: stu.current_level,
+          currentSublevel: stu.current_sublevel,
+          currentTopic: focusLevel?.topic ?? null,
+          levelsLeft,
+        })
+      }
 
       studentBlocks.push({
         name: stu.name,
@@ -336,6 +354,29 @@ export async function GET(request: Request) {
         weakAreaLabel,
         atCurriculumEnd,
       })
+    }
+
+    // Separate "Action needed" email, primary address only (adding levels is an
+    // admin job, not for the cc copy). Sent before the weekly email so a weekly
+    // send failure cannot suppress it.
+    if (renewalStudents.length > 0) {
+      const renewal = buildCurriculumRenewal({
+        parentName: profile.name ?? null,
+        students: renewalStudents,
+        appUrl,
+      })
+      const renewalResult = await sendCurriculumRenewal({
+        to: profile.email,
+        subject: renewal.subject,
+        html: renewal.html,
+        text: renewal.text,
+      })
+      if (renewalResult.ok) {
+        renewalSent++
+      } else {
+        renewalErrors++
+        errorDetails.push({ parentId: profile.id, reason: `renewal: ${renewalResult.error}` })
+      }
     }
 
     const unsubToken = createWeeklyUnsubscribeToken(profile.id)
@@ -388,6 +429,8 @@ export async function GET(request: Request) {
     sent,
     skipped,
     errors,
+    renewalSent,
+    renewalErrors,
     errorDetails: errorDetails.length > 0 ? errorDetails : undefined,
   })
 }

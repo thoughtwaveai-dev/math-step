@@ -6,7 +6,9 @@
 
 ## Current Status
 
-**Phase:** Levels 17.1 to 19.2 (2026-09-25). The other six levels of the one-month plan: 17.1 Solving Quadratics, 17.2 Sequences, 18.1 Pythagoras' Theorem, 18.2 Ratio and Proportion, 19.1 Percentage Change, 19.2 Area and Perimeter. 30 new problem types. Only 17.1 needed new infrastructure: the `QuadraticRootsInput` control, which sorts the two roots so the strict grader accepts them in any order. The other five answer with plain integers or a decimal on existing grader paths, plus one yes/no type on the existing control. No `gradeAnswer` or schema change. See entry below.
+**Phase:** Curriculum renewal email (2026-09-26). Quentin skims the weekly progress email, so the one-line "last level" notice inside it was easy to miss. The weekly-review cron now also sends a separate email with an "Action needed" subject when a student has 3 or fewer levels after their current one. Primary parent address only, Sundays, repeats until new levels are added. No schema change, no new cron, no new env var. See entry below.
+
+**Phase (preceding):** Levels 17.1 to 19.2 (2026-09-25). The other six levels of the one-month plan: 17.1 Solving Quadratics, 17.2 Sequences, 18.1 Pythagoras' Theorem, 18.2 Ratio and Proportion, 19.1 Percentage Change, 19.2 Area and Perimeter. 30 new problem types. Only 17.1 needed new infrastructure: the `QuadraticRootsInput` control, which sorts the two roots so the strict grader accepts them in any order. The other five answer with plain integers or a decimal on existing grader paths, plus one yes/no type on the existing control. No `gradeAnswer` or schema change. See entry below.
 
 **Phase (preceding):** Level 16.2 Factorising Quadratics (2026-09-25). First of 7 new levels (16.2 to 19.2) planned to cover about one month at Joaquin's pace. He was parked on 16.1 with 10 consecutive passes against 3 required. Quentin chose the plan "Algebra first": 16.2 Factorising Quadratics, 17.1 Solving Quadratics, 17.2 Sequences, 18.1 Pythagoras, 18.2 Ratio and Proportion, 19.1 Percentage Change, 19.2 Area and Perimeter. 16.2 ships first on its own so he is unblocked quickly. It adds the `BracketPairInput` control, which sorts the two brackets so the student can enter them in any order under the strict grader. See entry below.
 
@@ -33,6 +35,38 @@
 **Phase (preceding):** Level 13.1 Linear Equations & Graphs (2026-05-27). Joaquin finished 12.2 Graphing and was about to hit Coming Soon again. New algebraic curriculum level adds 5 problem types: write the equation from slope + intercept, slope from two points, y-intercept from slope + point, point-on-line yes/no, and evaluate a linear equation in either direction. Text-only — no graphs in v1. No schema change beyond inserting the `levels` row (id=25). No `gradeAnswer` changes — generator-side constraints (slope ∉ {-1, 0, 1}, intercept ≠ 0 for any type that displays a `y = mx + b` string) keep every answer on the existing algebraic or signed-integer paths. Polish pass (2026-05-27) updated the equation-writing prompt copy + lesson card so the `y = mx + b` pattern is explicit (no student literally typing `y = mx + b`), with placeholders on the equation and yes/no inputs.
 
 ---
+
+### Curriculum renewal email (2026-09-26)
+
+**Why.** Quentin asked for the "add new levels" reminder as its own email with the action in the
+subject line. He does not always read the weekly progress email, and the ceiling line inside it only
+appeared once the student was already on the last level, which left under a week of lead time.
+
+**What.**
+- New pure template `src/lib/email/templates/curriculumRenewal.ts`: `buildCurriculumRenewal`,
+  `countLevelsAfter`, `RENEWAL_THRESHOLD = 3`. Subjects: "Action needed: add new MathStep levels for
+  Joaquin (3 left)", "... (on the last level)", and "... for A and B" for more than one student.
+  Body per student: current level and topic, levels left, "Add new levels before X runs out."
+- `resend.ts`: `sendCurriculumRenewal`, same from address as the weekly email.
+- `weekly-review` cron: `levelsLeft = countLevelsAfter(...)` per student; `atCurriculumEnd` is now
+  `levelsLeft === 0` (same condition as before, one source). Students with `levelsLeft <= 3` go into
+  one renewal email per parent, sent to `profile.email` only (not `weekly_cc_email`: adding levels is
+  an admin job). Sent before the weekly email so a weekly send failure cannot suppress it. Skipped when
+  the `levels` fetch comes back empty, so a failed fetch cannot mail every parent "0 left". Response
+  JSON gains `renewalSent` and `renewalErrors`; failures also go into `errorDetails` as `renewal: ...`.
+- Rides the weekly run: gated by `weekly_enabled` and the `last_weekly_sent_date` guard, so at most
+  one per parent per Sunday. The existing ceiling line in the weekly email is unchanged.
+
+**Timing.** Joaquin clears a level about every 3 to 5 days. At 3 left the first email lands roughly
+two weeks before he runs out. On 2026-09-26 he was on 16.2 with 6 left, so the first send is expected
+around mid October 2026.
+
+**Verification.** The weekly cron was not run (a real run mails every opted-in parent and writes the
+dedup date). Scratchpad check against the live 38-level list: 16.2 gives 6 (no send), 17.1 gives 5,
+18.1 gives 3 (send), 18.2 gives 2, 19.1 gives 1, 19.2 gives 0 (last-level wording), 1.1 gives 37.
+Subjects, no-name greeting, multi-student subject, HTML escaping of the name, empty-list throw, and
+no en or em dashes all checked: all pass. `npx tsc --noEmit` exit 0; eslint on the three touched files
+exit 0; `npm run build` exit 0. Temp test data: none created.
 
 ### Levels 17.1 to 19.2 (2026-09-25)
 
